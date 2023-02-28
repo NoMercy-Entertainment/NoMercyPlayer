@@ -3,6 +3,8 @@
         "autoadvance",
         "beforeplaylistitem",
         "buckyplayer",
+        "displaydescription",
+        "displaytitle",
         "duringplaylistchange",
         "jwplayer",
         "playlistchange",

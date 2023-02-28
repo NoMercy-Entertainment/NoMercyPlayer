@@ -30,6 +30,7 @@ export class VideoPlayer {
             this.playerId = playerId;
         }
         
+        this.playerType = playerType;
         this.options = options;
 
         this.#overrides();
@@ -94,9 +95,6 @@ export class VideoPlayer {
             this.isJwplayer = true;
             this.isVideojs = false;
 
-            //@ts-expect-error
-            options.autostart = options.autoplay;
-
             this.#appendScriptFilesToDocument(options.scriptFiles ?? [
                 `https://ssl.p.jwpcdn.com/player/v/${this.jwplayerVersion}/jwplayer.js`
             ])
@@ -148,17 +146,36 @@ export class VideoPlayer {
     }
 
     #overrides() {
+        // Both
         if (this.options.controls === undefined) {
             this.options.controls = false;
         }
-        if (this.options.playerVersion !== undefined) {
-            this.jwplayerVersion = this.options.playerVersion;
-        }
-        if (this.options.playerVersion !== undefined) {
-            this.videojsVersion = this.options.playerVersion;
-        }
-        if (this.options.playlistVersion !== undefined) {
-            this.videojsPlaylistVersion = this.options.playlistVersion;
+
+        if (this.playerType === 'jwplayer') {
+            if (this.options.playlistVersion !== undefined) {
+                this.videojsPlaylistVersion = this.options.playlistVersion;
+            }
+            //@ts-expect-error
+            this.options.autostart = this.options.autoplay;
+
+            //@ts-expect-error
+            if (this.options.displaytitle === undefined) {
+                //@ts-expect-error
+                this.options.displaytitle = false;
+            }
+            //@ts-expect-error
+            if (this.options.displaydescription === undefined) {
+                //@ts-expect-error
+                this.options.displaydescription  = false;
+            }
+        } else { 
+            // Videojs
+            if (this.options.playerVersion !== undefined) {
+                this.jwplayerVersion = this.options.playerVersion;
+            }
+            if (this.options.playerVersion !== undefined) {
+                this.videojsVersion = this.options.playerVersion;
+            }
         }
     }
 
