@@ -397,7 +397,7 @@ export class VideoPlayer {
             data = {...(data ?? {})};
         }
         
-        this.getElement().parentElement.dispatchEvent(new CustomEvent(eventType, { 
+        this.getElement().parentElement?.dispatchEvent(new CustomEvent(eventType, { 
             detail: data 
         }));
     }
@@ -410,22 +410,18 @@ export class VideoPlayer {
 		}, time);
 	}
 
-    getElement() {
-        if (this.isJwplayer) {
-            return this.player?.getContainer?.() ?? document.getElementById(this.playerId);
-        } else {
-            return this.player?.el_ ?? document.getElementById(this.playerId);
-        }
+    getElement(): HTMLElement {
+        return document.getElementById(this.playerId) as HTMLElement;
     }
 
     on(event: any, callback: (arg0: any) => any) {
-        this.getElement().parentElement.addEventListener(event, (e: { detail: any; }) => callback(e.detail));
+        this.getElement().parentElement?.addEventListener(event, (e: { detail: any; }) => callback(e.detail));
     }
     off(event: any, callback: (arg0: any) => any) {
-        this.getElement().parentElement.removeEventListener(event, (e: { detail: any; }) => callback(e.detail));
+        this.getElement().parentElement?.removeEventListener(event, (e: { detail: any; }) => callback(e.detail));
     }
     once(event: any, callback: (arg0: any) => any) {
-        this.getElement().parentElement.addEventListener(event, (e: { detail: any; }) => callback(e.detail), { once: true });
+        this.getElement().parentElement?.addEventListener(event, (e: { detail: any; }) => callback(e.detail), { once: true });
     }
 
     isInViewport() {

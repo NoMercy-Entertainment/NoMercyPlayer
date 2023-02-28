@@ -76,45 +76,46 @@
             const js = new VideoPlayer('videojs', config, 'player1');
             window.js = js;
             
-            js.on('ready', (data) => {
-              
-              js.on('displayMessage', (data) => {
-                  console.log('displayMessage', data);
-              });
-              js.on('removeMessage', (data) => {
-                  console.log('removeMessage', data);
-              });
+            js.on('displayMessage', (data) => {
+                console.log('displayMessage', data);
+            });
+            js.on('removeMessage', (data) => {
+                console.log('removeMessage', data);
+            });
 
-              js.on('volume', (data) => {
-                  js.displayMessage(`Volume: ${data.volume}%`);
-              });
-              js.on('time', (data) => {
-                  const currJS = document.getElementById('currJS');
-                  currJS.innerHTML = `${js.humanTime(data.position)} - ${parseInt(data.percentage, 10)}% - ${js.humanTime(data.remaining)}`;
-              });
+            js.on('volume', (data) => {
+                js.displayMessage(`Volume: ${data.volume}%`);
+            });
+            js.on('time', (data) => {
+                const currJS = document.getElementById('currJS');
+                currJS.innerHTML = `${js.humanTime(data.position)} - ${parseInt(data.percentage, 10)}% - ${js.humanTime(data.remaining)}`;
+            });
+            js.on('ready', (data) => {
+              console.log('ready', data);
+              
             });
 
             config.key = 'W7zSm81+mmIsg7F+fyHRKhF3ggLkTqtGMhvI92kbqf/ysE99';
             const jw = new VideoPlayer('jwplayer', config, 'player2');
             
             window.jw = jw;
-            
-            jw.on('ready', (data) => {
-              
-              jw.on('displayMessage', (data) => {
-                  console.log('displayMessage', data);
-              });
-              jw.on('removeMessage', (data) => {
-                  console.log('removeMessage', data);
-              });
+                          
+            jw.on('displayMessage', (data) => {
+                console.log('displayMessage', data);
+            });
+            jw.on('removeMessage', (data) => {
+                console.log('removeMessage', data);
+            });
 
-              jw.on('volume', (data) => {
-                  jw.displayMessage(`Volume: ${data.volume}%`);
-              });
-              jw.on('time', (data) => {
-                  const currJW = document.getElementById('currJW');
-                  currJW.innerHTML = `${jw.humanTime(data.position)} - ${parseInt(data.percentage, 10)}% - ${jw.humanTime(data.remaining)}`;
-              });
+            jw.on('volume', (data) => {
+                jw.displayMessage(`Volume: ${data.volume}%`);
+            });
+            jw.on('time', (data) => {
+                const currJW = document.getElementById('currJW');
+                currJW.innerHTML = `${jw.humanTime(data.position)} - ${parseInt(data.percentage, 10)}% - ${jw.humanTime(data.remaining)}`;
+            });
+            jw.on('ready', (data) => {
+              console.log('ready', data);
             });
         </script>
   </body>
