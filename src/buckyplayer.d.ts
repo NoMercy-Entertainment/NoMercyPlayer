@@ -8,6 +8,7 @@ export interface VideoPlayer {
 }
 
 export interface VideoPlayerOptions {
+    controlsTimeout: number;
     iconStyles: never[];
     buttonStyles: any;
     buttons: any;
@@ -26,7 +27,7 @@ export interface PlaylistItem {
     description: string;
 }
 
-export interface VolumeState {
+export interface PlaybackState {
     position: any;
     duration: any;
     remaining: number;
@@ -34,4 +35,14 @@ export interface VolumeState {
     percentage: number;
     type: any;
     viewable: boolean;
+};
+
+export interface AudioTrack {
+    [key: string]: any;
+};
+export interface TextTrack {
+    [key: string]: any;
+};
+export interface QualityTrack {
+    [key: string]: any;
 };

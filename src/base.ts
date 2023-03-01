@@ -1,4 +1,4 @@
-import type { VideoPlayerOptions, VideoPlayer as Types, VolumeState } from "./buckyplayer.d";
+import type { VideoPlayerOptions, VideoPlayer as Types, PlaybackState } from "./buckyplayer.d";
 
 export default class Base {
 
@@ -188,19 +188,19 @@ export default class Base {
         this.events.forEach(event => {
             if (this.isJwplayer) {
                 this.player.once(event, (data: any) => {
-                    console.log(this.playerType, event, data);
+                    // console.log(this.playerType, event, data);
                     switch (event) {
                         case 'ready':
-                            this.#dispatchEvent('ready', this.#getReadyState(data));
+                            this.dispatchEvent('ready', this.#getReadyState(data));
                             break;
                     }
                 });
             } else {
                 this.player.one(event, (data: any) => {
-                    console.log(this.playerType, event, data);
+                    // console.log(this.playerType, event, data);
                     switch (event) {
                             case 'duringplaylistchange':
-                                this.#dispatchEvent('ready', this.#getReadyState(data));
+                                this.dispatchEvent('ready', this.#getReadyState(data));
                                 break;
                     }
                 });
@@ -232,7 +232,7 @@ export default class Base {
                     case 'canplay':
                         break;
                     case 'canplaythrough':
-                        this.#dispatchEvent('playlistitem', data);
+                        this.dispatchEvent('playlistitem', data);
                         break;
                     case 'complete': //jwplayer
                         break;
@@ -245,29 +245,29 @@ export default class Base {
                     case 'ended': //videojs
                         break;
                     case 'error':
-                        this.#dispatchEvent('error', data);
+                        this.dispatchEvent('error', data);
                         break;
                     case 'fullscreen': //jwplayer
                     case 'fullscreenchange': //videojs
-                        this.#dispatchEvent('fullscreen', data);
+                        this.dispatchEvent('fullscreen', data);
                         break;
                     case 'idle': //jwplayer
                         break;
                     case 'loadeddata': //videojs
                         break;
                     case 'loadedmetadata': //videojs
-                        this.#dispatchEvent('duration', this.#getTimeState(data));
+                        this.dispatchEvent('duration', this.#getTimeState(data));
                         break;
                     case 'loadstart': //videojs
                         break;
                     case 'mute':
-                        this.#dispatchEvent('mute', data);
+                        this.dispatchEvent('mute', data);
                         break;
                     case 'pause':
-                        this.#dispatchEvent('pause', { data: 'pause' });
+                        this.dispatchEvent('pause', { data: 'pause' });
                         break;
                     case 'play':
-                        this.#dispatchEvent('play', data);
+                        this.dispatchEvent('play', data);
                         break;
                     case 'firstFrame': //jwplayer aka playing
                         break;
@@ -278,8 +278,8 @@ export default class Base {
                     case 'durationchanged':
                     case 'playlistItem':
                     case 'playlistitem':
-                        this.#dispatchEvent('duration', this.#getTimeState(data));
-                        this.#dispatchEvent('playlistitem', data);
+                        this.dispatchEvent('duration', this.#getTimeState(data));
+                        this.dispatchEvent('playlistitem', data);
                         break;
                     case 'playlistchange':
                         break;
@@ -303,11 +303,11 @@ export default class Base {
                         break;
                     case 'time': // JWPlayer
                     case 'timeupdate': // VideoJS
-                        this.#dispatchEvent('time', this.#getTimeState(data));
+                        this.dispatchEvent('time', this.#getTimeState(data));
                         break;
                     case 'volume':
                     case 'volumechange':
-                        this.#dispatchEvent('volume', this.#getVolumeState(data));
+                        this.dispatchEvent('volume', this.#getPlaybackState(data));
                         break;
                     case 'waiting':
                         break;
@@ -331,7 +331,7 @@ export default class Base {
         }
     }
 
-    #getTimeState(data: { position: number; duration: number; type: any; viewable: any; }): VolumeState {
+    #getTimeState(data: { position: number; duration: number; type: any; viewable: any; }): PlaybackState {
         if (this.isJwplayer) {
             return {
                 position: this.player.getPosition(),
@@ -359,7 +359,7 @@ export default class Base {
             };
         }
     }
-    #getVolumeState(data: any) {
+    #getPlaybackState(data: any) {
         if (this.isJwplayer) {
             return data;
         } else {
@@ -428,7 +428,7 @@ export default class Base {
             appendFile(filePaths[0]);
         });
     }
-    #dispatchEvent(eventType: string, data: any) {
+    dispatchEvent(eventType: string, data?: unknown) {
         if (!data || typeof data === 'string') {
             data = data ?? '';
         } else if (typeof data === 'object') {
@@ -440,6 +440,18 @@ export default class Base {
         }));
     }
 
+    on(event: 'ready', callback: () => void): void;
+    on(event: 'play', callback: () => void): void;
+    on(event: 'pause', callback: () => void): void;
+    on(event: 'seeked', callback: () => void): void;
+    on(event: 'volume', callback: () => void): void;
+    on(event: 'mute', callback: () => void): void;
+    on(event: 'playlistitem', callback: () => void): void;
+    on(event: 'fullscreen', callback: () => void): void;
+    on(event: 'seeked', callback: () => void): void;
+    on(event: 'time', callback: (data: PlaybackState) => void): void;
+    on(event: 'duration', callback: (data: PlaybackState) => void): void;
+    on(event: 'controls', callback: (value: boolean) => void): void;
     on(event: any, callback: (arg0: any) => any) {
         this.getElement().parentElement?.addEventListener(event, (e: { detail: any; }) => callback(e.detail));
     }
@@ -449,11 +461,11 @@ export default class Base {
     once(event: any, callback: (arg0: any) => any) {
         this.getElement().parentElement?.addEventListener(event, (e: { detail: any; }) => callback(e.detail), { once: true });
     }
-    displayMessage(data: any, time = 2000) {
+    displayMessage(data: string, time = 2000) {
         clearTimeout(this.message);
-        this.#dispatchEvent('displayMessage', data);
+        this.dispatchEvent('displayMessage', data);
         this.message = setTimeout(() => {
-            this.#dispatchEvent('removeMessage', data);
+            this.dispatchEvent('removeMessage', data);
         }, time);
     }
 
@@ -475,8 +487,8 @@ export default class Base {
         }
     }
 
-    humanTime (time: any) {
-        time = parseInt(time, 10);
+    humanTime (time: string | number) {
+        time = parseInt(time as string, 10);
         let days: any = parseInt(`${(time / (3600 * 24))}`, 10);
 
         let hours: any = this.pad(parseInt(`${(time % 86400) / 3600}`, 10), 2);

@@ -4,7 +4,7 @@ import {
 } from './buttons.js';
 import Functions from './functions.js';
 
-import type { VideoPlayerOptions, VideoPlayer as Types, VolumeState } from "./buckyplayer.d";
+import type { VideoPlayerOptions, VideoPlayer as Types } from "./buckyplayer.d";
 export default class UI extends Functions {
     
     overlayStyles: string[] = [];
@@ -18,6 +18,7 @@ export default class UI extends Functions {
     iconStyles: string[] = [];
     topRowStyles: string[] = [];
     bottomRowStyles: string[] = [];
+    timer: NodeJS.Timeout = <NodeJS.Timeout>{};
 
 
     constructor(playerType: Types['playerType'], options: VideoPlayerOptions, playerId: Types['playerId'] = '') {
@@ -46,7 +47,23 @@ export default class UI extends Functions {
             el.classList.add(name);
         }
     }
+    
+    lock = false;
 
+	hideControls() {
+		if (!this.lock && this.isPlaying()) {
+		    this.dispatchEvent('controls', false);
+		}
+	};
+	showControls() {
+        this.dispatchEvent('controls', true);
+    }
+	dynamicControls() {
+		this.showControls();
+		clearTimeout(this.timer);
+		this.timer = setTimeout(this.hideControls.bind(this), this.options.controlsTimeout ?? 3500);
+	};
+    
     buildUI() {
         const overlay = document.createElement('div');
         overlay.id = 'overlay';
@@ -57,6 +74,10 @@ export default class UI extends Functions {
         if (!this.getElement().querySelector('#overlay')){
             this.getElement().prepend(overlay);
         }
+        
+        overlay.addEventListener('mousemove', () => {
+            this.dynamicControls();
+        });
 
         const topBar = this.createTopBar(overlay);
 
@@ -90,38 +111,40 @@ export default class UI extends Functions {
 
         this.createProgressBar(topRow);
         
-        this.createPlaybackButton(
-            bottomRow, 
-        );
+        this.createPlaybackButton(bottomRow);
+        
+        this.createVolumeButton(bottomRow);
 
         this.createPreviousButton(bottomRow);
 
-        this.createButton(
+        const seekBack = this.createButton(
             bottomRow, 
             'seekBack', 
         );
+        seekBack.addEventListener('click', () => {
+            this.rewindVideo();
+        });
+
         this.createNextButton(bottomRow);
 
-        this.createButton(
+        const seekForward = this.createButton(
             bottomRow, 
             'seekForward', 
         ); 
+        seekForward.addEventListener('click', () => {
+            this.forwardVideo();
+        });
+
+
         this.createDivider(
             bottomRow, 
         );
-        this.createButton(
-            bottomRow, 
-            'playlist', 
-        );
 
+        this.createPlaylistsButton(bottomRow);
         this.createLanguageButton(bottomRow);
         this.createQualityButton(bottomRow);
         this.createTheaterButton(bottomRow);
 
-        this.createButton(
-            bottomRow, 
-            'language', 
-        );
         // this.createButton(
         //     bottomRow, 
         //     this.buttonStyles,
@@ -157,9 +180,18 @@ export default class UI extends Functions {
     createTopBar(parent: HTMLElement) {
         const topBar = document.createElement('div');
         topBar.id = 'top-bar';
+        topBar.style.transform = 'translateY(0)';
 
         this.topBarStyles.push('top-bar');
         this.addClasses(topBar, this.topBarStyles);
+
+		this.on('controls', (value) => {
+            if (value) {
+                topBar.style.transform = 'translateY(0)';
+            } else {
+                topBar.style.transform = '';
+            }
+		});
 
         parent.appendChild(topBar);
 
@@ -168,11 +200,20 @@ export default class UI extends Functions {
     createBottomBar(parent: HTMLElement) {
         const bottomBar = document.createElement('div');
         bottomBar.id = 'bottom-bar';
+        bottomBar.style.transform = 'translateY(0)';
 
         this.bottomBarStyles.push('bottom-bar');
         this.addClasses(bottomBar, this.bottomBarStyles);
 
         parent.appendChild(bottomBar);
+
+		this.on('controls', (value) => {
+            if (value) {
+                bottomBar.style.transform = 'translateY(0)';
+            } else {
+                bottomBar.style.transform = '';
+            }
+		});
 
         return bottomBar;
     }
@@ -271,7 +312,6 @@ export default class UI extends Functions {
             'bg-red-300',
             'absolute',
             'h-2',
-            'w-2/3',
             'z-0',
             'rounded-r-full',
         ]);
@@ -284,7 +324,6 @@ export default class UI extends Functions {
             'bg-red-600',
             'absolute',
             'h-2',
-            'w-2/4',
             'z-10',
             'rounded',
             'rounded-r-full',
@@ -300,25 +339,24 @@ export default class UI extends Functions {
             // this.player.nomercy.hideControls();
         });
 
-        this.on('time', (t: VolumeState) => {
-            sliderBuffer.style.width = `${t.buffered}%`;
-            sliderProgress.style.width = `${t.percentage}%`;
+        this.on('time', (data) => {
+            sliderBuffer.style.width = `${data.buffered}%`;
+            sliderProgress.style.width = `${data.percentage}%`;
         });
 
-
         sliderBar.addEventListener('mouseover', (e) => {
-            console.log('mouse over', e);
+            // console.log('mouse over', e);
             // sliderPop.style.setProperty('--visibility', 'hidden');
             // player.currentTime(scrubTimePlayer);
         });
         sliderBar.addEventListener('mouseleave', (e) => {
-            console.log('mouse leave', e);
+            // console.log('mouse leave', e);
             // sliderPop.style.setProperty('--visibility', 'hidden');
             // sliderNipple.style.display = 'none';
         });
 
         sliderBar.addEventListener('mousemove', (e) => {
-            console.log('mouse move', e);
+            // console.log('mouse move', e);
 
         });
     
@@ -331,25 +369,29 @@ export default class UI extends Functions {
         const div = document.createElement('div');
         div.textContent = '00:00';
 
-        classes.push('time');
-        classes.push('select-none');
-        classes.push('flex');
-        classes.push('items-center');
-
-        classes.push(`${type}-time`);
-        this.addClasses(div, classes);
-    
+        this.addClasses(div, [
+            ...classes,
+            ...this.buttonStyles,
+            'flex',
+            'font-mono',
+            'text-sm',
+            'items-center',
+            'select-none',
+            'time',
+            `${type}-time`,
+        ]);
+        
         switch (type) {
         case 'current':
     
-            this.on('time', (data: any) => {
+            this.on('time', (data) => {
                 div.textContent = this.humanTime(data.position);
             });
             break;
     
         case 'remaining':
     
-            this.on('duration', (data: any) => {   
+            this.on('duration', (data) => {   
                 if (data.remaining === Infinity) {
                     div.textContent = 'Live';
                 } else {
@@ -357,7 +399,7 @@ export default class UI extends Functions {
                 }
             });
 
-            this.on('time', (data: any) => {  
+            this.on('time', (data) => {  
                 if (data.remaining === Infinity) {
                     div.textContent = 'Live';
                 } else {
@@ -367,7 +409,7 @@ export default class UI extends Functions {
             break;
     
         case 'duration':    
-            this.on('duration', (data: any) => {   
+            this.on('duration', (data) => {   
                 if (data.duration === Infinity) {
                     div.textContent = 'Live';
                 } else {
@@ -382,6 +424,48 @@ export default class UI extends Functions {
     
         parent.append(div);
         return div;
+    }
+
+    createVolumeButton(parent: HTMLDivElement) {
+        const button = document.createElement('button');
+        button.id = 'volume';
+
+        this.addClasses(button, [
+            ...this.buttonStyles,
+            'volume'
+        ]);
+
+        this.createSVGElement(button, 'volumeMuted', this.buttons.volumeMuted, true);
+        this.createSVGElement(button, 'volumeLow', this.buttons.volumeLow, true);
+        this.createSVGElement(button, 'volumeMedium', this.buttons.volumeMedium, true);
+        this.createSVGElement(button, 'volumeHigh', this.buttons.volumeHigh);
+
+        button.addEventListener('click', (event) => {
+            event.stopPropagation();
+            this.toggleMute();
+        });
+
+        this.on('volume', () => {
+            if (this.isMuted()) {
+                button.querySelector<any>('.volumeHigh').style.display = 'none';
+                button.querySelector<any>('.volumeMuted').style.display = 'flex';
+            } else {
+                button.querySelector<any>('.volumeMuted').style.display = 'none';
+                button.querySelector<any>('.volumeHigh').style.display = 'flex';
+            }
+        });
+        this.on('mute', () => {
+            if (this.isMuted()) {
+                button.querySelector<any>('.volumeHigh').style.display = 'none';
+                button.querySelector<any>('.volumeMuted').style.display = 'flex';
+            } else {
+                button.querySelector<any>('.volumeMuted').style.display = 'none';
+                button.querySelector<any>('.volumeHigh').style.display = 'flex';
+            }
+        });
+
+        parent.append(button);
+        return button;
     }
     
     createPlaybackButton(parent: HTMLElement) {
@@ -432,7 +516,6 @@ export default class UI extends Functions {
             this.previous();
         });
 		this.on('playlistitem', () => {
-            console.log(this.getCurrentPlaylistIndex());
 			if (this.getCurrentPlaylistIndex() > 0) {
 				button.style.display = 'flex';
 			} else {
@@ -478,14 +561,15 @@ export default class UI extends Functions {
         const button = document.createElement('button');
 
         button.id = 'language';
+        button.style.display = 'none';
 
         this.addClasses(button, [
             ...this.buttonStyles,
             'language'
         ]);
 
-        this.createSVGElement(button, 'subtitle', this.buttons.ccHover);
-        this.createSVGElement(button, 'subtitled', this.buttons.cc, true);
+        this.createSVGElement(button, 'subtitle', this.buttons.subtitlesHover);
+        this.createSVGElement(button, 'subtitled', this.buttons.subtitles, true);
 
         button.addEventListener('click', (event) => {
             event.stopPropagation();
@@ -494,14 +578,23 @@ export default class UI extends Functions {
                 this.subsEnabled = false;
                 button.querySelector<any>('.subtitled').style.display = 'none';
                 button.querySelector<any>('.subtitle').style.display = 'flex';
+                this.setTextTrack(-1);
             } else {
                 this.subsEnabled = true;
                 button.querySelector<any>('.subtitle').style.display = 'none';
                 button.querySelector<any>('.subtitled').style.display = 'flex';
+                this.setTextTrack(1);
             }
 
             // this.toggleLanguage();
         });
+		this.on('playlistitem', () => {
+			if (this.hasTextTracks() || this.hasAudioTracks()) {
+				button.style.display = 'flex';
+			} else {
+				button.style.display = 'none';
+			}
+		});
 
         parent.appendChild(button);
         return button;
@@ -512,6 +605,7 @@ export default class UI extends Functions {
         const button = document.createElement('button');
 
         button.id = 'quality';
+        button.style.display = 'none';
 
         this.addClasses(button, [
             ...this.buttonStyles,
@@ -537,6 +631,14 @@ export default class UI extends Functions {
             // this.toggleLanguage();
         });
 
+		this.on('playlistitem', () => {
+			if (this.hasQualities()) {
+				button.style.display = 'flex';
+            } else {
+				button.style.display = 'none';
+			}
+		});
+
         parent.appendChild(button);
         return button;
     }
@@ -553,19 +655,19 @@ export default class UI extends Functions {
         ]);
 
         this.createSVGElement(button, 'theater', this.buttons.theater);
-        this.createSVGElement(button, 'theatered', this.buttons.theaterHover, true);
+        this.createSVGElement(button, 'theater-enable', this.buttons.theaterHover, true);
 
         button.addEventListener('click', (event) => {
             event.stopPropagation();
             
             if(this.theaterModeEnabled) {
                 this.theaterModeEnabled = false;
-                button.querySelector<any>('.theatered').style.display = 'none';
+                button.querySelector<any>('.theater-enable').style.display = 'none';
                 button.querySelector<any>('.theater').style.display = 'flex';
             } else {
                 this.theaterModeEnabled = true;
                 button.querySelector<any>('.theater').style.display = 'none';
-                button.querySelector<any>('.theatered').style.display = 'flex';
+                button.querySelector<any>('.theater-enable').style.display = 'flex';
             }
 
             // this.toggleLanguage();
@@ -586,7 +688,7 @@ export default class UI extends Functions {
             'fullscreen'
         ]);
 
-        this.createSVGElement(button, 'fullscreened', this.buttons.exitFullscreen, true);
+        this.createSVGElement(button, 'fullscreen-enable', this.buttons.exitFullscreen, true);
         this.createSVGElement(button, 'fullscreen', this.buttons.fullscreen);
 
 		button.addEventListener('click', (event) => {
@@ -596,9 +698,9 @@ export default class UI extends Functions {
 		this.on('fullscreen', () => {
 			if (this.isFullscreen()) {
 				button.querySelector<any>('.fullscreen').style.display = 'none';
-				button.querySelector<any>('.fullscreened').style.display = 'flex';
+				button.querySelector<any>('.fullscreen-enable').style.display = 'flex';
 			} else {
-				button.querySelector<any>('.fullscreened').style.display = 'none';
+				button.querySelector<any>('.fullscreen-enable').style.display = 'none';
 				button.querySelector<any>('.fullscreen').style.display = 'flex';
 			}
 		});
@@ -606,6 +708,36 @@ export default class UI extends Functions {
         parent.appendChild(button);
         return button;
                 
+    }
+    
+    createPlaylistsButton(parent: HTMLDivElement) {
+        const button = document.createElement('button');
+
+        button.id = 'playlist';
+        button.style.display = 'none';
+
+        this.addClasses(button, [
+            ...this.buttonStyles,
+            'playlist'
+        ]);
+
+        this.createSVGElement(button, 'playlist', this.buttons.playlist);
+
+        button.addEventListener('click', (event) => {
+            event.stopPropagation();
+            // this.togglePlaylists();
+        });
+
+        this.on('playlistitem', () => {
+            if (this.hasPlaylists()) {
+                button.style.display = 'flex';
+            } else {
+                button.style.display = 'none';
+            }
+        });
+
+        parent.appendChild(button);
+        return button;
     }
 
 }

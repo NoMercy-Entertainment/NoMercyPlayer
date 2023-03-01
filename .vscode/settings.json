@@ -6,6 +6,7 @@
         "checkmark",
         "displaydescription",
         "displaytitle",
+        "durationchanged",
         "duringplaylistchange",
         "jwplayer",
         "playlistchange",

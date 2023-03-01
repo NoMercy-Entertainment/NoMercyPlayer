@@ -1,14 +1,18 @@
 import Base from './base.js';
 
-import type { VideoPlayerOptions, VideoPlayer as Types } from "./buckyplayer.d";
+import type { VideoPlayerOptions, VideoPlayer as Types, TextTrack, AudioTrack } from "./buckyplayer.d";
 
 export default class Functions extends Base {
+    tapCount = 0;
+    leftTap: NodeJS.Timeout = <NodeJS.Timeout>{};
+    rightTap: NodeJS.Timeout = <NodeJS.Timeout>{};
+    leeway: number | undefined;
 
     constructor(playerType: Types['playerType'], options: VideoPlayerOptions, playerId: Types['playerId'] = '') {
         super(playerType, options, playerId);
 
     }
-
+    
     isPlaying() {
         if (this.isJwplayer) {
             return this.player.getState() === 'playing';
@@ -130,6 +134,22 @@ export default class Functions extends Base {
         }
     };
 
+    currentTime() {
+        if (this.isJwplayer) {
+            return this.player.getPosition();
+        } else {
+            return this.player.currentTime();
+        }
+    }
+    duration() {
+        if (this.isJwplayer) {
+            return this.player.getDuration();
+        } else {
+            return this.player.duration();
+        }
+    }
+
+
     seek(time: any) {
         if (this.isJwplayer) {
             this.player.seek(time);
@@ -137,6 +157,46 @@ export default class Functions extends Base {
             this.player.currentTime(time);
         }
     }
+    
+	rewindVideo(time = 10) {
+		this.dispatchEvent('removeForward');
+		clearTimeout(this.leftTap);
+
+		this.tapCount += time;
+		this.dispatchEvent('rewind', this.tapCount);
+
+		this.leftTap = setTimeout(() => {
+			this.dispatchEvent('removeRewind');
+			this.seek(this.currentTime() - this.tapCount);
+			this.tapCount = 0;
+			this.play();
+		}, this.leeway);
+	};
+
+	forwardVideo(time = 10) {
+		this.dispatchEvent('removeRewind');
+		clearTimeout(this.rightTap);
+
+		this.tapCount += time;
+		this.dispatchEvent('forward', this.tapCount);
+
+		this.rightTap = setTimeout(() => {
+			this.dispatchEvent('removeForward');
+			this.seek(this.currentTime() + this.tapCount);
+			this.tapCount = 0;
+			this.play();
+		}, this.leeway);
+	};
+
+	setEpisode(season: number, episode: number) {
+		const item = this.getPlaylist().findIndex((l: any) => l.season == season && l.episode == episode);
+		if (item == -1) {
+			this.setCurrentPlaylistItem(0);
+		} else {
+			this.setCurrentPlaylistItem(item);
+		}
+		play();
+	};
 
     isFullscreen() {
         if (this.isJwplayer) {
@@ -209,9 +269,154 @@ export default class Functions extends Base {
     isLastPlaylistItem(){
         return this.getCurrentPlaylistIndex() === this.getPlaylist().length - 1;
     }
+    hasPlaylists() {
+        return this.getPlaylist().length > 1;
+    }
+
+    getAudioTracks() {
+        if (this.isJwplayer) {
+            return this.player.getAudioTracks();
+        } else {
+            return this.player.audioTracks().tracks_;
+        }
+    }
+    getCurrentAudioTrack() {
+        return this.getAudioTracks()[this.getCurrentAudioTrackIndex()];
+    }
+    getCurrentAudioTrackIndex() {
+        if (this.isJwplayer) {
+            return this.player.getCurrentAudioTrack();
+        } else {
+            let index = -1;
+            for ( const track of this.player.audioTracks().tracks_) {
+                if (track.enabled) {
+                    index = this.player.audioTracks().tracks_.findIndex((t: AudioTrack) => t.id == track.id);
+                }
+            }
+            return index;
+        }
+    }
+    getAudioTrackLabel(index: number) {
+        return this.getCurrentAudioTrack().label;
+    }
+    getAudioTrackKind(index: number) {
+        return this.getCurrentAudioTrack().kind;
+    }
+    getAudioTrackLanguage(index: number) {
+        return this.getCurrentAudioTrack().language;
+    }
+    setAudioTrack(index: number) {
+        if (this.isJwplayer) {
+            this.player.setCurrentAudioTrack(index);
+        } else {
+            this.player.audioTracks().tracks_[index].enabled = true;
+        }
+    }
+    hasAudioTracks() {
+        return this.getAudioTracks().length > 1;
+    }
 
 
-    
+    getTextTracks() {
+        if (this.isJwplayer) {
+            return this.player.getCaptionsList().filter((t: any) => t.id.endsWith('vtt') || t.id.endsWith('ass'));
+        } else {
+            return this.player.textTracks().tracks_.filter((t: any) => t.kind == 'captions' || t.kind == 'subtitles');
+        }
+    }
+    getCurrentTextTrack() {
+        return this.getTextTracks()[this.getCurrentTextTrackIndex()];
+    }
+    getCurrentTextTrackIndex() {
+        if (this.isJwplayer) {
+            return this.player.getCurrentCaptions();
+        } else {
+            let index = -1;
+            for ( const track of this.player.textTracks().tracks_) {
+                if (track.mode == 'showing') {
+                    index = this.player.textTracks().tracks_.findIndex((t: TextTrack) => t.id == track.id);
+                }
+            }
+            return index;
+        }
+    }
+    getTextTrackLabel(index: number) {
+        return this.getCurrentTextTrack().label;
+    }
+    getTextTrackKind(index: number) {
+        return this.getCurrentTextTrack().kind;
+    }
+    getTextTrackMode(index: number) {
+        return this.getCurrentTextTrack().mode;
+    }
+    getTextTrackLanguage(index: number) {
+        return this.getCurrentTextTrack().language;
+    }
+    setTextTrack(index: number) {
+        if (this.isJwplayer) {
+            const number = this.player.getCaptionsList().findIndex((t: any) => t.id == this.getTextTracks()[index]?.id);
+            this.player.setCurrentCaptions(number);
+        } else {
+            this.player.textTracks().tracks_.forEach((t: TextTrack, i: number) => {
+                if (this.player.textTracks()[i]) {
+                    this.player.textTracks()[i].mode = 'hidden';
+                }
+            });
+            if(index >= 0){
+                const number = this.player.textTracks().tracks_.findIndex((t: any) => t.id == this.getTextTracks()[index]?.id)
+                this.player.textTracks()[number].mode = 'showing';
+            }
+        }
+    }
+    hasTextTracks() {
+        return this.getTextTracks().length > 0;
+    }
+
+    getQualities() {
+        if (this.isJwplayer) {
+            return this.player.getQualityLevels();
+        } else {
+            return this.player.qualityLevels();
+        }
+    }
+    getQuality(index: number) {
+        if (this.isJwplayer) {
+            return this.player.getQualityLevel(index);
+        } else {
+            return this.player.qualityLevels()[index];
+        }
+    }
+    getQualityLabel(index: number) {
+        return this.getQuality(index).label;
+    }
+    getQualityHeight(index: number) {
+        return this.getQuality(index).height;
+    }
+    getQualityWidth(index: number) {
+        return this.getQuality(index).width;
+    }
+    getQualityBandwidth(index: number) {
+        return this.getQuality(index).bandwidth;
+    }
+    getQualityIndex() {
+        if (this.isJwplayer) {
+            return this.player.getCurrentQuality();
+        } else {
+            return this.player.qualityLevels().selectedIndex;
+        }
+    }
+    setQuality(index: number) {
+        if (this.isJwplayer) {
+            this.player.setCurrentQuality(index);
+        } else {
+            this.player.qualityLevels().selectedIndex = index;
+        }
+    }
+    hasQualities() {
+        return this.getQualities().length > 1;
+    }
+
+        
     
 
     // pause() {

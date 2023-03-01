@@ -16,6 +16,10 @@
     </style>
 
     <style>
+        
+        * {
+            font-feature-settings: 'tnum' on, 'lnum' on;
+        }
         .vjs-poster, 
         .vjs-loading-spinner,
         .vjs-big-play-button,
@@ -82,9 +86,10 @@
             const config = {
                 width: size,
                 height: size / 16 * 9,
-                muted: true,
+                muted: false,
                 preload: 'auto',
                 playlist: 'https://api.nomercy.tv/playlist?v=2',
+                controlsTimeout: 3000,
                 // overlay: {
                 //     styles: {
                 //         background: 'rgba(0,0,0,0.5)',
