@@ -13,9 +13,14 @@
     "sourceMap": true,
     "rootDir": "./src",
     "downlevelIteration": true,
+    "moduleResolution": "Node",
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "./src/**/*.ts",
     "./src/**/*.d.ts",
+    "./src/*.d.ts", "src/app.js",
   ],
 }

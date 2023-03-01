@@ -3,6 +3,7 @@
         "autoadvance",
         "beforeplaylistitem",
         "buckyplayer",
+        "checkmark",
         "displaydescription",
         "displaytitle",
         "duringplaylistchange",

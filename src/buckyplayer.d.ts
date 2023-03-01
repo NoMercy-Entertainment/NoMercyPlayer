@@ -8,6 +8,9 @@ export interface VideoPlayer {
 }
 
 export interface VideoPlayerOptions {
+    iconStyles: never[];
+    buttonStyles: any;
+    buttons: any;
     playerVersion: string;
     playlistVersion: string;
     scriptFiles: string[];
@@ -22,3 +25,13 @@ export interface PlaylistItem {
     title: string;
     description: string;
 }
+
+export interface VolumeState {
+    position: any;
+    duration: any;
+    remaining: number;
+    buffered: number;
+    percentage: number;
+    type: any;
+    viewable: boolean;
+};

@@ -1,4 +1,5 @@
- 
+// ts-node app.ts
+
 function play() {
     if(jw){
         jw.play();
@@ -23,11 +24,11 @@ function sync() {
 
 function prev() {
     if(jw){
-        jw.prev();
+        jw.previous();
     }
 
     if(js){
-        js.prev();
+        js.previous();
     }
 };
 

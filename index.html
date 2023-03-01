@@ -6,9 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Buckyplayer API</title>
 
-    <script src="https://cdn.tailwindcss.com" ></script>
+    <link href="/dist/output.css" rel="stylesheet">
 
-    <script src="/dist/app.js" defer></script>
+    <!-- <script src="https://cdn.tailwindcss.com" ></script> -->
+    <script src="./dist/app.js" defer></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+    </style>
+
+    <style>
+        .vjs-poster, 
+        .vjs-loading-spinner,
+        .vjs-big-play-button,
+        .vjs-control-bar,
+        .vjs-hidden {
+            display: none !important;
+        }
+    </style>
+
   </head>
   <body>
     <body class="flex flex-col w-screen h-screen gap-4 items-center justify-center bg-zinc-900 text-white">
@@ -16,8 +32,7 @@
         <div class="flex flex-col sm:flex-row justify-center w-full gap-8">
             <div class="flex flex-col items-center w-full text-center gap-2">
                 <span>VideoJS</span>
-                <video id="player1" class="video-js" ></video>
-                <span id="currJS">VideoJS</span>
+                <video id="player1" class="video-js relative" ></video>
             </div>
 
             <div class="flex sm:flex-col flex-wrap gap-4 items-center justify-center">
@@ -50,14 +65,13 @@
 
             <div class="flex flex-col items-center w-full text-center gap-2">
                 <span>JWPlayer</span>
-                <video id="player2"></video>
-                <span id="currJW">JWPlayer</span>
+                <video id="player2" class="jwplayer relative"></video>
             </div>
         </div>
 
-        <script type="module" >
+        <script type="module">
 
-          import { VideoPlayer } from '/dist/buckyplayer.js';
+          import VideoPlayer from './dist/buckyplayer.js';
 
             const size = window.innerWidth < 500 
                 ? window.innerWidth < 800 
@@ -71,6 +85,54 @@
                 muted: true,
                 preload: 'auto',
                 playlist: 'https://api.nomercy.tv/playlist?v=2',
+                // overlay: {
+                //     styles: {
+                //         background: 'rgba(0,0,0,0.5)',
+                //         color: '#fff',
+                //         fontFamily: 'Poppins, sans-serif',
+                //         fontSize: '.8rem',
+                //         fill: '#fff',
+                //     },
+                //     children: {
+                //         top:{
+                //             children: [
+                //                 {
+                //                     type: 'back',
+                //                 },
+                //             ],
+                //         },
+                //         center:{},
+                //         bottom:{
+                //             children: [
+                //                 {
+                //                     type: 'playback',
+                //                 },
+                //                 {
+                //                     type: 'prev',
+                //                 },
+                //                 {
+                //                     type: 'next',
+                //                 },
+                //                 {
+                //                     type: 'volume',
+                //                 },
+                //                 {
+                //                     type: 'prev',
+                //                 },
+                //             ]
+                //         },
+                //     },
+                // },
+                buttons:{
+                    icons: {
+                        language: {
+                            path: "M11.9996 1.99805C17.5233 1.99805 22.0011 6.47589 22.0011 11.9996C22.0011 17.5233 17.5233 22.0011 11.9996 22.0011C6.47589 22.0011 1.99805 17.5233 1.99805 11.9996C1.99805 6.47589 6.47589 1.99805 11.9996 1.99805ZM14.9385 16.4993H9.06069C9.71273 18.9135 10.8461 20.5011 11.9996 20.5011C13.1531 20.5011 14.2865 18.9135 14.9385 16.4993ZM7.50791 16.4999L4.78542 16.4998C5.74376 18.0328 7.17721 19.2384 8.87959 19.9104C8.35731 19.0906 7.92632 18.0643 7.60932 16.8949L7.50791 16.4999ZM19.2138 16.4998L16.4913 16.4999C16.1675 17.8337 15.6999 18.9995 15.1185 19.9104C16.7155 19.2804 18.0752 18.1814 19.0286 16.7833L19.2138 16.4998ZM7.09302 9.99895H3.73542L3.73066 10.0162C3.57858 10.6525 3.49805 11.3166 3.49805 11.9996C3.49805 13.0558 3.69064 14.0669 4.04261 14.9999L7.21577 14.9995C7.07347 14.0504 6.99805 13.0422 6.99805 11.9996C6.99805 11.3156 7.03051 10.6464 7.09302 9.99895ZM15.3965 9.99901H8.60267C8.53465 10.6393 8.49805 11.309 8.49805 11.9996C8.49805 13.0591 8.58419 14.0694 8.73778 14.9997H15.2614C15.415 14.0694 15.5011 13.0591 15.5011 11.9996C15.5011 11.309 15.4645 10.6393 15.3965 9.99901ZM20.2642 9.99811L16.9062 9.99897C16.9687 10.6464 17.0011 11.3156 17.0011 11.9996C17.0011 13.0422 16.9257 14.0504 16.7834 14.9995L19.9566 14.9999C20.3086 14.0669 20.5011 13.0558 20.5011 11.9996C20.5011 11.3102 20.4191 10.64 20.2642 9.99811ZM8.88065 4.08875L8.85774 4.09747C6.81043 4.91218 5.15441 6.49949 4.24975 8.49935L7.29787 8.49972C7.61122 6.74693 8.15807 5.221 8.88065 4.08875ZM11.9996 3.49805L11.8839 3.50335C10.6185 3.6191 9.39603 5.62107 8.82831 8.4993H15.1709C14.6048 5.62914 13.3875 3.63033 12.1259 3.50436L11.9996 3.49805ZM15.1196 4.08881L15.2264 4.2629C15.8957 5.37537 16.4038 6.83525 16.7013 8.49972L19.7494 8.49935C18.8848 6.58795 17.3338 5.05341 15.4108 4.21008L15.1196 4.08881Z",
+                        },
+                        languageHover: {
+                            path: "M11.9996 1.99805C17.5233 1.99805 22.0011 6.47589 22.0011 11.9996C22.0011 17.5233 17.5233 22.0011 11.9996 22.0011C6.47589 22.0011 1.99805 17.5233 1.99805 11.9996C1.99805 6.47589 6.47589 1.99805 11.9996 1.99805ZM14.9385 16.4993H9.06069C9.71273 18.9135 10.8461 20.5011 11.9996 20.5011C13.1531 20.5011 14.2865 18.9135 14.9385 16.4993ZM7.50791 16.4999L4.78542 16.4998C5.74376 18.0328 7.17721 19.2384 8.87959 19.9104C8.35731 19.0906 7.92632 18.0643 7.60932 16.8949L7.50791 16.4999ZM19.2138 16.4998L16.4913 16.4999C16.1675 17.8337 15.6999 18.9995 15.1185 19.9104C16.7155 19.2804 18.0752 18.1814 19.0286 16.7833L19.2138 16.4998ZM7.09302 9.99895H3.73542L3.73066 10.0162C3.57858 10.6525 3.49805 11.3166 3.49805 11.9996C3.49805 13.0558 3.69064 14.0669 4.04261 14.9999L7.21577 14.9995C7.07347 14.0504 6.99805 13.0422 6.99805 11.9996C6.99805 11.3156 7.03051 10.6464 7.09302 9.99895ZM15.3965 9.99901H8.60267C8.53465 10.6393 8.49805 11.309 8.49805 11.9996C8.49805 13.0591 8.58419 14.0694 8.73778 14.9997H15.2614C15.415 14.0694 15.5011 13.0591 15.5011 11.9996C15.5011 11.309 15.4645 10.6393 15.3965 9.99901ZM20.2642 9.99811L16.9062 9.99897C16.9687 10.6464 17.0011 11.3156 17.0011 11.9996C17.0011 13.0422 16.9257 14.0504 16.7834 14.9995L19.9566 14.9999C20.3086 14.0669 20.5011 13.0558 20.5011 11.9996C20.5011 11.3102 20.4191 10.64 20.2642 9.99811ZM8.88065 4.08875L8.85774 4.09747C6.81043 4.91218 5.15441 6.49949 4.24975 8.49935L7.29787 8.49972C7.61122 6.74693 8.15807 5.221 8.88065 4.08875ZM11.9996 3.49805L11.8839 3.50335C10.6185 3.6191 9.39603 5.62107 8.82831 8.4993H15.1709C14.6048 5.62914 13.3875 3.63033 12.1259 3.50436L11.9996 3.49805ZM15.1196 4.08881L15.2264 4.2629C15.8957 5.37537 16.4038 6.83525 16.7013 8.49972L19.7494 8.49935C18.8848 6.58795 17.3338 5.05341 15.4108 4.21008L15.1196 4.08881Z",
+                        }
+                    }
+                }
             };
 
             const js = new VideoPlayer('videojs', config, 'player1');
@@ -85,10 +147,6 @@
 
             js.on('volume', (data) => {
                 js.displayMessage(`Volume: ${data.volume}%`);
-            });
-            js.on('time', (data) => {
-                const currJS = document.getElementById('currJS');
-                currJS.innerHTML = `${js.humanTime(data.position)} - ${parseInt(data.percentage, 10)}% - ${js.humanTime(data.remaining)}`;
             });
             js.on('ready', (data) => {
               console.log('ready', data);
@@ -109,10 +167,6 @@
 
             jw.on('volume', (data) => {
                 jw.displayMessage(`Volume: ${data.volume}%`);
-            });
-            jw.on('time', (data) => {
-                const currJW = document.getElementById('currJW');
-                currJW.innerHTML = `${jw.humanTime(data.position)} - ${parseInt(data.percentage, 10)}% - ${jw.humanTime(data.remaining)}`;
             });
             jw.on('ready', (data) => {
               console.log('ready', data);
