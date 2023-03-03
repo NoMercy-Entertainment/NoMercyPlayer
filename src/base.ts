@@ -65,7 +65,10 @@ export default class Base {
 	}
 
 	#loadJWPlayer() {
-		this.#appendScriptFilesToDocument(this.options.scriptFiles ?? [`https://ssl.p.jwpcdn.com/player/v/${this.jwplayerVersion}/jwplayer.js`])
+		this.#appendScriptFilesToDocument(this.options.scriptFiles ?? [
+			`https://ssl.p.jwpcdn.com/player/v/${this.jwplayerVersion}/jwplayer.js`,
+			'https://cdnjs.cloudflare.com/ajax/libs/webvtt-parser/2.2.0/parser.js',
+		])
 			.then(() => {
 				this.player = window.jwplayer(this.playerId);
 				this.player.setup(this.options);
