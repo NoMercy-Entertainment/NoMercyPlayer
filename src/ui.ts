@@ -1,8 +1,8 @@
 import {
-	bottomBarStyles, bottomRowStyles, buttonBaseStyle, Buttons, buttons, buttonStyles,
-	chapterMarkersStyles, dividerStyles, fluentIcons, Icon, iconStyles, overlayStyles,
-	sliderBarStyles, sliderBufferStyles, sliderNippleStyles, sliderPopImageStyles, sliderPopStyles,
-	sliderProgressStyles, timeStyles, topBarStyles, topRowStyles
+    bottomBarStyles, bottomRowStyles, buttonBaseStyle, Buttons, buttons, buttonStyles,
+    chapterMarkersStyles, dividerStyles, fluentIcons, Icon, iconStyles, overlayStyles,
+    sliderBarStyles, sliderBufferStyles, sliderNippleStyles, sliderPopImageStyles, sliderPopStyles,
+    sliderProgressStyles, timeStyles, topBarStyles, topRowStyles
 } from './buttons.js';
 import Functions from './functions.js';
 
@@ -25,13 +25,13 @@ export default class UI extends Functions {
 	progressBar: HTMLDivElement = <HTMLDivElement>{}; // sliderBar
 
 	previewTime: {
-        start: number;
-        end: number;
-        x: number;
-        y: number;
-        w: number;
-        h: number;
-    }[] = [];
+		start: number;
+		end: number;
+		x: number;
+		y: number;
+		w: number;
+		h: number;
+	}[] = [];
 
 	sliderBarStyles: string[] = [];
 	sliderBufferStyles: string[] = [];
@@ -87,7 +87,7 @@ export default class UI extends Functions {
 
 	hideControls() {
 		if (!this.lock && this.isPlaying()) {
-		    this.dispatchEvent('controls', false);
+			this.dispatchEvent('controls', false);
 		}
 	};
 
@@ -134,27 +134,7 @@ export default class UI extends Functions {
 
 		const bottomRow = this.createBottomRow(bottomBar);
 
-
-		this.createButton(
-			topBar,
-			'back'
-		);
-
-
-		this.createTime(
-			topRow,
-			'current',
-			[]
-		);
-		this.createDivider(
-			topRow,
-			'/'
-		);
-		this.createTime(
-			topRow,
-			'duration',
-			['mr-2']
-		);
+		this.createBackButton(topBar);
 
 		this.createProgressBar(topRow);
 
@@ -170,32 +150,22 @@ export default class UI extends Functions {
 
 		this.createSeekForwardButton(bottomRow);
 
-		this.createDivider(
-			bottomRow
-		);
+		this.createTime(bottomRow, 'current', ['ml-2']);
+		this.createDivider(bottomRow);
+		this.createTime(bottomRow, 'duration', ['mr-2']);
 
 		this.createPlaylistsButton(bottomRow);
 		this.createLanguageButton(bottomRow);
 		this.createQualityButton(bottomRow);
 		this.createTheaterButton(bottomRow);
 
-		// this.createButton(
-		//     bottomRow,
-		//     'pip'
-		// );
-		// this.createButton(
-		//     bottomRow,
-		//     'speed'
-		// );
+		this.createPIPButton(bottomRow);
 
-		this.createButton(
-			bottomRow,
-			'settings'
-		);
+		this.createSpeedButton(bottomRow);
 
-		this.createFullscreenButton(
-			bottomRow
-		);
+		this.createSettingsButton(bottomRow);
+
+		this.createFullscreenButton(bottomRow);
 	}
 
 	createContainer(parent: HTMLElement, classes: string[], id?: string) {
@@ -298,49 +268,494 @@ export default class UI extends Functions {
 			return parent;
 		}
 		parent.innerHTML += `
-		    <svg class="${id} ${icon.classes?.join(' ')} ${hidden ? 'hidden' : 'flex'}" viewBox="0 0 24 24">
-		        <path d="${icon.path.normal}" class="group-hover/button:hidden"></path>
+			<svg class="${id} ${icon.classes?.join(' ')} ${hidden ? 'hidden' : 'flex'} w-5 h-5" viewBox="0 0 24 24">
+				<path d="${icon.path.normal}" class="group-hover/button:hidden"></path>
 				<path d="${icon.path.hover}" class="hidden group-hover/button:flex"></path>
-		    </svg>
+			</svg>
 		`;
 		return parent;
 	}
 
-	createButton(parent: HTMLElement, icon: string, id?: string) {
+	createButton(parent: HTMLElement, icon: string) {
 		const button = document.createElement('button');
-		id = id ?? 'button';
 
-		button.id = id;
+		button.id = icon;
 
 		const classes = this.buttonStyles;
-		classes.push(id);
-		this.addClasses(button, classes);
+		classes.push(icon);
 
-		this.createSVGElement(button, id, this.buttons[icon]);
+		this.addClasses(button, classes);
 
 		parent.appendChild(button);
 		return button;
 	}
 
-	createSeekBackButton(bottomRow: HTMLDivElement) {
-		const seekBack = this.createButton(
-			bottomRow,
-			'seekBack'
+
+	createSettingsButton(parent: HTMLDivElement) {
+		const settingsButton = this.createButton(
+			parent,
+			'settings'
 		);
-		seekBack.addEventListener('click', () => {
-			this.rewindVideo(this.options.seekInterval);
+
+		this.createSVGElement(settingsButton, 'settings', this.buttons.settings);
+
+		settingsButton.addEventListener('click', () => {
+			this.dispatchEvent('settings');
+		});
+
+		parent.append(settingsButton);
+		return settingsButton;
+	}
+
+	createBackButton(topBar: HTMLDivElement) {
+		const backButton = this.createButton(
+			topBar,
+			'back'
+		);
+
+		this.createSVGElement(backButton, 'back', this.buttons.back);
+
+		backButton.addEventListener('click', () => {
+			this.dispatchEvent('back');
 		});
 	}
 
-	createSeekForwardButton(bottomRow: HTMLDivElement) {
+	createPlaybackButton(parent: HTMLElement) {
+		const playbackButton = this.createButton(
+			parent,
+			'playback'
+		);
+
+		this.createSVGElement(playbackButton, 'paused', this.buttons.play);
+		this.createSVGElement(playbackButton, 'playing', this.buttons.pause, true);
+
+		playbackButton.addEventListener('click', (event) => {
+			event.stopPropagation();
+			this.togglePlayback();
+		});
+		this.player.on('pause', () => {
+			playbackButton.querySelector<any>('.playing').style.display = 'none';
+			playbackButton.querySelector<any>('.paused').style.display = 'flex';
+		});
+		this.player.on('play', () => {
+			playbackButton.querySelector<any>('.paused').style.display = 'none';
+			playbackButton.querySelector<any>('.playing').style.display = 'flex';
+		});
+
+		parent.appendChild(playbackButton);
+		return playbackButton;
+	}
+
+	createSeekBackButton(parent: HTMLDivElement) {
+		const seekBack = this.createButton(
+			parent,
+			'seekBack'
+		);
+
+		this.createSVGElement(seekBack, 'seekBack', this.buttons.seekBack);
+
+		seekBack.addEventListener('click', () => {
+			this.rewindVideo(this.options.seekInterval);
+		});
+
+		parent.append(seekBack);
+		return seekBack;
+	}
+
+	createSeekForwardButton(parent: HTMLDivElement) {
 		const seekForward = this.createButton(
-			bottomRow,
+			parent,
 			'seekForward'
 		);
+
+		this.createSVGElement(seekForward, 'seekForward', this.buttons.seekForward);
+
 		seekForward.addEventListener('click', () => {
 			this.forwardVideo(this.options.seekInterval);
 		});
 
+		parent.append(seekForward);
+		return seekForward;
+	}
+
+	createTime(parent: HTMLDivElement, type: string, classes: string[]) {
+		const div = document.createElement('div');
+		div.textContent = '00:00';
+
+		this.addClasses(div, [
+			...classes,
+			...this.buttonStyles,
+			...this.timeStyles,
+			`${type}-time`,
+		]);
+
+		switch (type) {
+		case 'current':
+
+			this.on('time', (data) => {
+				div.textContent = this.humanTime(data.position);
+			});
+			break;
+
+		case 'remaining':
+
+			this.on('duration', (data) => {
+				if (data.remaining === Infinity) {
+					div.textContent = 'Live';
+				} else {
+					div.textContent = this.humanTime(data.remaining);
+				}
+			});
+
+			this.on('time', (data) => {
+				if (data.remaining === Infinity) {
+					div.textContent = 'Live';
+				} else {
+					div.textContent = this.humanTime(data.remaining);
+				}
+			});
+			break;
+
+		case 'duration':
+			this.on('duration', (data) => {
+				if (data.duration === Infinity) {
+					div.textContent = 'Live';
+				} else {
+					div.textContent = this.humanTime(data.duration);
+				}
+			});
+			break;
+
+		default:
+			break;
+		}
+
+		parent.append(div);
+		return div;
+	}
+
+	createVolumeButton(parent: HTMLDivElement) {
+		const volumeButton = this.createButton(
+			parent,
+			'volume'
+		);
+
+		this.createSVGElement(volumeButton, 'volumeMuted', this.buttons.volumeMuted, true);
+		this.createSVGElement(volumeButton, 'volumeLow', this.buttons.volumeLow, true);
+		this.createSVGElement(volumeButton, 'volumeMedium', this.buttons.volumeMedium, true);
+		this.createSVGElement(volumeButton, 'volumeHigh', this.buttons.volumeHigh);
+
+		volumeButton.addEventListener('click', (event) => {
+			event.stopPropagation();
+			this.toggleMute();
+		});
+
+		this.on('volume', () => {
+			if (this.isMuted()) {
+				volumeButton.querySelector<any>('.volumeHigh').style.display = 'none';
+				volumeButton.querySelector<any>('.volumeMuted').style.display = 'flex';
+			} else {
+				volumeButton.querySelector<any>('.volumeMuted').style.display = 'none';
+				volumeButton.querySelector<any>('.volumeHigh').style.display = 'flex';
+			}
+		});
+		this.on('mute', () => {
+			if (this.isMuted()) {
+				volumeButton.querySelector<any>('.volumeHigh').style.display = 'none';
+				volumeButton.querySelector<any>('.volumeMuted').style.display = 'flex';
+			} else {
+				volumeButton.querySelector<any>('.volumeMuted').style.display = 'none';
+				volumeButton.querySelector<any>('.volumeHigh').style.display = 'flex';
+			}
+		});
+
+		parent.append(volumeButton);
+		return volumeButton;
+	}
+
+	createPreviousButton(parent: HTMLDivElement) {
+		const previousButton = this.createButton(
+			parent,
+			'previous'
+		);
+		previousButton.style.display = 'none';
+
+		this.createSVGElement(previousButton, 'previous', this.buttons.previous);
+
+		previousButton.addEventListener('click', (event) => {
+			event.stopPropagation();
+			this.previous();
+		});
+		this.on('item', () => {
+			if (this.getCurrentPlaylistIndex() > 0) {
+				previousButton.style.display = 'flex';
+			} else {
+				previousButton.style.display = 'none';
+			}
+		});
+
+		parent.appendChild(previousButton);
+		return previousButton;
+	}
+
+	createNextButton(parent: HTMLDivElement) {
+		const nextButton = this.createButton(
+			parent,
+			'next'
+		);
+		nextButton.style.display = 'none';
+
+		this.createSVGElement(nextButton, 'next', this.buttons.next);
+
+		nextButton.addEventListener('click', (event) => {
+			event.stopPropagation();
+			this.next();
+		});
+		this.on('item', () => {
+			if (this.isLastPlaylistItem()) {
+				nextButton.style.display = 'none';
+			} else {
+				nextButton.style.display = 'flex';
+			}
+		});
+
+		parent.appendChild(nextButton);
+		return nextButton;
+	}
+
+	subsEnabled = false;
+	createLanguageButton(parent: HTMLElement) {
+		const languageButton = this.createButton(
+			parent,
+			'language'
+		);
+		languageButton.style.display = 'none';
+
+		this.createSVGElement(languageButton, 'subtitle', this.buttons.subtitles);
+		this.createSVGElement(languageButton, 'subtitled', this.buttons.subtitles, true);
+
+		languageButton.addEventListener('click', (event) => {
+			event.stopPropagation();
+
+			if (this.subsEnabled) {
+				this.subsEnabled = false;
+				languageButton.querySelector<any>('.subtitled').style.display = 'none';
+				languageButton.querySelector<any>('.subtitle').style.display = 'flex';
+				this.setTextTrack(-1);
+			} else {
+				this.subsEnabled = true;
+				languageButton.querySelector<any>('.subtitle').style.display = 'none';
+				languageButton.querySelector<any>('.subtitled').style.display = 'flex';
+				this.setTextTrack(1);
+			}
+
+			// this.toggleLanguage();
+		});
+		this.on('item', () => {
+			if (this.hasTextTracks() || this.hasAudioTracks()) {
+				languageButton.style.display = 'flex';
+			} else {
+				languageButton.style.display = 'none';
+			}
+		});
+
+		parent.appendChild(languageButton);
+		return languageButton;
+	}
+
+	highQuality = false;
+	createQualityButton(parent: HTMLElement) {
+		const qualityButton = this.createButton(
+			parent,
+			'quality'
+		);
+		qualityButton.style.display = 'none';
+
+		this.createSVGElement(qualityButton, 'low', this.buttons.quality);
+		this.createSVGElement(qualityButton, 'high', this.buttons.quality, true);
+
+		qualityButton.addEventListener('click', (event) => {
+			event.stopPropagation();
+
+			if (this.highQuality) {
+				this.highQuality = false;
+				qualityButton.querySelector<any>('.high').style.display = 'none';
+				qualityButton.querySelector<any>('.low').style.display = 'flex';
+			} else {
+				this.highQuality = true;
+				qualityButton.querySelector<any>('.low').style.display = 'none';
+				qualityButton.querySelector<any>('.high').style.display = 'flex';
+			}
+
+			// this.toggleLanguage();
+		});
+
+		this.on('item', () => {
+			if (this.hasQualities()) {
+				qualityButton.style.display = 'flex';
+			} else {
+				qualityButton.style.display = 'none';
+			}
+		});
+
+		parent.appendChild(qualityButton);
+		return qualityButton;
+	}
+
+	theaterModeEnabled = false;
+	createTheaterButton(parent: HTMLDivElement) {
+		const theaterButton = this.createButton(
+			parent,
+			'theater'
+		);
+
+		this.createSVGElement(theaterButton, 'theater', this.buttons.theater);
+		this.createSVGElement(theaterButton, 'theater-enabled', this.buttons.theaterExit, true);
+
+		theaterButton.addEventListener('click', (event) => {
+			event.stopPropagation();
+
+			if (this.theaterModeEnabled) {
+				this.theaterModeEnabled = false;
+				theaterButton.querySelector<any>('.theater-enabled').style.display = 'none';
+				theaterButton.querySelector<any>('.theater').style.display = 'flex';
+				this.dispatchEvent('theaterMode', false);
+			} else {
+				this.theaterModeEnabled = true;
+				theaterButton.querySelector<any>('.theater').style.display = 'none';
+				theaterButton.querySelector<any>('.theater-enabled').style.display = 'flex';
+				this.dispatchEvent('theaterMode', true);
+			}
+
+			// this.toggleLanguage();
+		});
+
+		parent.appendChild(theaterButton);
+		return theaterButton;
+	}
+
+	createFullscreenButton(parent: HTMLElement) {
+		const fullscreenButton = this.createButton(
+			parent,
+			'fullscreen'
+		);
+
+		this.createSVGElement(fullscreenButton, 'fullscreen-enable', this.buttons.exitFullscreen, true);
+		this.createSVGElement(fullscreenButton, 'fullscreen', this.buttons.fullscreen);
+
+		fullscreenButton.addEventListener('click', (event) => {
+			event.stopPropagation();
+			this.toggleFullscreen();
+		});
+		this.on('fullscreen', () => {
+			if (this.isFullscreen()) {
+				fullscreenButton.querySelector<any>('.fullscreen').style.display = 'none';
+				fullscreenButton.querySelector<any>('.fullscreen-enable').style.display = 'flex';
+			} else {
+				fullscreenButton.querySelector<any>('.fullscreen-enable').style.display = 'none';
+				fullscreenButton.querySelector<any>('.fullscreen').style.display = 'flex';
+			}
+		});
+
+		parent.appendChild(fullscreenButton);
+		return fullscreenButton;
+
+	}
+
+	createPlaylistsButton(parent: HTMLDivElement) {
+		const playlistButton = this.createButton(
+			parent,
+			'playlist'
+		);
+
+		playlistButton.style.display = 'none';
+
+		this.createSVGElement(playlistButton, 'playlist', this.buttons.playlist);
+
+		playlistButton.addEventListener('click', (event) => {
+			event.stopPropagation();
+			console.log(this.getPlaylist());
+			// this.togglePlaylists();
+		});
+
+		this.on('item', () => {
+			if (this.hasPlaylists()) {
+				playlistButton.style.display = 'flex';
+			} else {
+				playlistButton.style.display = 'none';
+			}
+		});
+
+		parent.appendChild(playlistButton);
+		return playlistButton;
+	}
+
+	createSpeedButton(parent: HTMLDivElement) {
+		const speedButton = this.createButton(
+			parent,
+			'speed'
+		);
+
+		speedButton.style.display = 'none';
+
+		this.createSVGElement(speedButton, 'speed', this.buttons.speed);
+
+		speedButton.addEventListener('click', (event) => {
+			event.stopPropagation();
+			console.log(this.getPlaylist());
+			// this.togglePlaylists();
+		});
+
+		this.on('item', () => {
+			if (this.hasSpeeds()) {
+				speedButton.style.display = 'flex';
+			} else {
+				speedButton.style.display = 'none';
+			}
+		});
+
+		parent.appendChild(speedButton);
+		return speedButton;
+	}
+
+	pipEnabled = false;
+	createPIPButton(parent: HTMLDivElement) {
+		const pipButton = this.createButton(
+			parent,
+			'pip'
+		);
+
+		pipButton.style.display = 'none';
+
+		this.createSVGElement(pipButton, 'pip-enter', this.buttons.pipEnter);
+		this.createSVGElement(pipButton, 'pip-exit', this.buttons.pipExit, true);
+
+		pipButton.addEventListener('click', (event) => {
+			event.stopPropagation();
+
+			if (this.pipEnabled) {
+				this.pipEnabled = false;
+				pipButton.querySelector<any>('.pip-exit').style.display = 'none';
+				pipButton.querySelector<any>('.pip-enter').style.display = 'flex';
+				this.dispatchEvent('pip', false);
+			} else {
+				this.pipEnabled = true;
+				pipButton.querySelector<any>('.pip-enter').style.display = 'none';
+				pipButton.querySelector<any>('.pip-exit').style.display = 'flex';
+				this.dispatchEvent('pip', true);
+			}
+		});
+
+		this.on('item', () => {
+			if (this.hasPIP()) {
+				pipButton.style.display = 'flex';
+			} else {
+				pipButton.style.display = 'none';
+			}
+		});
+
+		parent.appendChild(pipButton);
+		return pipButton;
 	}
 
 	createProgressBar(parent: HTMLDivElement) {
@@ -391,7 +806,6 @@ export default class UI extends Functions {
 		sliderBar.append(sliderPop);
 
 		this.on('seeked', () => {
-			console.log('seeked');
 			sliderPop.style.setProperty('--visibility', 'hidden');
 
 			this.hideControls();
@@ -411,7 +825,6 @@ export default class UI extends Functions {
 			switch (event) {
 			case 'mouseover':
 				sliderBar.addEventListener(event, (e) => {
-					sliderNipple.style.display = 'flex';
 					const scrubTime = this.#getScrubTime(e, sliderBar);
 					this.#getSliderPopImage(scrubTime, sliderPopImage);
 					sliderText.textContent = this.humanTime(scrubTime.scrubTimePlayer);
@@ -425,7 +838,6 @@ export default class UI extends Functions {
 				break;
 			case 'mouseleave':
 				sliderBar.addEventListener(event, () => {
-					sliderNipple.style.display = 'none';
 					sliderPop.style.setProperty('--visibility', 'hidden');
 					// hide sliderPop
 				});
@@ -462,7 +874,6 @@ export default class UI extends Functions {
 				sliderPop.style.setProperty('--visibility', 'hidden');
 				this.isMouseDown = false;
 				const scrubTime = this.#getScrubTime(e, sliderBar);
-				// console.log(scrubTime);
 				sliderProgress.style.width = `${scrubTime.scrubTime}%`;
 				sliderNipple.style.left = `${scrubTime.scrubTime}%`;
 				this.seek(scrubTime.scrubTimePlayer);
@@ -533,33 +944,36 @@ export default class UI extends Functions {
 			if (image) {
 				sliderPopImage.style.backgroundImage = `url('${image}')`;
 			}
-			this.getFileContents({
-				url: this.getCurrentTimeFile(),
-				options: {},
-				callback: (data: string) => {
-					// eslint-disable-next-line max-len
-					const regex
-                        = /(\d{2}:\d{2}:\d{2})\.\d{3}\s-->\s(\d{2}:\d{2}:\d{2})\.\d{3}\nsprite\.webp#(xywh=\d{1,},\d{1,},\d{1,},\d{1,})/gmu;
+			const file = this.getCurrentTimeFile();
+			if (file) {
+				this.getFileContents({
+					url: file,
+					options: {},
+					callback: (data: string) => {
+						// eslint-disable-next-line max-len
+						const regex
+							= /(\d{2}:\d{2}:\d{2})\.\d{3}\s-->\s(\d{2}:\d{2}:\d{2})\.\d{3}\nsprite\.webp#(xywh=\d{1,},\d{1,},\d{1,},\d{1,})/gmu;
 
-					let m: any;
-					while ((m = regex.exec(data)) !== null) {
-						if (m.index === regex.lastIndex) {
-							regex.lastIndex += 1;
+						let m: any;
+						while ((m = regex.exec(data)) !== null) {
+							if (m.index === regex.lastIndex) {
+								regex.lastIndex += 1;
+							}
+
+							const data = m[3].split('=')[1].split(',');
+
+							this.previewTime.push({
+								start: this.convertToSeconds(m[1]),
+								end: this.convertToSeconds(m[2]),
+								x: data[0],
+								y: data[1],
+								w: data[2],
+								h: data[3],
+							});
 						}
-
-						const data = m[3].split('=')[1].split(',');
-
-						this.previewTime.push({
-							start: this.convertToSeconds(m[1]),
-							end: this.convertToSeconds(m[2]),
-							x: data[0],
-							y: data[1],
-							w: data[2],
-							h: data[3],
-						});
-					}
-				},
-			});
+					},
+				});
+			}
 		}
 
 		let img = this.previewTime.find(
@@ -592,378 +1006,4 @@ export default class UI extends Functions {
 			scrubTimePlayer: (offsetX / sliderBar.offsetWidth) * this.duration(),
 		};
 	}
-
-	createTime(parent: HTMLDivElement, type: string, classes: string[]) {
-		const div = document.createElement('div');
-		div.textContent = '00:00';
-
-		this.addClasses(div, [
-			...classes,
-			...this.buttonStyles,
-			...this.timeStyles,
-			`${type}-time`,
-		]);
-
-		switch (type) {
-		case 'current':
-
-			this.on('time', (data) => {
-				div.textContent = this.humanTime(data.position);
-			});
-			break;
-
-		case 'remaining':
-
-			this.on('duration', (data) => {
-				if (data.remaining === Infinity) {
-					div.textContent = 'Live';
-				} else {
-					div.textContent = this.humanTime(data.remaining);
-				}
-			});
-
-			this.on('time', (data) => {
-				if (data.remaining === Infinity) {
-					div.textContent = 'Live';
-				} else {
-					div.textContent = this.humanTime(data.remaining);
-				}
-			});
-			break;
-
-		case 'duration':
-			this.on('duration', (data) => {
-				if (data.duration === Infinity) {
-					div.textContent = 'Live';
-				} else {
-					div.textContent = this.humanTime(data.duration);
-				}
-			});
-			break;
-
-		default:
-			break;
-		}
-
-		parent.append(div);
-		return div;
-	}
-
-	createVolumeButton(parent: HTMLDivElement) {
-		const button = document.createElement('button');
-		button.id = 'volume';
-
-		this.addClasses(button, [
-			...this.buttonStyles,
-			'volume',
-		]);
-
-		this.createSVGElement(button, 'volumeMuted', this.buttons.volumeMuted, true);
-		this.createSVGElement(button, 'volumeLow', this.buttons.volumeLow, true);
-		this.createSVGElement(button, 'volumeMedium', this.buttons.volumeMedium, true);
-		this.createSVGElement(button, 'volumeHigh', this.buttons.volumeHigh);
-
-		button.addEventListener('click', (event) => {
-			event.stopPropagation();
-			this.toggleMute();
-		});
-
-		this.on('volume', () => {
-			if (this.isMuted()) {
-				button.querySelector<any>('.volumeHigh').style.display = 'none';
-				button.querySelector<any>('.volumeMuted').style.display = 'flex';
-			} else {
-				button.querySelector<any>('.volumeMuted').style.display = 'none';
-				button.querySelector<any>('.volumeHigh').style.display = 'flex';
-			}
-		});
-		this.on('mute', () => {
-			if (this.isMuted()) {
-				button.querySelector<any>('.volumeHigh').style.display = 'none';
-				button.querySelector<any>('.volumeMuted').style.display = 'flex';
-			} else {
-				button.querySelector<any>('.volumeMuted').style.display = 'none';
-				button.querySelector<any>('.volumeHigh').style.display = 'flex';
-			}
-		});
-
-		parent.append(button);
-		return button;
-	}
-
-	createPlaybackButton(parent: HTMLElement) {
-		const button = document.createElement('button');
-
-		button.id = 'playback';
-
-		this.addClasses(button, [
-			...this.buttonStyles,
-			'playback',
-		]);
-
-		this.createSVGElement(button, 'paused', this.buttons.play);
-		this.createSVGElement(button, 'playing', this.buttons.pause, true);
-
-		button.addEventListener('click', (event) => {
-			event.stopPropagation();
-			this.togglePlayback();
-		});
-		this.player.on('pause', () => {
-			button.querySelector<any>('.playing').style.display = 'none';
-			button.querySelector<any>('.paused').style.display = 'flex';
-		});
-		this.player.on('play', () => {
-			button.querySelector<any>('.paused').style.display = 'none';
-			button.querySelector<any>('.playing').style.display = 'flex';
-		});
-
-		parent.appendChild(button);
-		return button;
-	}
-
-	createPreviousButton(bottomBar: HTMLDivElement) {
-		const button = document.createElement('button');
-
-		button.id = 'previous';
-		button.style.display = 'none';
-
-		this.addClasses(button, [
-			...this.buttonStyles,
-			'previous',
-		]);
-
-		this.createSVGElement(button, 'previous', this.buttons.previous);
-
-		button.addEventListener('click', (event) => {
-			event.stopPropagation();
-			this.previous();
-		});
-		this.on('item', () => {
-			if (this.getCurrentPlaylistIndex() > 0) {
-				button.style.display = 'flex';
-			} else {
-				button.style.display = 'none';
-			}
-		});
-
-		bottomBar.appendChild(button);
-		return button;
-	}
-
-	createNextButton(bottomBar: HTMLDivElement) {
-		const button = document.createElement('button');
-
-		button.id = 'next';
-		button.style.display = 'none';
-
-		this.addClasses(button, [
-			...this.buttonStyles,
-			'next',
-		]);
-
-		this.createSVGElement(button, 'next', this.buttons.next);
-
-		button.addEventListener('click', (event) => {
-			event.stopPropagation();
-			this.next();
-		});
-		this.on('item', () => {
-			if (this.isLastPlaylistItem()) {
-				button.style.display = 'none';
-			} else {
-				button.style.display = 'flex';
-			}
-		});
-
-		bottomBar.appendChild(button);
-		return button;
-	}
-
-	subsEnabled = false;
-	createLanguageButton(parent: HTMLElement) {
-		const button = document.createElement('button');
-
-		button.id = 'language';
-		button.style.display = 'none';
-
-		this.addClasses(button, [
-			...this.buttonStyles,
-			'language',
-		]);
-
-		this.createSVGElement(button, 'subtitle', this.buttons.subtitles);
-		this.createSVGElement(button, 'subtitled', this.buttons.subtitles, true);
-
-		button.addEventListener('click', (event) => {
-			event.stopPropagation();
-
-			if (this.subsEnabled) {
-				this.subsEnabled = false;
-				button.querySelector<any>('.subtitled').style.display = 'none';
-				button.querySelector<any>('.subtitle').style.display = 'flex';
-				this.setTextTrack(-1);
-			} else {
-				this.subsEnabled = true;
-				button.querySelector<any>('.subtitle').style.display = 'none';
-				button.querySelector<any>('.subtitled').style.display = 'flex';
-				this.setTextTrack(1);
-			}
-
-			// this.toggleLanguage();
-		});
-		this.on('item', () => {
-			if (this.hasTextTracks() || this.hasAudioTracks()) {
-				button.style.display = 'flex';
-			} else {
-				button.style.display = 'none';
-			}
-		});
-
-		parent.appendChild(button);
-		return button;
-	}
-
-	highQuality = false;
-	createQualityButton(parent: HTMLElement) {
-		const button = document.createElement('button');
-
-		button.id = 'quality';
-		button.style.display = 'none';
-
-		this.addClasses(button, [
-			...this.buttonStyles,
-			'quality',
-		]);
-
-		this.createSVGElement(button, 'low', this.buttons.quality);
-		this.createSVGElement(button, 'high', this.buttons.quality, true);
-
-		button.addEventListener('click', (event) => {
-			event.stopPropagation();
-
-			if (this.highQuality) {
-				this.highQuality = false;
-				button.querySelector<any>('.high').style.display = 'none';
-				button.querySelector<any>('.low').style.display = 'flex';
-			} else {
-				this.highQuality = true;
-				button.querySelector<any>('.low').style.display = 'none';
-				button.querySelector<any>('.high').style.display = 'flex';
-			}
-
-			// this.toggleLanguage();
-		});
-
-		this.on('item', () => {
-			if (this.hasQualities()) {
-				button.style.display = 'flex';
-			} else {
-				button.style.display = 'none';
-			}
-		});
-
-		parent.appendChild(button);
-		return button;
-	}
-
-	theaterModeEnabled = false;
-	createTheaterButton(bottomBar: HTMLDivElement) {
-		const button = document.createElement('button');
-
-		button.id = 'theater';
-
-		this.addClasses(button, [
-			...this.buttonStyles,
-			'theater',
-		]);
-
-		this.createSVGElement(button, 'theater', this.buttons.theater);
-		this.createSVGElement(button, 'theater-enabled', this.buttons.theaterExit, true);
-
-		button.addEventListener('click', (event) => {
-			event.stopPropagation();
-
-			if (this.theaterModeEnabled) {
-				this.theaterModeEnabled = false;
-				button.querySelector<any>('.theater-enabled').style.display = 'none';
-				button.querySelector<any>('.theater').style.display = 'flex';
-				this.dispatchEvent('theaterMode', false);
-			} else {
-				this.theaterModeEnabled = true;
-				button.querySelector<any>('.theater').style.display = 'none';
-				button.querySelector<any>('.theater-enabled').style.display = 'flex';
-				this.dispatchEvent('theaterMode', true);
-			}
-
-			// this.toggleLanguage();
-		});
-
-		bottomBar.appendChild(button);
-		return button;
-	}
-
-	createFullscreenButton(parent: HTMLElement) {
-
-		const button = document.createElement('button');
-
-		button.id = 'fullscreen';
-
-		this.addClasses(button, [
-			...this.buttonStyles,
-			'fullscreen',
-		]);
-
-		this.createSVGElement(button, 'fullscreen-enable', this.buttons.exitFullscreen, true);
-		this.createSVGElement(button, 'fullscreen', this.buttons.fullscreen);
-
-		button.addEventListener('click', (event) => {
-			event.stopPropagation();
-			this.toggleFullscreen();
-		});
-		this.on('fullscreen', () => {
-			if (this.isFullscreen()) {
-				button.querySelector<any>('.fullscreen').style.display = 'none';
-				button.querySelector<any>('.fullscreen-enable').style.display = 'flex';
-			} else {
-				button.querySelector<any>('.fullscreen-enable').style.display = 'none';
-				button.querySelector<any>('.fullscreen').style.display = 'flex';
-			}
-		});
-
-		parent.appendChild(button);
-		return button;
-
-	}
-
-	createPlaylistsButton(parent: HTMLDivElement) {
-		const button = document.createElement('button');
-
-		button.id = 'playlist';
-		button.style.display = 'none';
-
-		this.addClasses(button, [
-			...this.buttonStyles,
-			'playlist',
-		]);
-
-		this.createSVGElement(button, 'playlist', this.buttons.playlist);
-
-		button.addEventListener('click', (event) => {
-			event.stopPropagation();
-			console.log(this.getPlaylist());
-			// this.togglePlaylists();
-		});
-
-		this.on('item', () => {
-			if (this.hasPlaylists()) {
-				button.style.display = 'flex';
-			} else {
-				button.style.display = 'none';
-			}
-		});
-
-		parent.appendChild(button);
-		return button;
-	}
-
 }

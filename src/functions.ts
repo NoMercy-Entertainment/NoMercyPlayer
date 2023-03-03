@@ -476,30 +476,41 @@ export default class Functions extends Base {
 	}
 
 	getCurrentChapterFile(): string {
-		if (this.isJwplayer) {
-			return this.getCurrentPlaylistItem().tracks.find((t: { kind: string }) => t.kind === 'chapters')?.file;
-		}
+		// if (this.isJwplayer) {
+		// 	return this.getCurrentPlaylistItem().tracks.find((t: { kind: string }) => t.kind === 'chapters')?.file;
+		// }
 		return this.getCurrentPlaylistItem().metadata.find((t: { kind: string }) => t.kind === 'chapters')?.file;
 	}
 
 	fetchChapterFile() {
-		this.getFileContents({
-			url: this.getCurrentChapterFile(),
-			options: {},
-			callback: (data: string) => {
-				// @ts-ignore
-				const parser = new window.WebVTTParser();
-				const tree = parser.parse(data, 'metadata');
+		const file = this.getCurrentChapterFile();
+		if (file) {
+			this.getFileContents({
+				url: file,
+				options: {},
+				callback: (data: string) => {
+					// @ts-ignore
+					const parser = new window.WebVTTParser();
+					const tree = parser.parse(data, 'metadata');
 
-				this.chapters = tree;
+					this.chapters = tree;
 
-				this.dispatchEvent('chapters', this.getChapters());
-			},
-		});
+					this.dispatchEvent('chapters', this.getChapters());
+				},
+			});
+		}
 	}
 
 	getChapters() {
 		return this.chapters?.cues?.map((c: { id: any; text: any; startTime: any; }) =>
 		 	({ id: c.id, title: c.text, time: c.startTime })) ?? [];
+	}
+
+	hasSpeeds() {
+		return true;
+	}
+
+	hasPIP() {
+		return true;
 	}
 }

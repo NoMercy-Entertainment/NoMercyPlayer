@@ -232,15 +232,15 @@ export default class Base {
 
 	createStyles() {
 
-		this.addClasses(this.getElement(), ['buckyplayer']);
+		this.addClasses(this.getElement(), ['nomercyplayer']);
 		// reset jwplayer styles
 		this.getElement().style.width = '';
 		this.getElement().style.height = '';
 
-		if (document.getElementById('buckyplayer-styles')) return;
+		if (document.getElementById('nomercyplayer-styles')) return;
 
 		const styleSheet = document.createElement('style');
-		styleSheet.id = 'buckyplayer-styles';
+		styleSheet.id = 'nomercyplayer-styles';
 
 		const styles = `
             @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
@@ -252,14 +252,14 @@ export default class Base {
             .font-mono {
                 font-family: 'Source Code Pro', monospace;
             }
-            .buckyplayer {
+            .nomercyplayer {
                 position: relative;
                 width: 100%;
                 height: 100%;
                 overflow: hidden;
 				aspect-ratio: 16/9;
             }
-			.buckyplayer * {
+			.nomercyplayer * {
 				user-select: none;
 			}
             .vjs-poster, 
@@ -270,7 +270,10 @@ export default class Base {
                 display: none !important;
             }
         `;
-		styleSheet.innerText = styles;
+		styleSheet.innerHTML = styles
+			.replace(/[\t]{2,}/gu, '\t')
+			.replace(/[\s]{2,}/gu, ' ');
+
 		document.head.appendChild(styleSheet);
 	}
 
@@ -558,6 +561,7 @@ export default class Base {
 	on(event: 'duration', callback: (data: PlaybackState) => void): void;
 	on(event: 'controls', callback: (value: boolean) => void): void;
 	on(event: 'theaterMode', callback: (value: boolean) => void): void;
+	on(event: 'pip', callback: (value: boolean) => void): void;
 	on(event: 'chapters', callback: (value: Chapter[]) => void): void;
 	on(event: 'pop-image', callback: (value: string) => void): void;
 	on(event: any, callback: (arg0: any) => any) {
@@ -709,8 +713,14 @@ export default class Base {
 				delete newItem.textTracks;
 
 				newItem.tracks = [
+					...item.tracks?.filter(t => t.kind == 'captions')?.map(t => ({ ...t, file: t.file })) ?? [],
 					...item.textTracks?.map(t => ({ ...t, file: t.src })) ?? [],
-					...item.metadata?.filter(t => t.kind !== 'captions') ?? [],
+					...item.metadata?.filter(t => t.kind == 'captions') ?? [],
+				];
+
+				newItem.metadata = [
+					...item.metadata ?? [],
+					...item.tracks?.filter(t => t.kind !== 'captions') ?? [],
 				];
 			} else {
 				delete newItem.image;

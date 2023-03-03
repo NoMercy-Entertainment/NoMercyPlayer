@@ -1,26 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NoMercyPlayer API</title>
 
-    <link href="./dist/output.css?v=12151221fgf13f" rel="stylesheet">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>NoMercyPlayer API</title>
 
-    <!-- <script src="./dist/app.js?v=12151221fgf13f" defer></script> -->
+        <link href="./dist/output.css?v=kw4n5l2n45" rel="stylesheet">
 
-  </head>
-  <body>
-    <body class="flex flex-col w-screen h-screen gap-4 items-center justify-center bg-zinc-900 text-white">
+        <!-- <script src="./dist/app.js?v=kw4n5l2n45" defer></script> -->
 
-        <div class="flex flex-col sm:flex-row justify-center w-full gap-8">
-            <div class="flex flex-col items-center w-full text-center gap-2">
-                <span>VideoJS</span>
-                <video id="player1"></video>
-            </div>
 
-            <!-- <div class="flex sm:flex-col flex-wrap gap-4 items-center justify-center">
+        <!-- <div class="flex flex-wrap items-center justify-center gap-4 sm:flex-col">
                 <button type="button"
                     class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
                     onClick="play()">
@@ -47,8 +39,17 @@
                     Sync
                 </button>
             </div> -->
+    </head>
 
-            <div class="flex flex-col items-center w-full text-center gap-2">
+    <body class="flex flex-col items-center justify-center w-screen h-screen gap-4 text-white bg-zinc-900">
+
+        <div id="container" class="flex justify-center w-full gap-8">
+            <div id="wrapper1" class="flex flex-col items-center w-full max-w-4xl gap-2 text-cener">
+                <span>VideoJS</span>
+                <video id="player1"></video>
+            </div>
+
+            <div id="wrapper2" class="flex flex-col items-center w-full max-w-4xl gap-2 text-cener">
                 <span>JWPlayer</span>
                 <video id="player2"></video>
             </div>
@@ -56,14 +57,14 @@
 
         <script type="module">
 
-          import VideoPlayer from './dist/nomercyplayer.js?v=12151221fgf13f';
+            import VideoPlayer from './dist/nomercyplayer.js?v=kw4n5l2n45';
 
             const config = {
                 muted: false,
                 controls: false,
                 chapters: true,
                 preload: 'auto',
-                playlist: 'https://api.nomercy.tv/playlist-js?v=3',
+                playlist: 'https://api.nomercy.tv/playlist-jw?v=3',
                 controlsTimeout: 3000,
                 // overlay: {
                 //     styles: {
@@ -107,7 +108,7 @@
 
             const js = new VideoPlayer('videojs', config, 'player1');
             window.js = js;
-            
+
             js.on('displayMessage', (data) => {
                 console.log('displayMessage', data);
             });
@@ -117,21 +118,46 @@
             js.on('theaterMode', (data) => {
                 // handle resize container
                 console.log('theaterMode', data);
+                if (data) {
+                    document.querySelector('body').classList.remove('justify-center');
+                    document.querySelector('#container').classList.add('flex-col');
+                    document.querySelector('#wrapper1').classList.remove('max-w-4xl');
+                    document.querySelector('#wrapper1').classList.add('w-2/3');
+                } else {
+                    document.querySelector('body').classList.add('justify-center');
+                    document.querySelector('#container').classList.remove('flex-col');
+                    document.querySelector('#wrapper1').classList.add('max-w-4xl');
+                    document.querySelector('#wrapper1').classList.remove('w-2/3');
+                }
+            });
+            js.on('pip', (data) => {
+                console.log('pip', data);
+                if (data) {
+                    document.querySelector('#wrapper1').classList.add('absolute');
+                    document.querySelector('#wrapper1').classList.add('bottom-4');
+                    document.querySelector('#wrapper1').classList.add('right-4');
+                    document.querySelector('#wrapper1').classList.add('max-w-sm');
+                } else {
+                    document.querySelector('#wrapper1').classList.remove('absolute');
+                    document.querySelector('#wrapper1').classList.remove('bottom-4');
+                    document.querySelector('#wrapper1').classList.remove('right-4');
+                    document.querySelector('#wrapper1').classList.remove('max-w-sm');
+                }
             });
 
             js.on('volume', (data) => {
                 js.displayMessage(`Volume: ${data.volume}%`);
             });
             js.on('ready', (data) => {
-              console.log('ready', data);
-              
+                console.log('ready', data);
+
             });
 
             config.key = 'W7zSm81+mmIsg7F+fyHRKhF3ggLkTqtGMhvI92kbqf/ysE99';
             const jw = new VideoPlayer('jwplayer', config, 'player2');
-            
+
             window.jw = jw;
-                          
+
             jw.on('displayMessage', (data) => {
                 console.log('displayMessage', data);
             });
@@ -142,13 +168,39 @@
             jw.on('theaterMode', (data) => {
                 // handle resize container
                 console.log('theaterMode', data);
+                if (data) {
+                    document.querySelector('body').classList.remove('justify-center');
+                    document.querySelector('#container').classList.add('flex-col');
+                    document.querySelector('#wrapper2').classList.remove('max-w-4xl');
+                    document.querySelector('#wrapper2').classList.add('w-2/3');
+                } else {
+                    document.querySelector('body').classList.add('justify-center');
+                    document.querySelector('#container').classList.remove('flex-col');
+                    document.querySelector('#wrapper2').classList.add('max-w-4xl');
+                    document.querySelector('#wrapper2').classList.remove('w-2/3');
+                }
+            });
+            jw.on('pip', (data) => {
+                console.log('pip', data);
+                if (data) {
+                    document.querySelector('#wrapper2').classList.add('absolute');
+                    document.querySelector('#wrapper2').classList.add('bottom-4');
+                    document.querySelector('#wrapper2').classList.add('right-4');
+                    document.querySelector('#wrapper2').classList.add('max-w-sm');
+                } else {
+                    document.querySelector('#wrapper2').classList.remove('absolute');
+                    document.querySelector('#wrapper2').classList.remove('bottom-4');
+                    document.querySelector('#wrapper2').classList.remove('right-4');
+                    document.querySelector('#wrapper2').classList.remove('max-w-sm');
+                }
             });
             jw.on('volume', (data) => {
                 jw.displayMessage(`Volume: ${data.volume}%`);
             });
             jw.on('ready', (data) => {
-              console.log('ready', data);
+                console.log('ready', data);
             });
         </script>
-  </body>
+    </body>
+
 </html>
