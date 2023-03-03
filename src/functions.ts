@@ -16,7 +16,7 @@ export default class Functions extends Base {
 
 	#eventHandlers() {
 		this.on('item', () => {
-			this.#fetchChapterFile();
+			this.fetchChapterFile();
 		});
 	}
 
@@ -482,32 +482,23 @@ export default class Functions extends Base {
 		return this.getCurrentPlaylistItem().metadata.find((t: { kind: string }) => t.kind === 'chapters')?.file;
 	}
 
-	#fetchChapterFile() {
-		if (this.isJwplayer) {
-			//
-		} else {
+	fetchChapterFile() {
+		this.getFileContents({
+			url: this.getCurrentChapterFile(),
+			options: {},
+			callback: (data: string) => {
+				// @ts-ignore
+				const parser = new window.WebVTTParser();
+				const tree = parser.parse(data, 'metadata');
 
-			this.getFileContents({
-				url: this.getCurrentChapterFile(),
-				options: {},
-				callback: (data: string) => {
-					// @ts-ignore
-					const parser = new window.WebVTTParser();
-					const tree = parser.parse(data, 'metadata');
+				this.chapters = tree;
 
-					this.chapters = tree;
-
-					this.dispatchEvent('chapters', this.getChapters());
-				},
-			});
-		}
+				this.dispatchEvent('chapters', this.getChapters());
+			},
+		});
 	}
 
 	getChapters() {
-		if (this.isJwplayer) {
-			return this.player.getChapters().map((c: { title: { en: any; }; time: any; }, i: any) =>
-				({ id: `Chapter ${i + 1}`, title: c.title.en, time: c.time }));
-		}
 		return this.chapters?.cues?.map((c: { id: any; text: any; startTime: any; }) =>
 		 	({ id: c.id, title: c.text, time: c.startTime })) ?? [];
 	}
