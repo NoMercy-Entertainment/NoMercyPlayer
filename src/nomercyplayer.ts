@@ -1,4 +1,4 @@
-import type { VideoPlayerOptions, VideoPlayer as Types } from './buckyplayer.d';
+import type { VideoPlayerOptions, VideoPlayer as Types } from './nomercyplayer.d';
 import UI from './ui.js';
 
 export default class VideoPlayer extends UI {

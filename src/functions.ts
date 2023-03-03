@@ -1,6 +1,6 @@
 import Base from './base.js';
 
-import type { VideoPlayerOptions, VideoPlayer as Types, TextTrack, AudioTrack } from './buckyplayer.d';
+import type { VideoPlayerOptions, VideoPlayer as Types, TextTrack, AudioTrack } from './nomercyplayer.d';
 
 export default class Functions extends Base {
 	tapCount = 0;

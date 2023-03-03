@@ -2,5 +2,6 @@
     "include": [
         ".eslintrc.js", 
         "tailwind.config.cjs",
+        "src/nomercyplayer.d.ts",
     ]
 }

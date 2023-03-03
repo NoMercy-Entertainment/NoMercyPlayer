@@ -1,7 +1,7 @@
 import type {
 	Chapter,
 	PlaybackState, PlaylistItem, VideoPlayer as Types, VideoPlayerOptions
-} from './buckyplayer.d';
+} from './nomercyplayer.d';
 
 export default class Base {
 

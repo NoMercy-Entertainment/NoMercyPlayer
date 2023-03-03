@@ -1,12 +1,12 @@
 import {
 	bottomBarStyles, bottomRowStyles, buttonBaseStyle, Buttons, buttons, buttonStyles,
-	chapterMarkersStyles, dividerStyles, fluentIcons, Icons, iconStyles, overlayStyles,
+	chapterMarkersStyles, dividerStyles, fluentIcons, Icon, iconStyles, overlayStyles,
 	sliderBarStyles, sliderBufferStyles, sliderNippleStyles, sliderPopImageStyles, sliderPopStyles,
 	sliderProgressStyles, timeStyles, topBarStyles, topRowStyles
 } from './buttons.js';
 import Functions from './functions.js';
 
-import type { VideoPlayerOptions, VideoPlayer as Types, Chapter } from './buckyplayer.d';
+import type { VideoPlayerOptions, VideoPlayer as Types, Chapter } from './nomercyplayer.d';
 export default class UI extends Functions {
 
 	overlayStyles: string[] = [];
@@ -14,7 +14,7 @@ export default class UI extends Functions {
 	bottomBarStyles: string[] = [];
 
 	buttonBaseStyle: string[] = [];
-	fluentIcons: Icons = <Icons>{};
+	fluentIcons: Icon = <Icon>{};
 	buttonStyles: string[] = [];
 	buttons: Buttons = <Buttons>{};
 	iconStyles: string[] = [];
@@ -292,30 +292,31 @@ export default class UI extends Functions {
 		return divider;
 	}
 
-	createSVGElement(parent: HTMLElement, id: string, icon: {path: string, classes: string[]}, hidden?: boolean) {
+	createSVGElement(parent: HTMLElement, id: string, icon: Buttons['key'], hidden?: boolean) {
+		if (!icon) {
+			console.log(id);
+			return parent;
+		}
 		parent.innerHTML += `
-            <svg class="${id} ${icon!.classes.join(' ')} ${hidden ? 'hidden group-hover:block'	: 'block group-hover:hidden'}" viewBox="0 0 24 24">
-                <path d="${icon!.path}"></path>
-            </svg>
-        `;
+		    <svg class="${id} ${icon.classes?.join(' ')} ${hidden ? 'hidden' : 'flex'}" viewBox="0 0 24 24">
+		        <path d="${icon.path.normal}" class="group-hover/button:hidden"></path>
+				<path d="${icon.path.hover}" class="hidden group-hover/button:flex"></path>
+		    </svg>
+		`;
 		return parent;
 	}
 
-	createButton(parent: HTMLElement, id?: string, icon?: {path: string, classes: string[]}) {
+	createButton(parent: HTMLElement, icon: string, id?: string) {
 		const button = document.createElement('button');
 		id = id ?? 'button';
 
 		button.id = id;
 
-		if (!icon) {
-			icon = this.buttons[id];
-		}
-
 		const classes = this.buttonStyles;
 		classes.push(id);
 		this.addClasses(button, classes);
 
-		this.createSVGElement(button, id, icon);
+		this.createSVGElement(button, id, this.buttons[icon]);
 
 		parent.appendChild(button);
 		return button;
@@ -790,7 +791,7 @@ export default class UI extends Functions {
 			'language',
 		]);
 
-		this.createSVGElement(button, 'subtitle', this.buttons.subtitlesHover);
+		this.createSVGElement(button, 'subtitle', this.buttons.subtitles);
 		this.createSVGElement(button, 'subtitled', this.buttons.subtitles, true);
 
 		button.addEventListener('click', (event) => {
@@ -835,7 +836,7 @@ export default class UI extends Functions {
 		]);
 
 		this.createSVGElement(button, 'low', this.buttons.quality);
-		this.createSVGElement(button, 'high', this.buttons.qualityHover, true);
+		this.createSVGElement(button, 'high', this.buttons.quality, true);
 
 		button.addEventListener('click', (event) => {
 			event.stopPropagation();
@@ -877,20 +878,20 @@ export default class UI extends Functions {
 		]);
 
 		this.createSVGElement(button, 'theater', this.buttons.theater);
-		this.createSVGElement(button, 'theater-enable', this.buttons.theaterHover, true);
+		this.createSVGElement(button, 'theater-enabled', this.buttons.theaterExit, true);
 
 		button.addEventListener('click', (event) => {
 			event.stopPropagation();
 
 			if (this.theaterModeEnabled) {
 				this.theaterModeEnabled = false;
-				button.querySelector<any>('.theater-enable').style.display = 'none';
+				button.querySelector<any>('.theater-enabled').style.display = 'none';
 				button.querySelector<any>('.theater').style.display = 'flex';
 				this.dispatchEvent('theaterMode', false);
 			} else {
 				this.theaterModeEnabled = true;
 				button.querySelector<any>('.theater').style.display = 'none';
-				button.querySelector<any>('.theater-enable').style.display = 'flex';
+				button.querySelector<any>('.theater-enabled').style.display = 'flex';
 				this.dispatchEvent('theaterMode', true);
 			}
 
