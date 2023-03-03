@@ -6,28 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Buckyplayer API</title>
 
-    <link href="./dist/output.css?v=2452g42ty23" rel="stylesheet">
+    <link href="./dist/output.css?v=12151221fgf13f" rel="stylesheet">
 
-    <!-- <script src="https://cdn.tailwindcss.com" ></script> -->
-    <script src="./dist/app.js?v=2452g42ty23" defer></script>
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-    </style>
-
-    <style>
-        
-        * {
-            font-feature-settings: 'tnum' on, 'lnum' on;
-        }
-        .vjs-poster, 
-        .vjs-loading-spinner,
-        .vjs-big-play-button,
-        .vjs-control-bar,
-        .vjs-hidden {
-            display: none !important;
-        }
-    </style>
+    <script src="./dist/app.js?v=12151221fgf13f" defer></script>
 
   </head>
   <body>
@@ -36,7 +17,7 @@
         <div class="flex flex-col sm:flex-row justify-center w-full gap-8">
             <div class="flex flex-col items-center w-full text-center gap-2">
                 <span>VideoJS</span>
-                <video id="player1" class="video-js relative" ></video>
+                <video id="player1"></video>
             </div>
 
             <div class="flex sm:flex-col flex-wrap gap-4 items-center justify-center">
@@ -69,13 +50,13 @@
 
             <div class="flex flex-col items-center w-full text-center gap-2">
                 <span>JWPlayer</span>
-                <video id="player2" class="jwplayer relative"></video>
+                <video id="player2"></video>
             </div>
         </div>
 
         <script type="module">
 
-          import VideoPlayer from './dist/buckyplayer.js?v=2452g42ty23';
+          import VideoPlayer from './dist/buckyplayer.js?v=12151221fgf13f';
 
             const size = window.innerWidth < 500 
                 ? window.innerWidth < 800 
@@ -84,11 +65,10 @@
                 : 640;
 
             const config = {
-                width: size,
-                height: size / 16 * 9,
                 muted: false,
+                controls: true,
                 preload: 'auto',
-                playlist: 'https://api.nomercy.tv/playlist?v=2',
+                playlist: 'https://api.nomercy.tv/playlist-js?v=3',
                 controlsTimeout: 3000,
                 // overlay: {
                 //     styles: {

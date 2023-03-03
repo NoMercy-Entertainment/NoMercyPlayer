@@ -4,14 +4,19 @@
         "beforeplaylistitem",
         "buckyplayer",
         "checkmark",
+        "chromecast",
         "displaydescription",
         "displaytitle",
         "durationchanged",
         "duringplaylistchange",
         "jwplayer",
+        "lnum",
         "playlistchange",
         "playlistitem",
         "playlistsorted",
-        "videojs"
+        "tailwindcss",
+        "tnum",
+        "videojs",
+        "xywh"
     ]
 }

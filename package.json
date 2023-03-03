@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "tailwind": "tailwindcss -i ./src/index.scss -o ./dist/output.css --watch"
+    "tailwind": "tailwindcss -i ./src/index.scss -o ./dist/output.css --watch",
+    "test": "jest",
+    "lint": "eslint 'src/**/*.{js,ts,d.ts}'",
+    "format": "eslint 'src/**/*.{js,ts,d.ts}' --fix"
   },
   "keywords": [],
   "author": "",
@@ -12,6 +15,14 @@
   "devDependencies": {
     "@types/jwplayer": "^8.2.13",
     "@types/node": "^18.14.2",
+    "@typescript-eslint/eslint-plugin": "^5.54.0",
+    "@typescript-eslint/parser": "^5.54.0",
+    "eslint": "^8.34.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-import-resolver-typescript": "^3.5.3",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-tailwindcss": "^3.8.3",
     "jwplayer": "^1.0.3",
     "tailwindcss": "^3.2.7",
     "typescript": "^4.9.5",
