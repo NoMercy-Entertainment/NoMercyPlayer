@@ -294,7 +294,7 @@ export default class UI extends Functions {
 
 	createSVGElement(parent: HTMLElement, id: string, icon: {path: string, classes: string[]}, hidden?: boolean) {
 		parent.innerHTML += `
-            <svg class="${id} ${icon!.classes.join(' ')}" viewBox="0 0 24 24" style="display: ${hidden ? 'none'	: ''};">
+            <svg class="${id} ${icon!.classes.join(' ')} ${hidden ? 'hidden group-hover:block'	: 'block group-hover:hidden'}" viewBox="0 0 24 24">
                 <path d="${icon!.path}"></path>
             </svg>
         `;

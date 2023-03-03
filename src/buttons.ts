@@ -7,6 +7,7 @@ export const buttonBaseStyle = [
 	'justify-center',
 	'h-10',
 	'w-10',
+	'group'
 ];
 
 export interface Icons {
