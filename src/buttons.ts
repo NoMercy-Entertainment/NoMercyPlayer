@@ -186,11 +186,7 @@ export const sliderPopStyles = [
 	'-translate-x-1/2',
 ];
 
-export const sliderPopImageStyles = [
-	'slider-pop-image',
-	'w-40',
-	'h-20',
-];
+export const sliderPopImageStyles = ['slider-pop-image'];
 
 export const timeStyles = [
 	'flex',
