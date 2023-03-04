@@ -81,8 +81,12 @@ export default class Base {
 					'adSkipped',
 					'adStarted',
 					'adTime',
+					'audioTracks',
+					'audioTracksChanged',
 					'beforePlay',
 					'buffer',
+					'captionsList',
+					'captionsChanged',
 					'cast',
 					'chapter',
 					'complete',
@@ -319,6 +323,11 @@ export default class Base {
 					break;
 				case 'adTime':
 					break;
+				case 'audioTracks':
+					this.dispatchEvent('audio', data);
+					break;
+				case 'audioTracksChanged':
+					break;
 				case 'beforePlay':
 					break;
 				case 'beforeplaylistItem':
@@ -353,6 +362,8 @@ export default class Base {
 					break;
 				case 'loadedmetadata': // videojs
 					this.dispatchEvent('duration', this.#getTimeState(data));
+					this.dispatchEvent('audio', data);
+					this.dispatchEvent('captions', data);
 					break;
 				case 'loadstart': // videojs
 					break;
@@ -397,6 +408,11 @@ export default class Base {
 				case 'stalled':
 					break;
 				case 'suspend':
+					break;
+				case 'captionsList':
+					this.dispatchEvent('captions', data);
+					break;
+				case 'captionsChanged':
 					break;
 				case 'time': // JWPlayer
 				case 'timeupdate': // VideoJS
@@ -556,6 +572,8 @@ export default class Base {
 	on(event: 'volume', callback: () => void): void;
 	on(event: 'mute', callback: () => void): void;
 	on(event: 'item', callback: () => void): void;
+	on(event: 'audio', callback: () => void): void;
+	on(event: 'captions', callback: () => void): void;
 	on(event: 'fullscreen', callback: () => void): void;
 	on(event: 'time', callback: (data: PlaybackState) => void): void;
 	on(event: 'duration', callback: (data: PlaybackState) => void): void;

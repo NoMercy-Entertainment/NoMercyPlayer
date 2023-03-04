@@ -155,7 +155,8 @@ export default class UI extends Functions {
 		this.createTime(bottomRow, 'duration', ['mr-2']);
 
 		this.createPlaylistsButton(bottomRow);
-		this.createLanguageButton(bottomRow);
+		this.createCaptionsButton(bottomRow);
+		this.createAudioButton(bottomRow);
 		this.createQualityButton(bottomRow);
 		this.createTheaterButton(bottomRow);
 
@@ -303,6 +304,14 @@ export default class UI extends Functions {
 			this.dispatchEvent('settings');
 		});
 
+		this.on('pip', (data) => {
+			if (data) {
+				settingsButton.style.display = 'none';
+			} else {
+				settingsButton.style.display = 'flex';
+			}
+		});
+
 		parent.append(settingsButton);
 		return settingsButton;
 	}
@@ -317,6 +326,14 @@ export default class UI extends Functions {
 
 		backButton.addEventListener('click', () => {
 			this.dispatchEvent('back');
+		});
+
+		this.on('pip', (data) => {
+			if (data) {
+				backButton.style.display = 'none';
+			} else {
+				backButton.style.display = 'flex';
+			}
 		});
 	}
 
@@ -358,6 +375,14 @@ export default class UI extends Functions {
 			this.rewindVideo(this.options.seekInterval);
 		});
 
+		this.on('pip', (data) => {
+			if (data) {
+				seekBack.style.display = 'none';
+			} else {
+				seekBack.style.display = 'flex';
+			}
+		});
+
 		parent.append(seekBack);
 		return seekBack;
 	}
@@ -374,15 +399,23 @@ export default class UI extends Functions {
 			this.forwardVideo(this.options.seekInterval);
 		});
 
+		this.on('pip', (data) => {
+			if (data) {
+				seekForward.style.display = 'none';
+			} else {
+				seekForward.style.display = 'flex';
+			}
+		});
+
 		parent.append(seekForward);
 		return seekForward;
 	}
 
 	createTime(parent: HTMLDivElement, type: string, classes: string[]) {
-		const div = document.createElement('div');
-		div.textContent = '00:00';
+		const time = document.createElement('div');
+		time.textContent = '00:00';
 
-		this.addClasses(div, [
+		this.addClasses(time, [
 			...classes,
 			...this.buttonStyles,
 			...this.timeStyles,
@@ -393,7 +426,7 @@ export default class UI extends Functions {
 		case 'current':
 
 			this.on('time', (data) => {
-				div.textContent = this.humanTime(data.position);
+				time.textContent = this.humanTime(data.position);
 			});
 			break;
 
@@ -401,17 +434,17 @@ export default class UI extends Functions {
 
 			this.on('duration', (data) => {
 				if (data.remaining === Infinity) {
-					div.textContent = 'Live';
+					time.textContent = 'Live';
 				} else {
-					div.textContent = this.humanTime(data.remaining);
+					time.textContent = this.humanTime(data.remaining);
 				}
 			});
 
 			this.on('time', (data) => {
 				if (data.remaining === Infinity) {
-					div.textContent = 'Live';
+					time.textContent = 'Live';
 				} else {
-					div.textContent = this.humanTime(data.remaining);
+					time.textContent = this.humanTime(data.remaining);
 				}
 			});
 			break;
@@ -419,9 +452,9 @@ export default class UI extends Functions {
 		case 'duration':
 			this.on('duration', (data) => {
 				if (data.duration === Infinity) {
-					div.textContent = 'Live';
+					time.textContent = 'Live';
 				} else {
-					div.textContent = this.humanTime(data.duration);
+					time.textContent = this.humanTime(data.duration);
 				}
 			});
 			break;
@@ -430,8 +463,16 @@ export default class UI extends Functions {
 			break;
 		}
 
-		parent.append(div);
-		return div;
+		this.on('pip', (data) => {
+			if (data) {
+				time.style.display = 'none';
+			} else {
+				time.style.display = 'flex';
+			}
+		});
+
+		parent.append(time);
+		return time;
 	}
 
 	createVolumeButton(parent: HTMLDivElement) {
@@ -494,6 +535,14 @@ export default class UI extends Functions {
 			}
 		});
 
+		this.on('pip', (data) => {
+			if (data) {
+				previousButton.style.display = 'none';
+			} else {
+				previousButton.style.display = 'flex';
+			}
+		});
+
 		parent.appendChild(previousButton);
 		return previousButton;
 	}
@@ -519,48 +568,114 @@ export default class UI extends Functions {
 			}
 		});
 
+		this.on('pip', (data) => {
+			if (data) {
+				nextButton.style.display = 'none';
+			} else {
+				nextButton.style.display = 'flex';
+			}
+		});
+
 		parent.appendChild(nextButton);
 		return nextButton;
 	}
 
 	subsEnabled = false;
-	createLanguageButton(parent: HTMLElement) {
-		const languageButton = this.createButton(
+	createCaptionsButton(parent: HTMLElement) {
+		const captionButton = this.createButton(
 			parent,
 			'language'
 		);
-		languageButton.style.display = 'none';
+		captionButton.style.display = 'none';
 
-		this.createSVGElement(languageButton, 'subtitle', this.buttons.subtitles);
-		this.createSVGElement(languageButton, 'subtitled', this.buttons.subtitles, true);
+		this.createSVGElement(captionButton, 'subtitle', this.buttons.subtitles);
+		this.createSVGElement(captionButton, 'subtitled', this.buttons.subtitles, true);
 
-		languageButton.addEventListener('click', (event) => {
+		captionButton.addEventListener('click', (event) => {
 			event.stopPropagation();
+			console.log(this.getTextTracks());
 
 			if (this.subsEnabled) {
 				this.subsEnabled = false;
-				languageButton.querySelector<any>('.subtitled').style.display = 'none';
-				languageButton.querySelector<any>('.subtitle').style.display = 'flex';
+				captionButton.querySelector<any>('.subtitled').style.display = 'none';
+				captionButton.querySelector<any>('.subtitle').style.display = 'flex';
 				this.setTextTrack(-1);
 			} else {
 				this.subsEnabled = true;
-				languageButton.querySelector<any>('.subtitle').style.display = 'none';
-				languageButton.querySelector<any>('.subtitled').style.display = 'flex';
+				captionButton.querySelector<any>('.subtitle').style.display = 'none';
+				captionButton.querySelector<any>('.subtitled').style.display = 'flex';
 				this.setTextTrack(1);
 			}
 
 			// this.toggleLanguage();
 		});
-		this.on('item', () => {
-			if (this.hasTextTracks() || this.hasAudioTracks()) {
-				languageButton.style.display = 'flex';
+		this.on('captions', () => {
+			if (this.hasTextTracks()) {
+				captionButton.style.display = 'flex';
 			} else {
-				languageButton.style.display = 'none';
+				captionButton.style.display = 'none';
 			}
 		});
 
-		parent.appendChild(languageButton);
-		return languageButton;
+		this.on('pip', (data) => {
+			if (data) {
+				captionButton.style.display = 'none';
+			} else {
+				captionButton.style.display = 'flex';
+			}
+		});
+
+		parent.appendChild(captionButton);
+		return captionButton;
+	}
+
+	audiosEnabled = false;
+	createAudioButton(parent: HTMLElement) {
+		const audioButton = this.createButton(
+			parent,
+			'audio'
+		);
+		audioButton.style.display = 'none';
+
+		this.createSVGElement(audioButton, 'audio', this.buttons.language);
+		this.createSVGElement(audioButton, 'audio-enable', this.buttons.language, true);
+
+		audioButton.addEventListener('click', (event) => {
+			event.stopPropagation();
+			console.log(this.getAudioTracks());
+
+			if (this.audiosEnabled) {
+				this.audiosEnabled = false;
+				audioButton.querySelector<any>('.audio-enable').style.display = 'none';
+				audioButton.querySelector<any>('.audio').style.display = 'flex';
+				this.setTextTrack(-1);
+			} else {
+				this.audiosEnabled = true;
+				audioButton.querySelector<any>('.audio').style.display = 'none';
+				audioButton.querySelector<any>('.audio-enable').style.display = 'flex';
+				this.setTextTrack(1);
+			}
+
+			// this.toggleLanguage();
+		});
+		this.on('audio', () => {
+			if (this.hasAudioTracks()) {
+				audioButton.style.display = 'flex';
+			} else {
+				audioButton.style.display = 'none';
+			}
+		});
+
+		this.on('pip', (data) => {
+			if (data) {
+				audioButton.style.display = 'none';
+			} else {
+				audioButton.style.display = 'flex';
+			}
+		});
+
+		parent.appendChild(audioButton);
+		return audioButton;
 	}
 
 	highQuality = false;
@@ -576,6 +691,7 @@ export default class UI extends Functions {
 
 		qualityButton.addEventListener('click', (event) => {
 			event.stopPropagation();
+			console.log(this.getQualities());
 
 			if (this.highQuality) {
 				this.highQuality = false;
@@ -595,6 +711,14 @@ export default class UI extends Functions {
 				qualityButton.style.display = 'flex';
 			} else {
 				qualityButton.style.display = 'none';
+			}
+		});
+
+		this.on('pip', (data) => {
+			if (data) {
+				qualityButton.style.display = 'none';
+			} else {
+				qualityButton.style.display = 'flex';
 			}
 		});
 
@@ -630,6 +754,14 @@ export default class UI extends Functions {
 			// this.toggleLanguage();
 		});
 
+		this.on('pip', (data) => {
+			if (data) {
+				theaterButton.style.display = 'none';
+			} else {
+				theaterButton.style.display = 'flex';
+			}
+		});
+
 		parent.appendChild(theaterButton);
 		return theaterButton;
 	}
@@ -654,6 +786,14 @@ export default class UI extends Functions {
 			} else {
 				fullscreenButton.querySelector<any>('.fullscreen-enable').style.display = 'none';
 				fullscreenButton.querySelector<any>('.fullscreen').style.display = 'flex';
+			}
+		});
+
+		this.on('pip', (data) => {
+			if (data) {
+				fullscreenButton.style.display = 'none';
+			} else {
+				fullscreenButton.style.display = 'flex';
 			}
 		});
 
@@ -686,6 +826,14 @@ export default class UI extends Functions {
 			}
 		});
 
+		this.on('pip', (data) => {
+			if (data) {
+				playlistButton.style.display = 'none';
+			} else {
+				playlistButton.style.display = 'flex';
+			}
+		});
+
 		parent.appendChild(playlistButton);
 		return playlistButton;
 	}
@@ -702,7 +850,7 @@ export default class UI extends Functions {
 
 		speedButton.addEventListener('click', (event) => {
 			event.stopPropagation();
-			console.log(this.getPlaylist());
+			// console.log(this.getPlaylist());
 			// this.togglePlaylists();
 		});
 
@@ -711,6 +859,14 @@ export default class UI extends Functions {
 				speedButton.style.display = 'flex';
 			} else {
 				speedButton.style.display = 'none';
+			}
+		});
+
+		this.on('pip', (data) => {
+			if (data) {
+				speedButton.style.display = 'none';
+			} else {
+				speedButton.style.display = 'flex';
 			}
 		});
 
@@ -890,6 +1046,13 @@ export default class UI extends Functions {
 			}
 		});
 
+		this.on('pip', (data) => {
+			if (data) {
+				this.progressBar.style.display = 'none';
+			} else {
+				this.progressBar.style.display = 'flex';
+			}
+		});
 
 		parent.append(sliderBar);
 		return sliderBar;
