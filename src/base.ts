@@ -1,6 +1,6 @@
 import type {
 	Chapter,
-	PlaybackState, PlaylistItem, VideoPlayer as Types, VideoPlayerOptions
+	PlaybackState, PlaylistItem, VideoPlayer as Types, VideoPlayerOptions, VolumeState
 } from './nomercyplayer.d';
 
 export default class Base {
@@ -152,6 +152,7 @@ export default class Base {
 					'loadedmetadata',
 					'loadstart',
 					'pause',
+					'play',
 					'playing',
 					'playlistchange',
 					'playlistitem',
@@ -257,6 +258,7 @@ export default class Base {
                 font-family: 'Source Code Pro', monospace;
             }
             .nomercyplayer {
+				display: flex;
                 position: relative;
                 width: 100%;
                 height: 100%;
@@ -265,6 +267,10 @@ export default class Base {
             }
 			.nomercyplayer * {
 				user-select: none;
+			}
+			.slider-pop-image {
+				min-height: 80px;
+				min-width: 144px;
 			}
             .vjs-poster, 
             .vjs-loading-spinner,
@@ -337,7 +343,7 @@ export default class Base {
 				case 'canplay':
 					break;
 				case 'canplaythrough':
-					this.dispatchEvent('item', data);
+					// this.dispatchEvent('item', data);
 					break;
 				case 'complete': // jwplayer
 					break;
@@ -371,13 +377,12 @@ export default class Base {
 					this.dispatchEvent('mute', data);
 					break;
 				case 'pause':
-					this.dispatchEvent('pause', { data: 'pause' });
+					this.dispatchEvent('pause', data);
 					break;
 				case 'play':
 					this.dispatchEvent('play', data);
 					break;
 				case 'firstFrame': // jwplayer aka playing
-					break;
 				case 'playing': // videojs
 					break;
 				case 'playlist':
@@ -569,7 +574,7 @@ export default class Base {
 	on(event: 'play', callback: () => void): void;
 	on(event: 'pause', callback: () => void): void;
 	on(event: 'seeked', callback: () => void): void;
-	on(event: 'volume', callback: () => void): void;
+	on(event: 'volume', callback: (data: VolumeState) => void): void;
 	on(event: 'mute', callback: () => void): void;
 	on(event: 'item', callback: () => void): void;
 	on(event: 'audio', callback: () => void): void;
@@ -586,10 +591,44 @@ export default class Base {
 		this.getElement().parentElement?.addEventListener(event, (e: { detail: any; }) => callback(e.detail));
 	}
 
+	off(event: 'ready', callback: () => void): void;
+	off(event: 'play', callback: () => void): void;
+	off(event: 'pause', callback: () => void): void;
+	off(event: 'seeked', callback: () => void): void;
+	off(event: 'volume', callback: (data: VolumeState) => void): void;
+	off(event: 'mute', callback: () => void): void;
+	off(event: 'item', callback: () => void): void;
+	off(event: 'audio', callback: () => void): void;
+	off(event: 'captions', callback: () => void): void;
+	off(event: 'fullscreen', callback: () => void): void;
+	off(event: 'time', callback: (data: PlaybackState) => void): void;
+	off(event: 'duration', callback: (data: PlaybackState) => void): void;
+	off(event: 'controls', callback: (value: boolean) => void): void;
+	off(event: 'theaterMode', callback: (value: boolean) => void): void;
+	off(event: 'pip', callback: (value: boolean) => void): void;
+	off(event: 'chapters', callback: (value: Chapter[]) => void): void;
+	off(event: 'pop-image', callback: (value: string) => void): void;
 	off(event: any, callback: (arg0: any) => any) {
 		this.getElement().parentElement?.removeEventListener(event, (e: { detail: any; }) => callback(e.detail));
 	}
 
+	once(event: 'ready', callback: () => void): void;
+	once(event: 'play', callback: () => void): void;
+	once(event: 'pause', callback: () => void): void;
+	once(event: 'seeked', callback: () => void): void;
+	once(event: 'volume', callback: (data: VolumeState) => void): void;
+	once(event: 'mute', callback: () => void): void;
+	once(event: 'item', callback: () => void): void;
+	once(event: 'audio', callback: () => void): void;
+	once(event: 'captions', callback: () => void): void;
+	once(event: 'fullscreen', callback: () => void): void;
+	once(event: 'time', callback: (data: PlaybackState) => void): void;
+	once(event: 'duration', callback: (data: PlaybackState) => void): void;
+	once(event: 'controls', callback: (value: boolean) => void): void;
+	once(event: 'theaterMode', callback: (value: boolean) => void): void;
+	once(event: 'pip', callback: (value: boolean) => void): void;
+	once(event: 'chapters', callback: (value: Chapter[]) => void): void;
+	once(event: 'pop-image', callback: (value: string) => void): void;
 	once(event: any, callback: (arg0: any) => any) {
 		this.getElement().parentElement?.addEventListener(event, (e: { detail: any; }) => callback(e.detail), { once: true });
 	}
@@ -699,9 +738,9 @@ export default class Base {
 			});
 	};
 
-	addClasses(el: HTMLElement, names: string[]) {
+	addClasses(el: Element, names: string[]) {
 		for (const name of names.filter(Boolean)) {
-			el.classList.add(name);
+			el.classList.add(name.trim());
 		}
 	}
 

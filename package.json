@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsc --watch",
-    "tailwind": "tailwindcss -i ./src/index.scss -o ./dist/output.css --watch",
+    "tailwind": "tailwindcss -i ./src/index.scss -o ./dist/nomercyplayer.css --watch",
     "test": "jest",
     "lint": "eslint 'src/**/*.{js,ts,d.ts}'",
     "format": "eslint 'src/**/*.{js,ts,d.ts}' --fix"

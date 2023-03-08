@@ -8,7 +8,7 @@ export interface VideoPlayer {
 }
 
 export interface VideoPlayerOptions {
-    seekInterval: number | undefined;
+    seekInterval: number;
     token?: string;
     controlsTimeout: number;
     iconStyles: never[];
@@ -122,4 +122,9 @@ export interface Chapter {
     id: string;
     title: string;
     time: number;
+}
+
+export interface VolumeState {
+    volume: number;
+    muted: boolean;
 }

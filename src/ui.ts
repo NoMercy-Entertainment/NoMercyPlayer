@@ -1,12 +1,14 @@
-import {
-    bottomBarStyles, bottomRowStyles, buttonBaseStyle, Buttons, buttons, buttonStyles,
-    chapterMarkersStyles, dividerStyles, fluentIcons, Icon, iconStyles, overlayStyles,
-    sliderBarStyles, sliderBufferStyles, sliderNippleStyles, sliderPopImageStyles, sliderPopStyles,
-    sliderProgressStyles, timeStyles, topBarStyles, topRowStyles
-} from './buttons.js';
+import { buttons, fluentIcons, Icon } from './buttons.js';
 import Functions from './functions.js';
+import {
+    bottomBarStyles, bottomRowStyles, buttonBaseStyle, buttonStyles, chapterBarStyles,
+    chapterMarkersStyles, dividerStyles, iconStyles, overlayStyles, sliderBarStyles,
+    sliderBufferStyles, sliderNippleStyles, sliderPopImageStyles, sliderPopStyles,
+    sliderProgressStyles, sliderTextStyles, timeStyles, topBarStyles, topRowStyles
+} from './styles.js';
 
 import type { VideoPlayerOptions, VideoPlayer as Types, Chapter } from './nomercyplayer.d';
+
 export default class UI extends Functions {
 
 	overlayStyles: string[] = [];
@@ -16,7 +18,7 @@ export default class UI extends Functions {
 	buttonBaseStyle: string[] = [];
 	fluentIcons: Icon = <Icon>{};
 	buttonStyles: string[] = [];
-	buttons: Buttons = <Buttons>{};
+	buttons: Icon = <Icon>{};
 	iconStyles: string[] = [];
 	topRowStyles: string[] = [];
 	bottomRowStyles: string[] = [];
@@ -44,6 +46,9 @@ export default class UI extends Functions {
 	chapterMarkersStyles: string[] = [];
 	sliderTextStyles: string[] = [];
 	chapterTextStyles: string[] = [];
+	sliderPopImage: any;
+	chapterBar: HTMLDivElement = <HTMLDivElement>{};
+	chapterBarStyles: string[] = [];
 
 	constructor(playerType: Types['playerType'], options: VideoPlayerOptions, playerId: Types['playerId'] = '') {
 		super(playerType, options, playerId);
@@ -57,6 +62,7 @@ export default class UI extends Functions {
 			this.bottomRowStyles = bottomRowStyles;
 
 			this.sliderBarStyles = sliderBarStyles;
+			this.chapterBarStyles = chapterBarStyles;
 			this.sliderBufferStyles = sliderBufferStyles;
 			this.sliderProgressStyles = sliderProgressStyles;
 			this.sliderNippleStyles = sliderNippleStyles;
@@ -64,6 +70,7 @@ export default class UI extends Functions {
 			this.sliderPopImageStyles = sliderPopImageStyles;
 			this.timeStyles = timeStyles;
 			this.dividerStyles = dividerStyles;
+			this.sliderTextStyles = sliderTextStyles;
 			this.chapterMarkersStyles = chapterMarkersStyles;
 
 			this.buttonBaseStyle = buttonBaseStyle;
@@ -146,9 +153,9 @@ export default class UI extends Functions {
 
 		this.createSeekBackButton(bottomRow);
 
-		this.createNextButton(bottomRow);
-
 		this.createSeekForwardButton(bottomRow);
+
+		this.createNextButton(bottomRow);
 
 		this.createTime(bottomRow, 'current', ['ml-2']);
 		this.createDivider(bottomRow);
@@ -263,24 +270,42 @@ export default class UI extends Functions {
 		return divider;
 	}
 
-	createSVGElement(parent: HTMLElement, id: string, icon: Buttons['key'], hidden?: boolean) {
-		if (!icon) {
-			console.log(id);
-			return parent;
-		}
-		parent.innerHTML += `
-			<svg class="${id} ${icon.classes?.join(' ')} ${hidden ? 'hidden' : 'flex'} w-5 h-5" viewBox="0 0 24 24">
-				<path d="${icon.path.normal}" class="group-hover/button:hidden"></path>
-				<path d="${icon.path.hover}" class="hidden group-hover/button:flex"></path>
-			</svg>
-		`;
-		return parent;
+	createSVGElement(parent: HTMLElement, id: string, icon: Icon['path'], hidden?: boolean) {
+
+		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+		svg.setAttribute('viewBox', '0 0 24 24');
+
+		svg.id = id;
+		this.addClasses(svg, [
+			...icon.classes,
+			id,
+			'w-5',
+			'h-5',
+			hidden ? 'hidden' : 'flex',
+		]);
+
+		const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+		path.setAttribute('d', icon.normal);
+		this.addClasses(path, ['group-hover/button:hidden']);
+		svg.appendChild(path);
+
+		const path2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+		path2.setAttribute('d', icon.hover);
+		this.addClasses(path2, ['hidden', 'group-hover/button:flex']);
+		svg.appendChild(path2);
+
+		parent.appendChild(svg);
+
+		return svg;
+
 	}
 
 	createButton(parent: HTMLElement, icon: string) {
 		const button = document.createElement('button');
 
 		button.id = icon;
+		button.type = 'button';
+		button.title = this.buttons[icon]?.title;
 
 		const classes = this.buttonStyles;
 		classes.push(icon);
@@ -342,21 +367,22 @@ export default class UI extends Functions {
 			parent,
 			'playback'
 		);
+		playbackButton.title = this.buttons.play?.title;
 
-		this.createSVGElement(playbackButton, 'paused', this.buttons.play);
-		this.createSVGElement(playbackButton, 'playing', this.buttons.pause, true);
+		const pausedButton = this.createSVGElement(playbackButton, 'paused', this.buttons.play);
+		const playButton = this.createSVGElement(playbackButton, 'playing', this.buttons.pause, true);
 
 		playbackButton.addEventListener('click', (event) => {
 			event.stopPropagation();
 			this.togglePlayback();
 		});
-		this.player.on('pause', () => {
-			playbackButton.querySelector<any>('.playing').style.display = 'none';
-			playbackButton.querySelector<any>('.paused').style.display = 'flex';
+		this.on('pause', () => {
+			playButton.style.display = 'none';
+			pausedButton.style.display = 'flex';
 		});
-		this.player.on('play', () => {
-			playbackButton.querySelector<any>('.paused').style.display = 'none';
-			playbackButton.querySelector<any>('.playing').style.display = 'flex';
+		this.on('play', () => {
+			pausedButton.style.display = 'none';
+			playButton.style.display = 'flex';
 		});
 
 		parent.appendChild(playbackButton);
@@ -372,7 +398,7 @@ export default class UI extends Functions {
 		this.createSVGElement(seekBack, 'seekBack', this.buttons.seekBack);
 
 		seekBack.addEventListener('click', () => {
-			this.rewindVideo(this.options.seekInterval);
+			this.rewindVideo();
 		});
 
 		this.on('pip', (data) => {
@@ -396,7 +422,7 @@ export default class UI extends Functions {
 		this.createSVGElement(seekForward, 'seekForward', this.buttons.seekForward);
 
 		seekForward.addEventListener('click', () => {
-			this.forwardVideo(this.options.seekInterval);
+			this.forwardVideo();
 		});
 
 		this.on('pip', (data) => {
@@ -466,7 +492,7 @@ export default class UI extends Functions {
 		this.on('pip', (data) => {
 			if (data) {
 				time.style.display = 'none';
-			} else {
+			} else if (this.duration() == 0) {
 				time.style.display = 'flex';
 			}
 		});
@@ -480,33 +506,53 @@ export default class UI extends Functions {
 			parent,
 			'volume'
 		);
+		volumeButton.title = this.buttons.volumeHigh?.title;
 
-		this.createSVGElement(volumeButton, 'volumeMuted', this.buttons.volumeMuted, true);
-		this.createSVGElement(volumeButton, 'volumeLow', this.buttons.volumeLow, true);
-		this.createSVGElement(volumeButton, 'volumeMedium', this.buttons.volumeMedium, true);
-		this.createSVGElement(volumeButton, 'volumeHigh', this.buttons.volumeHigh);
+		const mutedButton = this.createSVGElement(volumeButton, 'volumeMuted', this.buttons.volumeMuted, true);
+		const lowButton = this.createSVGElement(volumeButton, 'volumeLow', this.buttons.volumeLow, true);
+		const mediumButton = this.createSVGElement(volumeButton, 'volumeMedium', this.buttons.volumeMedium, true);
+		const highButton = this.createSVGElement(volumeButton, 'volumeHigh', this.buttons.volumeHigh);
 
 		volumeButton.addEventListener('click', (event) => {
 			event.stopPropagation();
 			this.toggleMute();
 		});
 
-		this.on('volume', () => {
+		this.on('volume', (data) => {
+			console.log(data);
 			if (this.isMuted()) {
-				volumeButton.querySelector<any>('.volumeHigh').style.display = 'none';
-				volumeButton.querySelector<any>('.volumeMuted').style.display = 'flex';
+				lowButton.style.display = 'none';
+				mediumButton.style.display = 'none';
+				highButton.style.display = 'none';
+
+				mutedButton.style.display = 'flex';
+			} else if (data.volume <= 0.3) {
+				mediumButton.style.display = 'none';
+				highButton.style.display = 'none';
+				mutedButton.style.display = 'none';
+
+				lowButton.style.display = 'flex';
+			} else if (data.volume <= 0.6) {
+				lowButton.style.display = 'none';
+				highButton.style.display = 'none';
+				mutedButton.style.display = 'none';
+
+				mediumButton.style.display = 'flex';
 			} else {
-				volumeButton.querySelector<any>('.volumeMuted').style.display = 'none';
-				volumeButton.querySelector<any>('.volumeHigh').style.display = 'flex';
+				lowButton.style.display = 'none';
+				mediumButton.style.display = 'none';
+				mutedButton.style.display = 'none';
+
+				highButton.style.display = 'flex';
 			}
 		});
 		this.on('mute', () => {
 			if (this.isMuted()) {
-				volumeButton.querySelector<any>('.volumeHigh').style.display = 'none';
-				volumeButton.querySelector<any>('.volumeMuted').style.display = 'flex';
+				highButton.style.display = 'none';
+				mutedButton.style.display = 'flex';
 			} else {
-				volumeButton.querySelector<any>('.volumeMuted').style.display = 'none';
-				volumeButton.querySelector<any>('.volumeHigh').style.display = 'flex';
+				mutedButton.style.display = 'none';
+				highButton.style.display = 'flex';
 			}
 		});
 
@@ -538,7 +584,7 @@ export default class UI extends Functions {
 		this.on('pip', (data) => {
 			if (data) {
 				previousButton.style.display = 'none';
-			} else {
+			} else if (this.getCurrentPlaylistIndex() == 0) {
 				previousButton.style.display = 'flex';
 			}
 		});
@@ -571,7 +617,7 @@ export default class UI extends Functions {
 		this.on('pip', (data) => {
 			if (data) {
 				nextButton.style.display = 'none';
-			} else {
+			} else if (this.isLastPlaylistItem()) {
 				nextButton.style.display = 'flex';
 			}
 		});
@@ -584,12 +630,13 @@ export default class UI extends Functions {
 	createCaptionsButton(parent: HTMLElement) {
 		const captionButton = this.createButton(
 			parent,
-			'language'
+			'subtitles'
 		);
 		captionButton.style.display = 'none';
+		captionButton.title = this.buttons.subtitles?.title;
 
-		this.createSVGElement(captionButton, 'subtitle', this.buttons.subtitles);
-		this.createSVGElement(captionButton, 'subtitled', this.buttons.subtitles, true);
+		const offButton = this.createSVGElement(captionButton, 'subtitle', this.buttons.subtitlesOff);
+		const onButton = this.createSVGElement(captionButton, 'subtitled', this.buttons.subtitles, true);
 
 		captionButton.addEventListener('click', (event) => {
 			event.stopPropagation();
@@ -597,13 +644,13 @@ export default class UI extends Functions {
 
 			if (this.subsEnabled) {
 				this.subsEnabled = false;
-				captionButton.querySelector<any>('.subtitled').style.display = 'none';
-				captionButton.querySelector<any>('.subtitle').style.display = 'flex';
+				onButton.style.display = 'none';
+				offButton.style.display = 'flex';
 				this.setTextTrack(-1);
 			} else {
 				this.subsEnabled = true;
-				captionButton.querySelector<any>('.subtitle').style.display = 'none';
-				captionButton.querySelector<any>('.subtitled').style.display = 'flex';
+				offButton.style.display = 'none';
+				onButton.style.display = 'flex';
 				this.setTextTrack(1);
 			}
 
@@ -620,7 +667,7 @@ export default class UI extends Functions {
 		this.on('pip', (data) => {
 			if (data) {
 				captionButton.style.display = 'none';
-			} else {
+			} else if (this.hasTextTracks()) {
 				captionButton.style.display = 'flex';
 			}
 		});
@@ -636,9 +683,10 @@ export default class UI extends Functions {
 			'audio'
 		);
 		audioButton.style.display = 'none';
+		audioButton.title = this.buttons.language?.title;
 
-		this.createSVGElement(audioButton, 'audio', this.buttons.language);
-		this.createSVGElement(audioButton, 'audio-enable', this.buttons.language, true);
+		const offButton = this.createSVGElement(audioButton, 'audio', this.buttons.languageOff);
+		const onButton = this.createSVGElement(audioButton, 'audio-enable', this.buttons.language, true);
 
 		audioButton.addEventListener('click', (event) => {
 			event.stopPropagation();
@@ -646,14 +694,14 @@ export default class UI extends Functions {
 
 			if (this.audiosEnabled) {
 				this.audiosEnabled = false;
-				audioButton.querySelector<any>('.audio-enable').style.display = 'none';
-				audioButton.querySelector<any>('.audio').style.display = 'flex';
-				this.setTextTrack(-1);
+				onButton.style.display = 'none';
+				offButton.style.display = 'flex';
+				this.setAudioTrack(0);
 			} else {
 				this.audiosEnabled = true;
-				audioButton.querySelector<any>('.audio').style.display = 'none';
-				audioButton.querySelector<any>('.audio-enable').style.display = 'flex';
-				this.setTextTrack(1);
+				offButton.style.display = 'none';
+				onButton.style.display = 'flex';
+				this.setAudioTrack(1);
 			}
 
 			// this.toggleLanguage();
@@ -669,7 +717,7 @@ export default class UI extends Functions {
 		this.on('pip', (data) => {
 			if (data) {
 				audioButton.style.display = 'none';
-			} else {
+			} else if (this.hasAudioTracks()) {
 				audioButton.style.display = 'flex';
 			}
 		});
@@ -686,8 +734,8 @@ export default class UI extends Functions {
 		);
 		qualityButton.style.display = 'none';
 
-		this.createSVGElement(qualityButton, 'low', this.buttons.quality);
-		this.createSVGElement(qualityButton, 'high', this.buttons.quality, true);
+		const offButton = this.createSVGElement(qualityButton, 'low', this.buttons.quality);
+		const onButton = this.createSVGElement(qualityButton, 'high', this.buttons.quality, true);
 
 		qualityButton.addEventListener('click', (event) => {
 			event.stopPropagation();
@@ -695,12 +743,12 @@ export default class UI extends Functions {
 
 			if (this.highQuality) {
 				this.highQuality = false;
-				qualityButton.querySelector<any>('.high').style.display = 'none';
-				qualityButton.querySelector<any>('.low').style.display = 'flex';
+				onButton.style.display = 'none';
+				offButton.style.display = 'flex';
 			} else {
 				this.highQuality = true;
-				qualityButton.querySelector<any>('.low').style.display = 'none';
-				qualityButton.querySelector<any>('.high').style.display = 'flex';
+				offButton.style.display = 'none';
+				onButton.style.display = 'flex';
 			}
 
 			// this.toggleLanguage();
@@ -717,7 +765,7 @@ export default class UI extends Functions {
 		this.on('pip', (data) => {
 			if (data) {
 				qualityButton.style.display = 'none';
-			} else {
+			} else if (this.hasQualities()) {
 				qualityButton.style.display = 'flex';
 			}
 		});
@@ -754,6 +802,13 @@ export default class UI extends Functions {
 			// this.toggleLanguage();
 		});
 
+		this.on('fullscreen', () => {
+			if (this.isFullscreen()) {
+				theaterButton.style.display = 'none';
+			} else {
+				theaterButton.style.display = 'flex';
+			}
+		});
 		this.on('pip', (data) => {
 			if (data) {
 				theaterButton.style.display = 'none';
@@ -829,7 +884,7 @@ export default class UI extends Functions {
 		this.on('pip', (data) => {
 			if (data) {
 				playlistButton.style.display = 'none';
-			} else {
+			} else if (this.hasPlaylists()) {
 				playlistButton.style.display = 'flex';
 			}
 		});
@@ -865,7 +920,7 @@ export default class UI extends Functions {
 		this.on('pip', (data) => {
 			if (data) {
 				speedButton.style.display = 'none';
-			} else {
+			} else if (this.hasSpeeds()) {
 				speedButton.style.display = 'flex';
 			}
 		});
@@ -882,6 +937,7 @@ export default class UI extends Functions {
 		);
 
 		pipButton.style.display = 'none';
+		pipButton.title = this.buttons.pipEnter?.title;
 
 		this.createSVGElement(pipButton, 'pip-enter', this.buttons.pipEnter);
 		this.createSVGElement(pipButton, 'pip-exit', this.buttons.pipExit, true);
@@ -893,15 +949,24 @@ export default class UI extends Functions {
 				this.pipEnabled = false;
 				pipButton.querySelector<any>('.pip-exit').style.display = 'none';
 				pipButton.querySelector<any>('.pip-enter').style.display = 'flex';
+				pipButton.title = this.buttons.pipEnter?.title;
 				this.dispatchEvent('pip', false);
 			} else {
 				this.pipEnabled = true;
 				pipButton.querySelector<any>('.pip-enter').style.display = 'none';
 				pipButton.querySelector<any>('.pip-exit').style.display = 'flex';
+				pipButton.title = this.buttons.pipExit?.title;
 				this.dispatchEvent('pip', true);
 			}
 		});
 
+		this.on('fullscreen', () => {
+			if (this.isFullscreen()) {
+				pipButton.style.display = 'none';
+			} else {
+				pipButton.style.display = 'flex';
+			}
+		});
 		this.on('item', () => {
 			if (this.hasPIP()) {
 				pipButton.style.display = 'flex';
@@ -929,6 +994,11 @@ export default class UI extends Functions {
 		this.addClasses(sliderProgress, this.sliderProgressStyles);
 		sliderBar.append(sliderProgress);
 
+		this.chapterBar = document.createElement('div');
+		this.chapterBar.id = 'chapter-progress';
+		this.addClasses(this.chapterBar, this.chapterBarStyles);
+		sliderBar.append(this.chapterBar);
+
 		sliderBar.append(sliderBuffer);
 
 		const sliderNipple = document.createElement('div');
@@ -938,14 +1008,14 @@ export default class UI extends Functions {
 
 		const sliderPop = document.createElement('div');
 		sliderPop.id = 'slider-pop';
-		sliderPop.style.setProperty('--visibility', 'hidden');
-		sliderPop.style.visibility = 'var(--visibility)';
+		sliderPop.style.setProperty('--visibility', '0');
+		sliderPop.style.opacity = 'var(--visibility)';
 		this.addClasses(sliderPop, this.sliderPopStyles);
 
-		const sliderPopImage = document.createElement('div');
-		this.addClasses(sliderPopImage, this.sliderPopImageStyles);
-		sliderPopImage.id = 'slider-pop-image';
-		sliderPop.append(sliderPopImage);
+		this.sliderPopImage = document.createElement('div');
+		this.addClasses(this.sliderPopImage, this.sliderPopImageStyles);
+		this.sliderPopImage.id = 'slider-pop-image';
+		sliderPop.append(this.sliderPopImage);
 
 		const sliderText = document.createElement('div');
 		sliderText.id = 'slider-text';
@@ -962,7 +1032,7 @@ export default class UI extends Functions {
 		sliderBar.append(sliderPop);
 
 		this.on('seeked', () => {
-			sliderPop.style.setProperty('--visibility', 'hidden');
+			sliderPop.style.setProperty('--visibility', '0');
 
 			this.hideControls();
 		});
@@ -982,11 +1052,11 @@ export default class UI extends Functions {
 			case 'mouseover':
 				sliderBar.addEventListener(event, (e) => {
 					const scrubTime = this.#getScrubTime(e, sliderBar);
-					this.#getSliderPopImage(scrubTime, sliderPopImage);
+					this.#getSliderPopImage(scrubTime);
 					sliderText.textContent = this.humanTime(scrubTime.scrubTimePlayer);
 					chapterText.textContent = this.#getChapterText(scrubTime.scrubTimePlayer);
 					if (this.previewTime.length > 0) {
-						sliderPop.style.setProperty('--visibility', 'visible');
+						sliderPop.style.setProperty('--visibility', '1');
 						const sliderPopOffsetX = this.#getSliderPopOffsetX(e, sliderBar, sliderPop, scrubTime);
 						sliderPop.style.left = `${sliderPopOffsetX}%`;
 					}
@@ -994,7 +1064,7 @@ export default class UI extends Functions {
 				break;
 			case 'mouseleave':
 				sliderBar.addEventListener(event, () => {
-					sliderPop.style.setProperty('--visibility', 'hidden');
+					sliderPop.style.setProperty('--visibility', '0');
 					// hide sliderPop
 				});
 				break;
@@ -1003,7 +1073,7 @@ export default class UI extends Functions {
 				document.addEventListener(event, (e: any) => {
 					// move sliderPop
 					const scrubTime = this.#getScrubTime(e, sliderBar);
-					this.#getSliderPopImage(scrubTime, sliderPopImage);
+					this.#getSliderPopImage(scrubTime);
 					const sliderPopOffsetX = this.#getSliderPopOffsetX(e, sliderBar, sliderPop, scrubTime);
 					sliderPop.style.left = `${sliderPopOffsetX}%`;
 					sliderText.textContent = this.humanTime(scrubTime.scrubTimePlayer);
@@ -1012,7 +1082,7 @@ export default class UI extends Functions {
 					sliderProgress.style.width = `${scrubTime.scrubTime}%`;
 					sliderNipple.style.left = `${scrubTime.scrubTime}%`;
 					if (this.previewTime.length > 0) {
-						sliderPop.style.setProperty('--visibility', 'visible');
+						sliderPop.style.setProperty('--visibility', '1');
 					}
 				});
 				break;
@@ -1027,7 +1097,7 @@ export default class UI extends Functions {
 		['mouseup', 'touchend'].forEach((event) => {
 			document.addEventListener(event, (e: any) => {
 				if ((e?.button ?? 0) !== 0 || !this.isMouseDown) return;
-				sliderPop.style.setProperty('--visibility', 'hidden');
+				sliderPop.style.setProperty('--visibility', '0');
 				this.isMouseDown = false;
 				const scrubTime = this.#getScrubTime(e, sliderBar);
 				sliderProgress.style.width = `${scrubTime.scrubTime}%`;
@@ -1042,7 +1112,7 @@ export default class UI extends Functions {
 
 		this.on('controls', (value) => {
 			if (!value) {
-				sliderPop.style.setProperty('--visibility', 'hidden');
+				sliderPop.style.setProperty('--visibility', '0');
 			}
 		});
 
@@ -1073,12 +1143,12 @@ export default class UI extends Functions {
 
 		this.addClasses(chapterMarker, this.chapterMarkersStyles);
 
-		this.progressBar.append(chapterMarker);
+		this.chapterBar.append(chapterMarker);
 		return chapterMarker;
 	}
 
 	createChapterMarkers() {
-		this.progressBar.querySelectorAll('.chapter-marker').forEach((element) => {
+		this.chapterBar.querySelectorAll('.chapter-marker').forEach((element) => {
 			element.remove();
 		});
 		this.getChapters().forEach((chapter: Chapter) => {
@@ -1101,11 +1171,11 @@ export default class UI extends Functions {
 		return offsetX;
 	}
 
-	#fetchSliderPopImage(scrubTime: any, sliderPopImage: HTMLDivElement) {
+	#fetchSliderPopImage(scrubTime: any) {
 		if (this.previewTime.length === 0) {
 			const image = this.getCurrentSpriteFile();
 			if (image) {
-				sliderPopImage.style.backgroundImage = `url('${image}')`;
+				this.sliderPopImage.style.backgroundImage = `url('${image}')`;
 			}
 			const file = this.getCurrentTimeFile();
 			if (file) {
@@ -1148,14 +1218,14 @@ export default class UI extends Functions {
 		return img;
 	}
 
-	#getSliderPopImage(scrubTime: any, sliderPopImage: any) {
+	#getSliderPopImage(scrubTime: any) {
 
-		const img = this.#fetchSliderPopImage(scrubTime, sliderPopImage);
+		const img = this.#fetchSliderPopImage(scrubTime);
 
 		if (img) {
-			sliderPopImage.style.backgroundPosition = `-${img.x}px -${img.y}px`;
-			sliderPopImage.style.width = `${img.w}px`;
-			sliderPopImage.style.height = `${img.h}px`;
+			this.sliderPopImage.style.width = `${img.w}px`;
+			this.sliderPopImage.style.height = `${img.h}px`;
+			this.sliderPopImage.style.backgroundPosition = `${img.x}px ${img.y}px`;
 		}
 	}
 

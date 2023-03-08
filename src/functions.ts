@@ -17,6 +17,10 @@ export default class Functions extends Base {
 	#eventHandlers() {
 		this.on('item', () => {
 			this.fetchChapterFile();
+			this.setMediaAPI();
+			this.once('play', () => {
+				this.setMediaAPI();
+			});
 		});
 	}
 
@@ -166,7 +170,7 @@ export default class Functions extends Base {
 	}
 
 
-	seek(time: any) {
+	seek(time: number) {
 		if (this.isJwplayer) {
 			this.player.seek(time);
 		} else {
@@ -174,11 +178,11 @@ export default class Functions extends Base {
 		}
 	}
 
-	rewindVideo(time = 10) {
+	rewindVideo() {
 		this.dispatchEvent('removeForward');
 		clearTimeout(this.leftTap);
 
-		this.tapCount += time;
+		this.tapCount += this.options.seekInterval ?? 10;
 		this.dispatchEvent('rewind', this.tapCount);
 
 		this.leftTap = setTimeout(() => {
@@ -188,11 +192,11 @@ export default class Functions extends Base {
 		}, this.leeway);
 	};
 
-	forwardVideo(time = 10) {
+	forwardVideo() {
 		this.dispatchEvent('removeRewind');
 		clearTimeout(this.rightTap);
 
-		this.tapCount += time;
+		this.tapCount += this.options.seekInterval ?? 10;
 		this.dispatchEvent('forward', this.tapCount);
 
 		this.rightTap = setTimeout(() => {
@@ -243,7 +247,6 @@ export default class Functions extends Base {
 			this.enterFullscreen();
 		}
 	}
-
 
 	getCurrentPlaylistIndex() {
 		if (this.isJwplayer) {
@@ -464,11 +467,11 @@ export default class Functions extends Base {
 	}
 
 	getCurrentTimeFile() {
-		if (this.isJwplayer) {
-			return this.getCurrentPlaylistItem().tracks.find((t: { kind: string }) => t.kind === 'thumbnails')?.file;
+		let file = this.getCurrentPlaylistItem().metadata.find((t: { kind: string }) => t.kind === 'thumbnails')?.file;
+		if (this.isJwplayer && !file) {
+			file = this.getCurrentPlaylistItem().tracks.find((t: { kind: string }) => t.kind === 'thumbnails')?.file;
 		}
-		return this.getCurrentPlaylistItem().metadata.find((t: { kind: string }) => t.kind === 'thumbnails')?.file;
-
+		return file;
 	}
 
 	getCurrentSpriteFile() {
@@ -476,9 +479,6 @@ export default class Functions extends Base {
 	}
 
 	getCurrentChapterFile(): string {
-		// if (this.isJwplayer) {
-		// 	return this.getCurrentPlaylistItem().tracks.find((t: { kind: string }) => t.kind === 'chapters')?.file;
-		// }
 		return this.getCurrentPlaylistItem().metadata.find((t: { kind: string }) => t.kind === 'chapters')?.file;
 	}
 
@@ -512,5 +512,48 @@ export default class Functions extends Base {
 
 	hasPIP() {
 		return true;
+	}
+
+	setMediaAPI() {
+
+		if ('mediaSession' in navigator) {
+			const playlistItem = this.getCurrentPlaylistItem();
+
+			const image = playlistItem.image ?? playlistItem.poster;
+
+			const parsedTitle = playlistItem.title
+				.replace('%S', this.localize('S'))
+				.replace('%E', this.localize('E'));
+
+			this.setTitle(`${playlistItem.season ? `${playlistItem.show} -` : ''} ${parsedTitle}`);
+
+			navigator.mediaSession.metadata = new window.MediaMetadata({
+				title: parsedTitle,
+				artist: playlistItem.show,
+				album: playlistItem.season ? `S${this.pad(playlistItem.season, 2)}E${this.pad(playlistItem.episode, 2)}` : '',
+				artwork: [
+					{
+						src: image,
+						type: 'image/jpg',
+					},
+				],
+			});
+
+			navigator.mediaSession.setActionHandler('previoustrack', this.previous.bind(this));
+			navigator.mediaSession.setActionHandler('nexttrack', this.next.bind(this));
+			navigator.mediaSession.setActionHandler('seekbackward', this.rewindVideo.bind(this));
+			navigator.mediaSession.setActionHandler('seekforward', this.forwardVideo.bind(this));
+			navigator.mediaSession.setActionHandler('seekto', time => this.seek(time.seekTime as number));
+			navigator.mediaSession.setActionHandler('play', this.play.bind(this));
+			navigator.mediaSession.setActionHandler('pause', this.pause.bind(this));
+		}
+	}
+
+	localize(value: string): string {
+		return value;
+	}
+
+	setTitle(value: string): void {
+		document.title = value;
 	}
 }

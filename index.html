@@ -7,7 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>NoMercyPlayer API</title>
 
-        <link href="./dist/output.css?v=kw4n5l2n45" rel="stylesheet">
+        <link href="./dist/nomercyplayer.css?v=kw4n5l2n45" rel="stylesheet">
 
         <!-- <script src="./dist/app.js?v=kw4n5l2n45" defer></script> -->
 
@@ -122,11 +122,13 @@
                     document.querySelector('body').classList.remove('justify-center');
                     document.querySelector('#container').classList.add('flex-col');
                     document.querySelector('#wrapper1').classList.remove('max-w-4xl');
+                    document.querySelector('#wrapper1').classList.remove('w-full');
                     document.querySelector('#wrapper1').classList.add('w-2/3');
                 } else {
                     document.querySelector('body').classList.add('justify-center');
                     document.querySelector('#container').classList.remove('flex-col');
                     document.querySelector('#wrapper1').classList.add('max-w-4xl');
+                    document.querySelector('#wrapper1').classList.add('w-full');
                     document.querySelector('#wrapper1').classList.remove('w-2/3');
                 }
             });
@@ -172,11 +174,13 @@
                     document.querySelector('body').classList.remove('justify-center');
                     document.querySelector('#container').classList.add('flex-col');
                     document.querySelector('#wrapper2').classList.remove('max-w-4xl');
+                    document.querySelector('#wrapper2').classList.remove('w-full');
                     document.querySelector('#wrapper2').classList.add('w-2/3');
                 } else {
                     document.querySelector('body').classList.add('justify-center');
                     document.querySelector('#container').classList.remove('flex-col');
                     document.querySelector('#wrapper2').classList.add('max-w-4xl');
+                    document.querySelector('#wrapper2').classList.add('w-full');
                     document.querySelector('#wrapper2').classList.remove('w-2/3');
                 }
             });
