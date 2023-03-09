@@ -61,10 +61,19 @@ export const topRowStyles = [
 	'gap-1',
 	'h-2',
 	'items-center',
-	'pl-3',
+	'pl-2',
 	'pr-2',
 	'relative',
 	'w-full',
+];
+
+export const centerStyles = [
+	'grid',
+	'relative',
+	'w-full',
+	'h-full',
+	'grid-rows-6',
+	'grid-cols-3',
 ];
 
 export const bottomRowStyles = [
@@ -172,6 +181,7 @@ export const sliderPopStyles = [
 	'slider-pop',
 	'text-center',
 	'transition-[opacity,transform]',
+	'pointer-events-none',
 	'z-20',
 ];
 

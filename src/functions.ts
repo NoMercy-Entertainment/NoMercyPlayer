@@ -6,8 +6,14 @@ export default class Functions extends Base {
 	tapCount = 0;
 	leftTap: NodeJS.Timeout = <NodeJS.Timeout>{};
 	rightTap: NodeJS.Timeout = <NodeJS.Timeout>{};
-	leeway: number | undefined;
+	leeway = 300;
 	chapters: any;
+
+	subsEnabled = false;
+	audiosEnabled = false;
+	highQuality = false;
+	theaterModeEnabled = false;
+	pipEnabled = false;
 
 	constructor(playerType: Types['playerType'], options: VideoPlayerOptions, playerId: Types['playerId'] = '') {
 		super(playerType, options, playerId);

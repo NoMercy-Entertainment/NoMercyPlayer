@@ -1,13 +1,25 @@
+/* eslint-disable indent */
 import { buttons, fluentIcons, Icon } from './buttons.js';
 import Functions from './functions.js';
 import {
-    bottomBarStyles, bottomRowStyles, buttonBaseStyle, buttonStyles, chapterBarStyles,
+    bottomBarStyles, bottomRowStyles, buttonBaseStyle, buttonStyles, centerStyles, chapterBarStyles,
     chapterMarkersStyles, dividerStyles, iconStyles, overlayStyles, sliderBarStyles,
     sliderBufferStyles, sliderNippleStyles, sliderPopImageStyles, sliderPopStyles,
     sliderProgressStyles, sliderTextStyles, timeStyles, topBarStyles, topRowStyles
 } from './styles.js';
 
 import type { VideoPlayerOptions, VideoPlayer as Types, Chapter } from './nomercyplayer.d';
+
+export interface Position {
+	x: {
+		start:number;
+		end: number;
+	};
+	y: {
+		start:number;
+		end: number;
+	};
+}
 
 export default class UI extends Functions {
 
@@ -25,6 +37,9 @@ export default class UI extends Functions {
 	timer: NodeJS.Timeout = <NodeJS.Timeout>{};
 	isMouseDown = false;
 	progressBar: HTMLDivElement = <HTMLDivElement>{}; // sliderBar
+
+	lock = false;
+	isScrubbing = false;
 
 	previewTime: {
 		start: number;
@@ -49,6 +64,9 @@ export default class UI extends Functions {
 	sliderPopImage: any;
 	chapterBar: HTMLDivElement = <HTMLDivElement>{};
 	chapterBarStyles: string[] = [];
+	centerStyles: string[] = [];
+	bottomBar: HTMLDivElement = <HTMLDivElement>{};
+	topRow: HTMLDivElement = <HTMLDivElement>{};
 
 	constructor(playerType: Types['playerType'], options: VideoPlayerOptions, playerId: Types['playerId'] = '') {
 		super(playerType, options, playerId);
@@ -59,6 +77,7 @@ export default class UI extends Functions {
 			this.topBarStyles = topBarStyles;
 			this.bottomBarStyles = bottomBarStyles;
 			this.topRowStyles = topRowStyles;
+			this.centerStyles = centerStyles;
 			this.bottomRowStyles = bottomRowStyles;
 
 			this.sliderBarStyles = sliderBarStyles;
@@ -88,9 +107,22 @@ export default class UI extends Functions {
 		this.on('chapters', () => {
 			this.createChapterMarkers();
 		});
+
+		this.on('play', () => {
+			this.hideControls();
+		});
+		this.on('pause', () => {
+			this.showControls();
+		});
 	}
 
-	lock = false;
+	unlockControls() {
+		this.lock = false;
+	}
+
+	lockControls() {
+		this.lock = true;
+	}
 
 	hideControls() {
 		if (!this.lock && this.isPlaying()) {
@@ -105,7 +137,9 @@ export default class UI extends Functions {
 	dynamicControls() {
 		this.showControls();
 		clearTimeout(this.timer);
-		this.timer = setTimeout(this.hideControls.bind(this), this.options.controlsTimeout ?? 3500);
+		if (!this.lock) {
+			this.timer = setTimeout(this.hideControls.bind(this), this.options.controlsTimeout ?? 3500);
+		}
 	};
 
 	buildUI() {
@@ -135,15 +169,17 @@ export default class UI extends Functions {
 
 		const topBar = this.createTopBar(overlay);
 
-		const bottomBar = this.createBottomBar(overlay);
+		this.createCenter(overlay);
 
-		const topRow = this.createTopRow(bottomBar);
+		this.bottomBar = this.createBottomBar(overlay);
 
-		const bottomRow = this.createBottomRow(bottomBar);
+		this.topRow = this.createTopRow(this.bottomBar);
+
+		const bottomRow = this.createBottomRow(this.bottomBar);
 
 		this.createBackButton(topBar);
 
-		this.createProgressBar(topRow);
+		this.createProgressBar(this.topRow);
 
 		this.createPlaybackButton(bottomRow);
 
@@ -196,8 +232,8 @@ export default class UI extends Functions {
 		this.topBarStyles.push('top-bar');
 		this.addClasses(topBar, this.topBarStyles);
 
-		this.on('controls', (value) => {
-			if (value) {
+		this.on('controls', (showing) => {
+			if (showing) {
 				topBar.style.transform = 'translateY(0)';
 			} else {
 				topBar.style.transform = '';
@@ -207,6 +243,125 @@ export default class UI extends Functions {
 		parent.appendChild(topBar);
 
 		return topBar;
+	}
+
+	createCenter(parent: HTMLElement) {
+		const center = document.createElement('div');
+		center.id = 'center';
+
+		this.addClasses(center, this.centerStyles);
+
+		['click', 'touchstart', 'touchend', 'mousemove'].forEach((event) => {
+			center.addEventListener(event, (e) => {
+				if (!this.isMobile()) return;
+
+				e.stopPropagation();
+				this.dynamicControls();
+			});
+		});
+
+		this.createTouchSeekBack(center, { x: { start: 1, end: 1 }, y: { start: 2, end: 6 } });
+		this.createTouchPlayback(center, { x: { start: 2, end: 2 }, y: { start: 3, end: 5 } });
+		this.createTouchSeekForward(center, { x: { start: 3, end: 3 }, y: { start: 2, end: 6 } });
+		this.createTouchVolUp(center, { x: { start: 2, end: 2 }, y: { start: 1, end: 3 } });
+		this.createTouchVolDown(center, { x: { start: 2, end: 2 }, y: { start: 5, end: 7 } });
+
+		parent.appendChild(center);
+
+		return center;
+
+	}
+
+	createTouchSeekBack(parent: HTMLElement, position: Position) {
+		if (!this.isMobile()) return;
+		const touchSeekBack = this.createTouchBox(parent, 'touchSeekBack', position);
+		['mouseup', 'touchend'].forEach((event) => {
+			touchSeekBack.addEventListener(event, this.doubleTap(() => {
+				this.rewindVideo();
+			}));
+		});
+
+		this.createSeekRipple(touchSeekBack, 'left');
+
+		return touchSeekBack;
+
+	}
+
+	createTouchSeekForward(parent: HTMLElement, position: Position) {
+		if (!this.isMobile()) return;
+		const touchSeekForward = this.createTouchBox(parent, 'touchSeekForward', position);
+		['mouseup', 'touchend'].forEach((event) => {
+			touchSeekForward.addEventListener(event, this.doubleTap(() => {
+				this.forwardVideo();
+			}));
+		});
+
+		this.createSeekRipple(touchSeekForward, 'right');
+
+		return touchSeekForward;
+	}
+
+	createTouchPlayback(parent: HTMLElement, position: Position) {
+		const touchPlayback = this.createTouchBox(parent, 'touchPlayback', position);
+		touchPlayback.addEventListener('click', () => {
+			this.togglePlayback();
+		});
+		this.addClasses(touchPlayback, ['flex', 'justify-center', 'items-center']);
+
+		if (this.isMobile()) {
+			const playButton = this.createSVGElement(touchPlayback, 'paused', this.buttons.bigPlay);
+			this.addClasses(playButton, ['pointer-events-none']);
+
+			this.on('pause', () => {
+				playButton.style.display = 'flex';
+			});
+			this.on('play', () => {
+				playButton.style.display = 'none';
+			});
+		}
+
+		return touchPlayback;
+	}
+
+	createTouchVolUp(parent: HTMLElement, position: Position) {
+		if (!this.isMobile()) return;
+		const touchVolUp = this.createTouchBox(parent, 'touchVolUp', position);
+		['mouseup', 'touchend'].forEach((event) => {
+			touchVolUp.addEventListener(event, this.doubleTap(() => {
+				this.volumeUp();
+			}));
+		});
+
+		return touchVolUp;
+	}
+
+	createTouchVolDown(parent: HTMLElement, position: Position) {
+		if (!this.isMobile()) return;
+		const touchVolDown = this.createTouchBox(parent, 'touchVolDown', position);
+		['mouseup', 'touchend'].forEach((event) => {
+			touchVolDown.addEventListener(event, this.doubleTap(() => {
+				this.volumeDown();
+			}));
+		});
+
+		return touchVolDown;
+	}
+
+	createTouchBox(parent: HTMLElement, id: string, position: Position) {
+		const touch = document.createElement('div');
+		touch.id = `touch-box-${id}`;
+
+		this.addClasses(touch, [`touch-box-${id}`]);
+
+		touch.style.gridColumnStart = position.x.start.toString();
+		touch.style.gridColumnEnd = position.x.end.toString();
+		touch.style.gridRowStart = position.y.start.toString();
+		touch.style.gridRowEnd = position.y.end.toString();
+
+		parent.appendChild(touch);
+
+		return touch;
+
 	}
 
 	createBottomBar(parent: HTMLElement) {
@@ -219,12 +374,23 @@ export default class UI extends Functions {
 
 		parent.appendChild(bottomBar);
 
-		this.on('controls', (value) => {
-			if (value) {
+		this.on('controls', (showing) => {
+			if (showing) {
 				bottomBar.style.transform = 'translateY(0)';
 			} else {
 				bottomBar.style.transform = '';
 			}
+		});
+
+		['mouseover', 'touchstart'].forEach((event) => {
+			bottomBar.addEventListener(event, () => {
+				this.lockControls();
+			});
+		});
+		['mouseleave', 'touchend'].forEach((event) => {
+			bottomBar.addEventListener(event, () => {
+				this.unlockControls();
+			});
 		});
 
 		return bottomBar;
@@ -316,7 +482,6 @@ export default class UI extends Functions {
 		return button;
 	}
 
-
 	createSettingsButton(parent: HTMLDivElement) {
 		const settingsButton = this.createButton(
 			parent,
@@ -390,6 +555,7 @@ export default class UI extends Functions {
 	}
 
 	createSeekBackButton(parent: HTMLDivElement) {
+		if (this.isMobile()) return;
 		const seekBack = this.createButton(
 			parent,
 			'seekBack'
@@ -414,6 +580,7 @@ export default class UI extends Functions {
 	}
 
 	createSeekForwardButton(parent: HTMLDivElement) {
+		if (this.isMobile()) return;
 		const seekForward = this.createButton(
 			parent,
 			'seekForward'
@@ -502,6 +669,7 @@ export default class UI extends Functions {
 	}
 
 	createVolumeButton(parent: HTMLDivElement) {
+		if (this.isMobile()) return;
 		const volumeButton = this.createButton(
 			parent,
 			'volume'
@@ -561,6 +729,7 @@ export default class UI extends Functions {
 	}
 
 	createPreviousButton(parent: HTMLDivElement) {
+		if (this.isMobile()) return;
 		const previousButton = this.createButton(
 			parent,
 			'previous'
@@ -626,7 +795,6 @@ export default class UI extends Functions {
 		return nextButton;
 	}
 
-	subsEnabled = false;
 	createCaptionsButton(parent: HTMLElement) {
 		const captionButton = this.createButton(
 			parent,
@@ -676,7 +844,6 @@ export default class UI extends Functions {
 		return captionButton;
 	}
 
-	audiosEnabled = false;
 	createAudioButton(parent: HTMLElement) {
 		const audioButton = this.createButton(
 			parent,
@@ -726,7 +893,6 @@ export default class UI extends Functions {
 		return audioButton;
 	}
 
-	highQuality = false;
 	createQualityButton(parent: HTMLElement) {
 		const qualityButton = this.createButton(
 			parent,
@@ -774,8 +940,8 @@ export default class UI extends Functions {
 		return qualityButton;
 	}
 
-	theaterModeEnabled = false;
 	createTheaterButton(parent: HTMLDivElement) {
+		if (this.isMobile()) return;
 		const theaterButton = this.createButton(
 			parent,
 			'theater'
@@ -894,6 +1060,7 @@ export default class UI extends Functions {
 	}
 
 	createSpeedButton(parent: HTMLDivElement) {
+		if (this.isMobile()) return;
 		const speedButton = this.createButton(
 			parent,
 			'speed'
@@ -929,8 +1096,8 @@ export default class UI extends Functions {
 		return speedButton;
 	}
 
-	pipEnabled = false;
 	createPIPButton(parent: HTMLDivElement) {
+		if (this.isMobile()) return;
 		const pipButton = this.createButton(
 			parent,
 			'pip'
@@ -978,6 +1145,54 @@ export default class UI extends Functions {
 		parent.appendChild(pipButton);
 		return pipButton;
 	}
+
+	createSeekRipple(parent: HTMLDivElement, side: string) {
+		const seekRipple = document.createElement('div');
+		this.addClasses(seekRipple, ['seek-ripple', side]);
+		// seekRipple.style.height = `${(window.innerWidth / 16) * 9}px`;
+
+		const arrowHolder = document.createElement('div');
+		arrowHolder.classList.add('seek-ripple-arrow');
+		seekRipple.append(arrowHolder);
+
+		const text = document.createElement('p');
+		text.classList.add('seek-ripple-text');
+		seekRipple.append(text);
+
+		if (side == 'left') {
+			seekRipple.style.borderRadius = '0 50% 50% 0';
+			seekRipple.style.left = '0px';
+			arrowHolder.innerHTML = `
+				<div class="arrow arrow2 arrow-left"></div>
+				<div class="arrow arrow1 arrow-left"></div>
+				<div class="arrow arrow3 arrow-left"></div>
+			`;
+			this.on('rewind', (val: number) => {
+				text.textContent = `${Math.abs(val)} ${this.localize('seconds')}`;
+				seekRipple.style.display = 'flex';
+			});
+			this.on('removeRewind', () => {
+				seekRipple.style.display = 'none';
+			});
+		} else if (side == 'right') {
+			seekRipple.style.borderRadius = '50% 0 0 50%';
+			seekRipple.style.right = '0px';
+			arrowHolder.innerHTML = `
+				<div class="arrow arrow3 arrow-right"></div>
+				<div class="arrow arrow1 arrow-right"></div>
+				<div class="arrow arrow2 arrow-right"></div>
+			`;
+			this.on('forward', (val: number) => {
+				text.textContent = `${Math.abs(val)} ${this.localize('seconds')}`;
+				seekRipple.style.display = 'flex';
+			});
+			this.on('removeForward', () => {
+				seekRipple.style.display = 'none';
+			});
+		}
+
+		parent.append(seekRipple);
+	};
 
 	createProgressBar(parent: HTMLDivElement) {
 
@@ -1033,8 +1248,6 @@ export default class UI extends Functions {
 
 		this.on('seeked', () => {
 			sliderPop.style.setProperty('--visibility', '0');
-
-			this.hideControls();
 		});
 
 		this.on('item', () => {
@@ -1042,10 +1255,6 @@ export default class UI extends Functions {
 			this.chapters = [];
 		});
 
-		this.on('time', (data) => {
-			sliderBuffer.style.width = `${data.buffered}%`;
-			sliderProgress.style.width = `${data.percentage}%`;
-		});
 
 		['mouseover', 'mouseleave', 'mousemove', 'touchmove'].forEach((event) => {
 			switch (event) {
@@ -1065,21 +1274,19 @@ export default class UI extends Functions {
 			case 'mouseleave':
 				sliderBar.addEventListener(event, () => {
 					sliderPop.style.setProperty('--visibility', '0');
-					// hide sliderPop
 				});
 				break;
 			case 'mousemove':
 			case 'touchmove':
-				document.addEventListener(event, (e: any) => {
-					// move sliderPop
+				this.bottomBar.addEventListener(event, (e: any) => {
 					const scrubTime = this.#getScrubTime(e, sliderBar);
 					this.#getSliderPopImage(scrubTime);
 					const sliderPopOffsetX = this.#getSliderPopOffsetX(e, sliderBar, sliderPop, scrubTime);
 					sliderPop.style.left = `${sliderPopOffsetX}%`;
 					sliderText.textContent = this.humanTime(scrubTime.scrubTimePlayer);
+					if (!this.isMouseDown) return;
+
 					chapterText.textContent = this.#getChapterText(scrubTime.scrubTimePlayer);
-					if ((e?.button ?? 0) !== 0 || !this.isMouseDown) return;
-					sliderProgress.style.width = `${scrubTime.scrubTime}%`;
 					sliderNipple.style.left = `${scrubTime.scrubTime}%`;
 					if (this.previewTime.length > 0) {
 						sliderPop.style.setProperty('--visibility', '1');
@@ -1089,29 +1296,36 @@ export default class UI extends Functions {
 			}
 		});
 		['mousedown', 'touchstart'].forEach((event) => {
-			sliderBar.addEventListener(event, (e: any) => {
-				if ((e?.button ?? 0) !== 0 || this.isMouseDown) return;
+			sliderBar.addEventListener(event, () => {
+				if (this.isMouseDown) return;
+
 				this.isMouseDown = true;
+				this.isScrubbing = true;
 			});
 		});
 		['mouseup', 'touchend'].forEach((event) => {
-			document.addEventListener(event, (e: any) => {
-				if ((e?.button ?? 0) !== 0 || !this.isMouseDown) return;
-				sliderPop.style.setProperty('--visibility', '0');
+			this.bottomBar.addEventListener(event, (e: any) => {
+				if (!this.isMouseDown) return;
+
 				this.isMouseDown = false;
+				this.isScrubbing = false;
+				sliderPop.style.setProperty('--visibility', '0');
 				const scrubTime = this.#getScrubTime(e, sliderBar);
-				sliderProgress.style.width = `${scrubTime.scrubTime}%`;
 				sliderNipple.style.left = `${scrubTime.scrubTime}%`;
 				this.seek(scrubTime.scrubTimePlayer);
 			});
 		});
 
 		this.on('time', (data) => {
-			sliderNipple.style.left = `${data.percentage}%`;
+			sliderBuffer.style.width = `${data.buffered}%`;
+			sliderProgress.style.width = `${data.percentage}%`;
+			if (!this.isScrubbing) {
+				sliderNipple.style.left = `${data.percentage}%`;
+			}
 		});
 
-		this.on('controls', (value) => {
-			if (!value) {
+		this.on('controls', (showing) => {
+			if (!showing) {
 				sliderPop.style.setProperty('--visibility', '0');
 			}
 		});
@@ -1223,15 +1437,18 @@ export default class UI extends Functions {
 		const img = this.#fetchSliderPopImage(scrubTime);
 
 		if (img) {
+			this.sliderPopImage.style.backgroundPosition = `-${img.x}px -${img.y}px`;
 			this.sliderPopImage.style.width = `${img.w}px`;
 			this.sliderPopImage.style.height = `${img.h}px`;
-			this.sliderPopImage.style.backgroundPosition = `${img.x}px ${img.y}px`;
 		}
 	}
 
 	#getScrubTime(e: any, sliderBar: HTMLDivElement) {
 		const elementRect = sliderBar.getBoundingClientRect();
-		let offsetX = e.clientX - elementRect.left;
+
+		const x = e.clientX ?? e.touches?.[0]?.clientX ?? e.changedTouches?.[0]?.clientX ?? 0;
+
+		let offsetX = x - elementRect.left;
 		if (offsetX <= 0) offsetX = 0;
 		if (offsetX >= elementRect.width) offsetX = elementRect.width;
 		return {

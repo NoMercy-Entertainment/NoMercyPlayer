@@ -67,7 +67,7 @@ export default class Base {
 	#loadJWPlayer() {
 		this.#appendScriptFilesToDocument(this.options.scriptFiles ?? [
 			`https://ssl.p.jwpcdn.com/player/v/${this.jwplayerVersion}/jwplayer.js`,
-			'https://cdnjs.cloudflare.com/ajax/libs/webvtt-parser/2.2.0/parser.js',
+			'https://cdn.jsdelivr.net/npm/webvtt-parser@2.2.0/parser.min.js',
 		])
 			.then(() => {
 				this.player = window.jwplayer(this.playerId);
@@ -124,7 +124,8 @@ export default class Base {
 		this.#appendScriptFilesToDocument(this.options.scriptFiles ?? [
 			`https://vjs.zencdn.net/${this.videojsVersion}/video.min.js`,
 			`https://cdn.jsdelivr.net/npm/videojs-playlist@${this.videojsPlaylistVersion}/dist/videojs-playlist.min.js`,
-			'https://cdnjs.cloudflare.com/ajax/libs/webvtt-parser/2.2.0/parser.js',
+			'https://cdn.jsdelivr.net/npm/videojs-landscape-fullscreen@11.1111.0/dist/videojs-landscape-fullscreen.min.js',
+			'https://cdn.jsdelivr.net/npm/webvtt-parser@2.2.0/parser.min.js',
 			// `https://vjs.zencdn.net/${this.videojsVersion}/video-js.css`,
 		])
 			.then(() => {
@@ -132,6 +133,15 @@ export default class Base {
 				this.#loadPlaylist();
 
 				window.videojs.log.level('off');
+
+				this.player.landscapeFullscreen({
+					fullscreen: {
+						enterOnRotate: true,
+						exitOnRotate: true,
+						alwaysInLandscapeMode: true,
+						iOS: false,
+					},
+				});
 
 				const groupCollapsed = window.console.groupCollapsed;
 				window.console.groupCollapsed = (e) => {
@@ -279,6 +289,85 @@ export default class Base {
             .vjs-hidden {
                 display: none !important;
             }
+			
+            .seek-ripple {
+				--deg: 90deg;
+                align-items: center;
+                background: linear-gradient(var(--deg), #ffffff10 10%, #ffffff10 45%, #ffffff05 100%);
+                display: none;
+                flex-direction: column;
+                height: 100%;
+                justify-content: center;
+                pointer-events: none;
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 28%;
+			}
+			.seek-ripple.left {
+				--deg: 90deg;
+			}
+			.seek-ripple.right {
+				--deg: 270deg;
+			}
+			.seek-ripple-arrow {
+				align-items: center;
+				display: flex;
+				flex-direction: row;
+				justify-content: center;
+				pointer-events: none;
+				position: relative;
+				width: 600px;
+			}
+
+			.seek-ripple-text {
+				font-size: 0.8rem;
+				font-weight: 700;
+				pointer-events: none;
+				position: relative;
+				text-align: center;
+				width: 600px;
+			}
+    
+            .arrow {
+                --size: 0.7;
+                border-bottom: calc(var(--size) * 1rem) solid transparent;
+                border-top: calc(var(--size) * 1rem) solid transparent;
+                float: left;
+                height: calc((var(--size) * 1rem) * 2);
+				margin-bottom: .5rem;
+                width: calc((var(--size) * 1rem) * 2);
+            }
+    
+            .arrow-right {
+                border-left: calc((var(--size) * 1rem) + 5px) solid white;
+            }
+    
+            .arrow-left {
+                border-right: calc((var(--size) * 1rem) + 5px) solid white;
+            }
+    
+            .arrow1 {
+                animation: flash 0.75s infinite;
+            }
+    
+            .arrow2 {
+                animation: flash 0.75s infinite 0.25s;
+            }
+    
+            .arrow3 {
+                animation: flash 0.75s infinite 0.5s;
+            }
+			
+			@keyframes flash {
+				0% {
+					opacity: 1;
+				}
+			
+				100% {
+					opacity: 0;
+				}
+			}
         `;
 		styleSheet.innerHTML = styles
 			.replace(/[\t]{2,}/gu, '\t')
@@ -570,65 +659,77 @@ export default class Base {
 		}));
 	}
 
-	on(event: 'ready', callback: () => void): void;
-	on(event: 'play', callback: () => void): void;
-	on(event: 'pause', callback: () => void): void;
-	on(event: 'seeked', callback: () => void): void;
-	on(event: 'volume', callback: (data: VolumeState) => void): void;
-	on(event: 'mute', callback: () => void): void;
-	on(event: 'item', callback: () => void): void;
 	on(event: 'audio', callback: () => void): void;
 	on(event: 'captions', callback: () => void): void;
-	on(event: 'fullscreen', callback: () => void): void;
-	on(event: 'time', callback: (data: PlaybackState) => void): void;
+	on(event: 'chapters', callback: (data: Chapter[]) => void): void;
+	on(event: 'controls', callback: (showing: boolean) => void): void;
 	on(event: 'duration', callback: (data: PlaybackState) => void): void;
-	on(event: 'controls', callback: (value: boolean) => void): void;
-	on(event: 'theaterMode', callback: (value: boolean) => void): void;
-	on(event: 'pip', callback: (value: boolean) => void): void;
-	on(event: 'chapters', callback: (value: Chapter[]) => void): void;
-	on(event: 'pop-image', callback: (value: string) => void): void;
+	on(event: 'forward', callback: (amount: number) => void): void;
+	on(event: 'fullscreen', callback: () => void): void;
+	on(event: 'item', callback: () => void): void;
+	on(event: 'mute', callback: () => void): void;
+	on(event: 'pause', callback: () => void): void;
+	on(event: 'pip', callback: (enabled: boolean) => void): void;
+	on(event: 'play', callback: () => void): void;
+	on(event: 'pop-image', callback: (url: string) => void): void;
+	on(event: 'ready', callback: () => void): void;
+	on(event: 'removeForward', callback: () => void): void;
+	on(event: 'removeRewind', callback: () => void): void;
+	on(event: 'rewind', callback: (amount: number) => void): void;
+	on(event: 'seeked', callback: () => void): void;
+	on(event: 'theaterMode', callback: (enabled: boolean) => void): void;
+	on(event: 'time', callback: (data: PlaybackState) => void): void;
+	on(event: 'volume', callback: (data: VolumeState) => void): void;
 	on(event: any, callback: (arg0: any) => any) {
 		this.getElement().parentElement?.addEventListener(event, (e: { detail: any; }) => callback(e.detail));
 	}
 
-	off(event: 'ready', callback: () => void): void;
-	off(event: 'play', callback: () => void): void;
-	off(event: 'pause', callback: () => void): void;
-	off(event: 'seeked', callback: () => void): void;
-	off(event: 'volume', callback: (data: VolumeState) => void): void;
-	off(event: 'mute', callback: () => void): void;
-	off(event: 'item', callback: () => void): void;
 	off(event: 'audio', callback: () => void): void;
 	off(event: 'captions', callback: () => void): void;
-	off(event: 'fullscreen', callback: () => void): void;
-	off(event: 'time', callback: (data: PlaybackState) => void): void;
+	off(event: 'chapters', callback: (data: Chapter[]) => void): void;
+	off(event: 'controls', callback: (showing: boolean) => void): void;
 	off(event: 'duration', callback: (data: PlaybackState) => void): void;
-	off(event: 'controls', callback: (value: boolean) => void): void;
-	off(event: 'theaterMode', callback: (value: boolean) => void): void;
-	off(event: 'pip', callback: (value: boolean) => void): void;
-	off(event: 'chapters', callback: (value: Chapter[]) => void): void;
-	off(event: 'pop-image', callback: (value: string) => void): void;
+	off(event: 'forward', callback: (amount: number) => void): void;
+	off(event: 'fullscreen', callback: () => void): void;
+	off(event: 'item', callback: () => void): void;
+	off(event: 'mute', callback: () => void): void;
+	off(event: 'pause', callback: () => void): void;
+	off(event: 'pip', callback: (enabled: boolean) => void): void;
+	off(event: 'play', callback: () => void): void;
+	off(event: 'pop-image', callback: (url: string) => void): void;
+	off(event: 'ready', callback: () => void): void;
+	off(event: 'removeForward', callback: () => void): void;
+	off(event: 'removeRewind', callback: () => void): void;
+	off(event: 'rewind', callback: (amount: number) => void): void;
+	off(event: 'seeked', callback: () => void): void;
+	off(event: 'theaterMode', callback: (enabled: boolean) => void): void;
+	off(event: 'time', callback: (data: PlaybackState) => void): void;
+	off(event: 'volume', callback: (data: VolumeState) => void): void;
 	off(event: any, callback: (arg0: any) => any) {
 		this.getElement().parentElement?.removeEventListener(event, (e: { detail: any; }) => callback(e.detail));
 	}
 
-	once(event: 'ready', callback: () => void): void;
-	once(event: 'play', callback: () => void): void;
-	once(event: 'pause', callback: () => void): void;
-	once(event: 'seeked', callback: () => void): void;
-	once(event: 'volume', callback: (data: VolumeState) => void): void;
-	once(event: 'mute', callback: () => void): void;
-	once(event: 'item', callback: () => void): void;
 	once(event: 'audio', callback: () => void): void;
 	once(event: 'captions', callback: () => void): void;
-	once(event: 'fullscreen', callback: () => void): void;
-	once(event: 'time', callback: (data: PlaybackState) => void): void;
+	once(event: 'chapters', callback: (data: Chapter[]) => void): void;
+	once(event: 'controls', callback: (showing: boolean) => void): void;
 	once(event: 'duration', callback: (data: PlaybackState) => void): void;
-	once(event: 'controls', callback: (value: boolean) => void): void;
-	once(event: 'theaterMode', callback: (value: boolean) => void): void;
-	once(event: 'pip', callback: (value: boolean) => void): void;
-	once(event: 'chapters', callback: (value: Chapter[]) => void): void;
-	once(event: 'pop-image', callback: (value: string) => void): void;
+	once(event: 'forward', callback: (amount: number) => void): void;
+	once(event: 'fullscreen', callback: () => void): void;
+	once(event: 'item', callback: () => void): void;
+	once(event: 'mute', callback: () => void): void;
+	once(event: 'pause', callback: () => void): void;
+	once(event: 'pip', callback: (enabled: boolean) => void): void;
+	once(event: 'play', callback: () => void): void;
+	once(event: 'pop-image', callback: (url: string) => void): void;
+	once(event: 'ready', callback: () => void): void;
+	once(event: 'removeForward', callback: () => void): void;
+	once(event: 'removeRewind', callback: () => void): void;
+	once(event: 'rewind', callback: (amount: number) => void): void;
+	once(event: 'seeked', callback: () => void): void;
+	once(event: 'theaterMode', callback: (enabled: boolean) => void): void;
+	once(event: 'time', callback: (data: PlaybackState) => void): void;
+	once(event: 'volume', callback: (data: VolumeState) => void): void;
 	once(event: any, callback: (arg0: any) => any) {
 		this.getElement().parentElement?.addEventListener(event, (e: { detail: any; }) => callback(e.detail), { once: true });
 	}
@@ -800,5 +901,28 @@ export default class Base {
 		};
 
 		return newPlaylist;
+	}
+
+	isMobile() {
+		return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/iu.test(navigator.userAgent);
+	}
+
+	doubleTap(callback: (event: Event) => void) {
+		let lastTap = 0;
+		let timeout: NodeJS.Timeout;
+		return function detectDoubleTap(event: Event) {
+		  const curTime = new Date().getTime();
+		  const tapLen = curTime - lastTap;
+		  if (tapLen < 500 && tapLen > 0) {
+				console.log('Double tapped!');
+				event.preventDefault();
+				callback(event);
+		  } else {
+				timeout = setTimeout(() => {
+			  clearTimeout(timeout);
+				}, 500);
+		  }
+		  lastTap = curTime;
+		};
 	}
 }
