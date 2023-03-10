@@ -666,7 +666,7 @@ export default class Base {
 	}
 
 	on(event: 'resize', callback: (data: any) => void): void;
-	on(event: 'audio', callback: () => void): void;
+	on(event: 'audio', callback: (data: any) => void): void;
 	on(event: 'captions', callback: () => void): void;
 	on(event: 'chapters', callback: (data: Chapter[]) => void): void;
 	on(event: 'controls', callback: (showing: boolean) => void): void;
@@ -678,6 +678,7 @@ export default class Base {
 	on(event: 'pause', callback: () => void): void;
 	on(event: 'pip', callback: (enabled: boolean) => void): void;
 	on(event: 'play', callback: () => void): void;
+	on(event: 'playing', callback: () => void): void;
 	on(event: 'pop-image', callback: (url: string) => void): void;
 	on(event: 'ready', callback: () => void): void;
 	on(event: 'removeForward', callback: () => void): void;
@@ -691,34 +692,35 @@ export default class Base {
 		this.getElement().parentElement?.addEventListener(event, (e: { detail: any; }) => callback(e.detail));
 	}
 
-	off(event: 'resize', callback: (data: any) => void): void;
+	off(event: 'resize', callback: () => void): void;
 	off(event: 'audio', callback: () => void): void;
 	off(event: 'captions', callback: () => void): void;
-	off(event: 'chapters', callback: (data: Chapter[]) => void): void;
-	off(event: 'controls', callback: (showing: boolean) => void): void;
-	off(event: 'duration', callback: (data: PlaybackState) => void): void;
-	off(event: 'forward', callback: (amount: number) => void): void;
+	off(event: 'chapters', callback: () => void): void;
+	off(event: 'controls', callback: () => void): void;
+	off(event: 'duration', callback: () => void): void;
+	off(event: 'forward', callback: () => void): void;
 	off(event: 'fullscreen', callback: () => void): void;
 	off(event: 'item', callback: () => void): void;
 	off(event: 'mute', callback: () => void): void;
 	off(event: 'pause', callback: () => void): void;
-	off(event: 'pip', callback: (enabled: boolean) => void): void;
+	off(event: 'pip', callback: () => void): void;
 	off(event: 'play', callback: () => void): void;
-	off(event: 'pop-image', callback: (url: string) => void): void;
+	off(event: 'playing', callback: () => void): void;
+	off(event: 'pop-image', callback: () => void): void;
 	off(event: 'ready', callback: () => void): void;
 	off(event: 'removeForward', callback: () => void): void;
 	off(event: 'removeRewind', callback: () => void): void;
-	off(event: 'rewind', callback: (amount: number) => void): void;
+	off(event: 'rewind', callback: () => void): void;
 	off(event: 'seeked', callback: () => void): void;
-	off(event: 'theaterMode', callback: (enabled: boolean) => void): void;
-	off(event: 'time', callback: (data: PlaybackState) => void): void;
-	off(event: 'volume', callback: (data: VolumeState) => void): void;
-	off(event: any, callback: (arg0: any) => any) {
+	off(event: 'theaterMode', callback: () => void): void;
+	off(event: 'time', callback: () => void): void;
+	off(event: 'volume', callback: () => void): void;
+	off(event: any, callback: () => any) {
 		this.getElement().parentElement?.removeEventListener(event, (e: { detail: any; }) => callback(e.detail));
 	}
 
 	once(event: 'resize', callback: (data: any) => void): void;
-	once(event: 'audio', callback: () => void): void;
+	once(event: 'audio', callback: (data: any) => void): void;
 	once(event: 'captions', callback: () => void): void;
 	once(event: 'chapters', callback: (data: Chapter[]) => void): void;
 	once(event: 'controls', callback: (showing: boolean) => void): void;
@@ -730,6 +732,7 @@ export default class Base {
 	once(event: 'pause', callback: () => void): void;
 	once(event: 'pip', callback: (enabled: boolean) => void): void;
 	once(event: 'play', callback: () => void): void;
+	once(event: 'playing', callback: () => void): void;
 	once(event: 'pop-image', callback: (url: string) => void): void;
 	once(event: 'ready', callback: () => void): void;
 	once(event: 'removeForward', callback: () => void): void;

@@ -29,6 +29,9 @@ export default class Functions extends Base {
 			this.setMediaAPI();
 			this.once('play', () => {
 				this.setMediaAPI();
+			});
+
+			this.once('captions', () => {
 				if (localStorage.getItem('subtitle-language') && localStorage.getItem('subtitle-type') && localStorage.getItem('subtitle-ext')) {
 					this.setTextTrack(this.getTextTrackIndexBy(
 						localStorage.getItem('subtitle-language') as string,
@@ -43,6 +46,18 @@ export default class Functions extends Base {
 						//
 					}
 				}
+			});
+			this.once('audio', (data) => {
+				console.log(data);
+				this.once('play', () => {
+					if (localStorage.getItem('audio-language')) {
+						console.log(this.getAudioTrackIndexBy(localStorage.getItem('audio-language') as string));
+
+						this.setAudioTrack(this.getAudioTrackIndexBy(localStorage.getItem('audio-language') as string));
+					} else {
+						this.setAudioTrack(-1);
+					}
+				});
 			});
 		});
 	}
@@ -362,10 +377,18 @@ export default class Functions extends Base {
 	setAudioTrack(index: number) {
 		if (this.isJwplayer) {
 			this.player.setCurrentAudioTrack(index);
+			localStorage.setItem('audio-language', this.player.getAudioTracks()[index].language);
 		} else {
 			this.player.audioTracks().tracks_[index].enabled = true;
+			localStorage.setItem('audio-language', this.player.audioTracks().tracks_[index].language);
 		}
 	}
+
+	getAudioTrackIndexBy(language: string) {
+		const index = this.getAudioTracks().findIndex((t: any) => t.language == language);
+		return index;
+	}
+
 
 	hasAudioTracks() {
 		return this.getAudioTracks().length > 1;
