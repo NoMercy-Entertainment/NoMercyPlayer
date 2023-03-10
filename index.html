@@ -7,38 +7,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>NoMercyPlayer API</title>
 
+        <script src="./dist/app.js?v=kw4n5l2n45" defer></script>
         <link href="./dist/nomercyplayer.css?v=kw4n5l2n45" rel="stylesheet">
 
-        <!-- <script src="./dist/app.js?v=kw4n5l2n45" defer></script> -->
-
-
-        <!-- <div class="flex flex-wrap items-center justify-center gap-4 sm:flex-col">
-                <button type="button"
-                    class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
-                    onClick="play()">
-                    Play
-                </button>
-                <button type="button"
-                    class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
-                    onClick="pause()">
-                    Pause
-                </button>
-                <button type="button"
-                    class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
-                    onClick="next()">
-                    Next
-                </button>
-                <button type="button"
-                    class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
-                    onClick="prev()">
-                    Prev
-                </button>
-                <button type="button"
-                    class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
-                    onClick="sync()">
-                    Sync
-                </button>
-            </div> -->
     </head>
 
     <body class="flex flex-col items-center justify-center w-screen h-screen gap-4 text-white bg-zinc-900">
@@ -54,6 +25,33 @@
                 <video id="player2"></video>
             </div>
         </div>
+        <div class="flex flex-wrap items-center justify-center gap-4">
+            <button type="button"
+                class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
+                onClick="play()">
+                Play
+            </button>
+            <button type="button"
+                class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
+                onClick="pause()">
+                Pause
+            </button>
+            <button type="button"
+                class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
+                onClick="next()">
+                Next
+            </button>
+            <button type="button"
+                class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
+                onClick="prev()">
+                Prev
+            </button>
+            <button type="button"
+                class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
+                onClick="sync()">
+                Sync
+            </button>
+        </div>
 
         <script type="module">
 
@@ -64,8 +62,9 @@
                 controls: false,
                 chapters: true,
                 preload: 'auto',
-                playlist: 'https://api.nomercy.tv/playlist-jw?v=3',
+                playlist: 'https://api.nomercy.tv/playlist-jw?v=6',
                 controlsTimeout: 3000,
+                doubleClickDelay: 200,
                 // overlay: {
                 //     styles: {
                 //         background: 'rgba(0,0,0,0.5)',
@@ -120,13 +119,13 @@
                 console.log('theaterMode', data);
                 if (data) {
                     document.querySelector('body').classList.remove('justify-center');
-                    document.querySelector('#container').classList.add('flex-col');
+                    document.querySelector('#container').classList.remove('sm:flex-row');
                     document.querySelector('#wrapper1').classList.remove('max-w-4xl');
                     document.querySelector('#wrapper1').classList.remove('w-full');
                     document.querySelector('#wrapper1').classList.add('w-2/3');
                 } else {
                     document.querySelector('body').classList.add('justify-center');
-                    document.querySelector('#container').classList.remove('flex-col');
+                    document.querySelector('#container').classList.add('sm:flex-row');
                     document.querySelector('#wrapper1').classList.add('max-w-4xl');
                     document.querySelector('#wrapper1').classList.add('w-full');
                     document.querySelector('#wrapper1').classList.remove('w-2/3');
@@ -172,13 +171,13 @@
                 console.log('theaterMode', data);
                 if (data) {
                     document.querySelector('body').classList.remove('justify-center');
-                    document.querySelector('#container').classList.add('flex-col');
+                    document.querySelector('#container').classList.remove('sm:flex-row');
                     document.querySelector('#wrapper2').classList.remove('max-w-4xl');
                     document.querySelector('#wrapper2').classList.remove('w-full');
                     document.querySelector('#wrapper2').classList.add('w-2/3');
                 } else {
                     document.querySelector('body').classList.add('justify-center');
-                    document.querySelector('#container').classList.remove('flex-col');
+                    document.querySelector('#container').classList.add('sm:flex-row');
                     document.querySelector('#wrapper2').classList.add('max-w-4xl');
                     document.querySelector('#wrapper2').classList.add('w-full');
                     document.querySelector('#wrapper2').classList.remove('w-2/3');

@@ -8,6 +8,9 @@ export interface VideoPlayer {
 }
 
 export interface VideoPlayerOptions {
+	debugEnabled_?: boolean;
+	plugins?: any;
+	doubleClickDelay: number;
     seekInterval: number;
     token?: string;
     controlsTimeout: number;

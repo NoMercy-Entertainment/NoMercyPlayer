@@ -9,6 +9,7 @@
         "durationchanged",
         "duringplaylistchange",
         "jwplayer",
+        "libassjs",
         "lnum",
         "nexttrack",
         "nomercyplayer",

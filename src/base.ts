@@ -70,6 +70,7 @@ export default class Base {
 			'https://cdn.jsdelivr.net/npm/webvtt-parser@2.2.0/parser.min.js',
 		])
 			.then(() => {
+				// @ts-ignore
 				this.player = window.jwplayer(this.playerId);
 				this.player.setup(this.options);
 				this.events = [
@@ -126,12 +127,13 @@ export default class Base {
 			`https://cdn.jsdelivr.net/npm/videojs-playlist@${this.videojsPlaylistVersion}/dist/videojs-playlist.min.js`,
 			'https://cdn.jsdelivr.net/npm/videojs-landscape-fullscreen@11.1111.0/dist/videojs-landscape-fullscreen.min.js',
 			'https://cdn.jsdelivr.net/npm/webvtt-parser@2.2.0/parser.min.js',
-			// `https://vjs.zencdn.net/${this.videojsVersion}/video-js.css`,
 		])
 			.then(() => {
+				// @ts-ignore
 				this.player = window.videojs(this.playerId, this.options);
 				this.#loadPlaylist();
 
+				// @ts-ignore
 				window.videojs.log.level('off');
 
 				this.player.landscapeFullscreen({
@@ -367,6 +369,10 @@ export default class Base {
 				100% {
 					opacity: 0;
 				}
+			}
+
+			.libassjs-canvas-parent {
+				position: absolute !important;
 			}
         `;
 		styleSheet.innerHTML = styles
@@ -659,6 +665,7 @@ export default class Base {
 		}));
 	}
 
+	on(event: 'resize', callback: (data: any) => void): void;
 	on(event: 'audio', callback: () => void): void;
 	on(event: 'captions', callback: () => void): void;
 	on(event: 'chapters', callback: (data: Chapter[]) => void): void;
@@ -684,6 +691,7 @@ export default class Base {
 		this.getElement().parentElement?.addEventListener(event, (e: { detail: any; }) => callback(e.detail));
 	}
 
+	off(event: 'resize', callback: (data: any) => void): void;
 	off(event: 'audio', callback: () => void): void;
 	off(event: 'captions', callback: () => void): void;
 	off(event: 'chapters', callback: (data: Chapter[]) => void): void;
@@ -709,6 +717,7 @@ export default class Base {
 		this.getElement().parentElement?.removeEventListener(event, (e: { detail: any; }) => callback(e.detail));
 	}
 
+	once(event: 'resize', callback: (data: any) => void): void;
 	once(event: 'audio', callback: () => void): void;
 	once(event: 'captions', callback: () => void): void;
 	once(event: 'chapters', callback: (data: Chapter[]) => void): void;
@@ -907,22 +916,35 @@ export default class Base {
 		return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/iu.test(navigator.userAgent);
 	}
 
-	doubleTap(callback: (event: Event) => void) {
+	doubleTap(callback: (event: Event) => void, callback2?: (event2: Event) => void) {
+		const delay = this.options.doubleClickDelay ?? 500;
 		let lastTap = 0;
 		let timeout: NodeJS.Timeout;
-		return function detectDoubleTap(event: Event) {
+		let timeout2: NodeJS.Timeout;
+		return function detectDoubleTap(event: Event, event2?: Event) {
 		  const curTime = new Date().getTime();
 		  const tapLen = curTime - lastTap;
-		  if (tapLen < 500 && tapLen > 0) {
-				console.log('Double tapped!');
+		  if (tapLen > 0 && tapLen < delay) {
 				event.preventDefault();
 				callback(event);
-		  } else {
+				clearTimeout(timeout2);
+			} else {
 				timeout = setTimeout(() => {
-			  clearTimeout(timeout);
-				}, 500);
+					clearTimeout(timeout);
+				}, delay);
+				timeout2 = setTimeout(() => {
+					callback2?.(event2!);
+				}, delay);
 		  }
 		  lastTap = curTime;
 		};
 	}
+
+	currentScriptPath = function () {
+		const scripts = document.querySelectorAll('link');
+		const currentScript = scripts[scripts.length - 1].href;
+		const currentScriptChunks = currentScript.split('/');
+		const currentScriptFile = currentScriptChunks[currentScriptChunks.length - 1];
+		return currentScript.replace(currentScriptFile, '');
+	};
 }

@@ -1,4 +1,5 @@
 import Base from './base.js';
+import SubtitlesOctopus from './octopus/subtitles-octopus.js';
 
 import type { VideoPlayerOptions, VideoPlayer as Types, TextTrack, AudioTrack } from './nomercyplayer.d';
 
@@ -14,6 +15,8 @@ export default class Functions extends Base {
 	highQuality = false;
 	theaterModeEnabled = false;
 	pipEnabled = false;
+	octopusInstance: any | null = null;
+	currentChapterFile = '';
 
 	constructor(playerType: Types['playerType'], options: VideoPlayerOptions, playerId: Types['playerId'] = '') {
 		super(playerType, options, playerId);
@@ -26,6 +29,20 @@ export default class Functions extends Base {
 			this.setMediaAPI();
 			this.once('play', () => {
 				this.setMediaAPI();
+				if (localStorage.getItem('subtitle-language') && localStorage.getItem('subtitle-type') && localStorage.getItem('subtitle-ext')) {
+					this.setTextTrack(this.getTextTrackIndexBy(
+						localStorage.getItem('subtitle-language') as string,
+						localStorage.getItem('subtitle-type') as string,
+						localStorage.getItem('subtitle-ext') as string
+					));
+				} else {
+					this.setTextTrack(-1);
+					try {
+						this.octopusInstance.dispose();
+					} catch (error) {
+						//
+					}
+				}
 			});
 		});
 	}
@@ -124,7 +141,6 @@ export default class Functions extends Base {
 		}
 	}
 
-
 	previous() {
 		if (this.isJwplayer) {
 			if (this.player.getPlaylistIndex() === 0) {
@@ -175,7 +191,6 @@ export default class Functions extends Base {
 
 	}
 
-
 	seek(time: number) {
 		if (this.isJwplayer) {
 			this.player.seek(time);
@@ -219,7 +234,7 @@ export default class Functions extends Base {
 		} else {
 			this.setCurrentPlaylistItem(item);
 		}
-		play();
+		this.play();
 	};
 
 	isFullscreen() {
@@ -356,7 +371,6 @@ export default class Functions extends Base {
 		return this.getAudioTracks().length > 1;
 	}
 
-
 	getTextTracks() {
 		if (this.isJwplayer) {
 			return this.player.getCaptionsList().filter((t: any) => t.id.endsWith('vtt') || t.id.endsWith('ass'));
@@ -366,7 +380,15 @@ export default class Functions extends Base {
 	}
 
 	getCurrentTextTrack() {
-		return this.getTextTracks()[this.getCurrentTextTrackIndex()];
+		if (this.isJwplayer) {
+			return this.player.getCaptionsList()[this.player.getCurrentCaptions()];
+		}
+		return this.getTextTracks()[this.getCurrentTextTrackIndex() - 1];
+	}
+
+	getTextTrackIndexBy(language: string, type: string, ext: string) {
+		const index = this.getTextTracks().findIndex((t: any) => (t.src ?? t.id).endsWith(`${language}.${type}.${ext}`));
+		return index;
 	}
 
 	getCurrentTextTrackIndex() {
@@ -381,6 +403,13 @@ export default class Functions extends Base {
 		}
 		return index;
 
+	}
+
+	getTextTrackSrc() {
+		if (this.isJwplayer) {
+			return this.getCurrentTextTrack().id;
+		}
+		return this.getCurrentTextTrack().src;
 	}
 
 	getTextTrackLabel() {
@@ -403,6 +432,26 @@ export default class Functions extends Base {
 		if (this.isJwplayer) {
 			const number = this.player.getCaptionsList().findIndex((t: any) => t.id == this.getTextTracks()[index]?.id);
 			this.player.setCurrentCaptions(number);
+
+			if (index >= 0) {
+				const file = this.player.getCaptionsList()[this.player.getCurrentCaptions(number)]?.id;
+				if (file) {
+					const [language, type, ext] = file.match(/\w+\.\w+\.\w+$/u)[0].split('.');
+					localStorage.setItem('subtitle-language', language);
+					localStorage.setItem('subtitle-type', type);
+					localStorage.setItem('subtitle-ext', ext);
+					this.opus();
+				}
+			} else {
+				localStorage.removeItem('subtitle-language');
+				localStorage.removeItem('subtitle-type');
+				localStorage.removeItem('subtitle-ext');
+				try {
+					this.octopusInstance.dispose();
+				} catch (error) {
+					//
+				}
+			}
 		} else {
 			this.player.textTracks().tracks_.forEach((t: TextTrack, i: number) => {
 				if (this.player.textTracks()[i]) {
@@ -412,9 +461,62 @@ export default class Functions extends Base {
 			if (index >= 0) {
 				const number = this.player.textTracks().tracks_.findIndex((t: any) => t.id == this.getTextTracks()[index]?.id);
 				this.player.textTracks()[number].mode = 'showing';
+
+				const file = this.player.textTracks()[number]?.src;
+				if (file) {
+					const [language, type, ext] = file.match(/\w+\.\w+\.\w+$/u)[0].split('.');
+					localStorage.setItem('subtitle-language', language);
+					localStorage.setItem('subtitle-type', type);
+					localStorage.setItem('subtitle-ext', ext);
+					this.opus();
+				}
+			} else {
+				localStorage.removeItem('subtitle-language');
+				localStorage.removeItem('subtitle-type');
+				localStorage.removeItem('subtitle-ext');
+				try {
+					this.octopusInstance.dispose();
+				} catch (error) {
+					//
+				}
 			}
 		}
 	}
+
+	opus() {
+		try {
+			this.octopusInstance.dispose();
+		} catch (error) {
+			//
+		}
+
+		const subtitleURL = this.getTextTrackSrc() ?? null;
+
+		if (subtitleURL) {
+			const options = {
+				video: this.getElement().querySelector('video'),
+				lossyRender: true,
+				subUrl: subtitleURL,
+				debug: this.options.debugEnabled_,
+				blendRender: true,
+				lazyFileLoading: true,
+				targetFps: 120,
+				fonts: this.getCurrentPlaylistItem().fonts.map((f: any) => f.file),
+				workerUrl: `${this.currentScriptPath()}octopus/subtitles-octopus-worker.js`,
+				legacyWorkerUrl: `${this.currentScriptPath()}octopus/subtitles-octopus-worker-legacy.js`,
+				onReady: async () => {
+					// player.nomercy.play();
+				},
+				onError: (event: any) => {
+					console.log('opus error', event);
+				},
+			};
+
+			if (subtitleURL && subtitleURL.endsWith('ass')) {
+				this.octopusInstance = new SubtitlesOctopus(options);
+			}
+		}
+	};
 
 	hasTextTracks() {
 		return this.getTextTracks().length > 0;
@@ -490,7 +592,8 @@ export default class Functions extends Base {
 
 	fetchChapterFile() {
 		const file = this.getCurrentChapterFile();
-		if (file) {
+		if (file && this.currentChapterFile !== file) {
+			this.currentChapterFile = file;
 			this.getFileContents({
 				url: file,
 				options: {},

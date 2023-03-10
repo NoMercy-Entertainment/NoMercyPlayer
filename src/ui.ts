@@ -67,6 +67,7 @@ export default class UI extends Functions {
 	centerStyles: string[] = [];
 	bottomBar: HTMLDivElement = <HTMLDivElement>{};
 	topRow: HTMLDivElement = <HTMLDivElement>{};
+	currentTimeFile = '';
 
 	constructor(playerType: Types['playerType'], options: VideoPlayerOptions, playerId: Types['playerId'] = '') {
 		super(playerType, options, playerId);
@@ -156,10 +157,12 @@ export default class UI extends Functions {
 			this.getElement().prepend(overlay);
 		}
 
-		overlay.addEventListener('mousemove', () => {
+		overlay.onmousemove = () => {
 			this.dynamicControls();
-		});
-
+		};
+		overlay.onmouseout = () => {
+			this.hideControls();
+		};
 		overlay.ondragstart = () => {
 			return false;
 		};
@@ -303,10 +306,17 @@ export default class UI extends Functions {
 
 	createTouchPlayback(parent: HTMLElement, position: Position) {
 		const touchPlayback = this.createTouchBox(parent, 'touchPlayback', position);
-		touchPlayback.addEventListener('click', () => {
-			this.togglePlayback();
-		});
 		this.addClasses(touchPlayback, ['flex', 'justify-center', 'items-center']);
+
+		// touchPlayback.addEventListener('click', () => {
+		// 	this.togglePlayback();
+		// });
+		['mouseup', 'touchend'].forEach((event) => {
+			touchPlayback.addEventListener(event, this.doubleTap(
+				() => this.toggleFullscreen(),
+				() => this.togglePlayback()
+			));
+		});
 
 		if (this.isMobile()) {
 			const playButton = this.createSVGElement(touchPlayback, 'paused', this.buttons.bigPlay);
@@ -387,7 +397,7 @@ export default class UI extends Functions {
 				this.lockControls();
 			});
 		});
-		['mouseleave', 'touchend'].forEach((event) => {
+		['mouseleave', 'touchend', 'mouseout'].forEach((event) => {
 			bottomBar.addEventListener(event, () => {
 				this.unlockControls();
 			});
@@ -808,7 +818,6 @@ export default class UI extends Functions {
 
 		captionButton.addEventListener('click', (event) => {
 			event.stopPropagation();
-			console.log(this.getTextTracks());
 
 			if (this.subsEnabled) {
 				this.subsEnabled = false;
@@ -819,7 +828,7 @@ export default class UI extends Functions {
 				this.subsEnabled = true;
 				offButton.style.display = 'none';
 				onButton.style.display = 'flex';
-				this.setTextTrack(1);
+				this.setTextTrack(this.getTextTrackIndexBy('eng', 'full', 'ass'));
 			}
 
 			// this.toggleLanguage();
@@ -1352,7 +1361,6 @@ export default class UI extends Functions {
 	createChapterMarker(chapter: Chapter) {
 		const chapterMarker = document.createElement('div');
 		chapterMarker.id = `chapter-marker-${chapter.id.replace(/\s/gu, '-')}`;
-
 		chapterMarker.style.left = `${chapter.time / this.duration() * 100}%`;
 
 		this.addClasses(chapterMarker, this.chapterMarkersStyles);
@@ -1392,7 +1400,8 @@ export default class UI extends Functions {
 				this.sliderPopImage.style.backgroundImage = `url('${image}')`;
 			}
 			const file = this.getCurrentTimeFile();
-			if (file) {
+			if (file && this.currentTimeFile !== file) {
+				this.currentTimeFile = file;
 				this.getFileContents({
 					url: file,
 					options: {},
