@@ -6,9 +6,38 @@ module.exports = {
 		'./index.html',
 	],
 	darkMode: 'media',
-  theme: {
-    extend: {},
-  },
+	theme: {
+		extend: {
+			width: {
+				available: [
+					'-webkit-fill-available',
+					'-moz-available',
+					'stretch',
+				],
+			},
+			height: {
+				available: [
+					'-webkit-fill-available',
+					'-moz-available',
+					'stretch',
+				],
+			},
+			minHeight: {
+				available: [
+					'-webkit-fill-available',
+					'-moz-available',
+					'stretch',
+				],
+			},
+			maxHeight: {
+				available: [
+					'-webkit-fill-available',
+					'-moz-available',
+					'stretch',
+				],
+			},
+		},
+	},
 	plugins: [
 	],
 };

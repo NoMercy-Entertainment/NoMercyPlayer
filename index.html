@@ -3,7 +3,7 @@
 
     <head>
         <meta charset="UTF-8" />
-        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>NoMercyPlayer API</title>
 
@@ -15,14 +15,15 @@
     <body class="flex flex-col items-center justify-center w-screen h-screen gap-4 text-white bg-zinc-900">
 
         <div id="container" class="flex flex-col justify-center w-full gap-8 sm:flex-row">
-            <div id="wrapper1" class="flex flex-col items-center w-full max-w-4xl gap-2 text-cener">
-                <span>VideoJS</span>
-                <video id="player1"></video>
-            </div>
 
-            <div id="wrapper2" class="flex flex-col items-center w-full max-w-4xl gap-2 text-cener">
+            <div id="wrapper2" class="flex flex-col items-center w-full max-w-4xl gap-2 text-center">
                 <span>JWPlayer</span>
                 <video id="player2"></video>
+            </div>
+
+            <div id="wrapper1" class="flex flex-col items-center w-full max-w-4xl gap-2 text-center">
+                <span>VideoJS</span>
+                <video id="player1" class="video-js"></video>
             </div>
         </div>
         <div class="flex flex-wrap items-center justify-center gap-4">
@@ -62,47 +63,19 @@
                 controls: false,
                 chapters: true,
                 preload: 'auto',
-                playlist: 'https://api.nomercy.tv/playlist-jw?v=6',
+                playlist: 'https://api.nomercy.tv/playlist-jw?v=9',
                 controlsTimeout: 3000,
-                doubleClickDelay: 200,
-                // overlay: {
-                //     styles: {
-                //         background: 'rgba(0,0,0,0.5)',
-                //         color: '#fff',
-                //         fontFamily: 'Poppins, sans-serif',
-                //         fontSize: '.8rem',
-                //         fill: '#fff',
-                //     },
-                //     children: {
-                //         top:{
-                //             children: [
-                //                 {
-                //                     type: 'back',
-                //                 },
-                //             ],
-                //         },
-                //         center:{},
-                //         bottom:{
-                //             children: [
-                //                 {
-                //                     type: 'playback',
-                //                 },
-                //                 {
-                //                     type: 'prev',
-                //                 },
-                //                 {
-                //                     type: 'next',
-                //                 },
-                //                 {
-                //                     type: 'volume',
-                //                 },
-                //                 {
-                //                     type: 'prev',
-                //                 },
-                //             ]
-                //         },
-                //     },
-                // },
+                doubleClickDelay: 500,
+                playbackRates: [
+                    0.25,
+                    0.5,
+                    0.75,
+                    1,
+                    1.25,
+                    1.5,
+                    1.75,
+                    2,
+                ],
             };
 
             const js = new VideoPlayer('videojs', config, 'player1');

@@ -1,13 +1,19 @@
 {
     "cSpell.words": [
         "autoadvance",
+        "autoplay",
+        "autoselect",
         "beforeplaylistitem",
         "checkmark",
         "chromecast",
+        "defaulttrack",
         "displaydescription",
         "displaytitle",
         "durationchanged",
         "duringplaylistchange",
+        "fullscreen",
+        "groupid",
+        "hlsjs",
         "jwplayer",
         "libassjs",
         "lnum",
@@ -21,7 +27,10 @@
         "seekforward",
         "seekto",
         "tailwindcss",
+        "thumbsheet",
         "tnum",
+        "unmute",
+        "unmuted",
         "videojs",
         "xywh"
     ]

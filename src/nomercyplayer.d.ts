@@ -1,61 +1,88 @@
 
-export interface VideoPlayer {
-    playerType: 'jwplayer'|'videojs'|undefined;
-    playerId: string;
-    player: any;
-    events: string[];
-    options: VideoPlayerOptions;
+export enum MIMEType {
+    ApplicationXFontOpentype = 'application/x-font-opentype',
+    ApplicationXFontTruetype = 'application/x-font-truetype',
 }
 
-export interface VideoPlayerOptions {
-	debugEnabled_?: boolean;
-	plugins?: any;
-	doubleClickDelay: number;
-    seekInterval: number;
-    token?: string;
-    controlsTimeout: number;
-    iconStyles: never[];
-    buttonStyles: any;
-    buttons: any;
-    playerVersion: string;
-    playlistVersion: string;
-    scriptFiles: string[];
-    autoplay: boolean;
-    controls: boolean;
-    playlist: string| PlaylistItem[];
-    anonymous: boolean;
+export enum TextTrackKind {
+    Subtitle = 'subtitle',
+    Subtitles = 'subtitles',
+}
+
+export enum TrackKind {
+    Captions = 'captions',
+    Chapters = 'chapters',
+    Fonts = 'fonts',
+    Sprite = 'sprite',
+    Subtitles = 'subtitles',
+    Timestamps = 'timestamps',
+}
+
+export interface AudioEvent {
+    currentTrack: number;
+    tracks: AudioEventTrack[];
+    type: string;
+}
+export interface AudioEventTrack {
+    autoselect: boolean;
+    groupid: string;
+    hlsjsIndex: number;
+    label: string;
+    language: string;
+    name: string;
+    defaulttrack: boolean;
+}
+export interface AudioTrack {
+    [key: string]: any;
+};
+export interface CaptionsEvent {
+    track: number;
+    tracks: CaptionsEventTrack[];
+    type: string;
+}
+
+export interface CaptionsEventTrack {
+	src: string;
+    id: string;
+    label: string;
+    language: string;
+}
+
+export interface Chapter {
+	left: number;
+    endTitle: number;
+    id: string;
+    time: number;
+	startTime: number;
+	title: string;
+	width: number;
+}
+
+export interface Font {
+    file: string;
+    mimeType: MIMEType;
 }
 
 export interface PlaybackState {
-    position: any;
-    duration: any;
-    remaining: number;
     buffered: number;
+    duration: any;
     percentage: number;
+    position: any;
+    remaining: number;
     type: any;
     viewable: boolean;
 };
 
-export interface AudioTrack {
-    [key: string]: any;
-};
-export interface TextTrack {
-    [key: string]: any;
-};
-export interface QualityTrack {
-    [key: string]: any;
-};
-
 export interface PlaylistItem {
-    id: number;
-    title: string;
     description: string;
     duration: string;
+    file?: string;
+    id: number;
     image?: string;
     poster?: string;
-    file?: string;
-    sources?: Source[];
     progress?: number;
+    sources?: Source[];
+    title: string;
 
     textTracks?: TextTrack[];
     tracks?: Track[];
@@ -71,21 +98,15 @@ export interface PlaylistItem {
     fontsFile?: string;
 }
 
-export interface Font {
-    file: string;
-    mimeType: MIMEType;
-}
-
-export enum MIMEType {
-    ApplicationXFontOpentype = 'application/x-font-opentype',
-    ApplicationXFontTruetype = 'application/x-font-truetype',
-}
+export interface QualityTrack {
+    [key: string]: any;
+};
 
 export interface RatingClass {
     country: string;
-    rating: string;
-    meaning: string;
     image: string;
+    meaning: string;
+    rating: string;
 }
 
 export interface Source {
@@ -93,17 +114,20 @@ export interface Source {
     type: string;
 }
 
+export interface Style {
+    [key: string]: string[];
+};
+
 export interface TextTrack {
+    [key: string]: any;
+};
+
+export interface TextTrack {
+    kind: TrackKind;
     label: string;
+    language: string;
     src: string;
     srclang: string;
-    language: string;
-    kind: TrackKind;
-}
-
-export enum TextTrackKind {
-    Subtitle = 'subtitle',
-    Subtitles = 'subtitles',
 }
 
 export interface Track {
@@ -112,22 +136,34 @@ export interface Track {
     label?: string;
 }
 
-export enum TrackKind {
-    Captions = 'captions',
-    Chapters = 'chapters',
-    Subtitles = 'subtitles',
-    Fonts = 'fonts',
-    Sprite = 'sprite',
-    Thumbnails = 'thumbnails',
+export interface VideoPlayer {
+    events: string[];
+    options: VideoPlayerOptions;
+    player: any;
+    playerId: string;
+    playerType: 'jwplayer'|'videojs'|undefined;
 }
 
-export interface Chapter {
-    id: string;
-    title: string;
-    time: number;
+export interface VideoPlayerOptions {
+	debug?: boolean;
+	doubleClickDelay?: number;
+    autoplay?: boolean;
+    buttonStyles?: any;
+    buttons?: any;
+    controls?: boolean;
+    controlsTimeout?: number;
+    playerVersion?: string;
+    playlist: string| PlaylistItem[];
+    playlistVersion?: string;
+    scriptFiles?: string[];
+    seekInterval?: number;
+    token?: string;
+	playbackRates?: number[];
+	plugins?: any;
+	styles?: Style;
 }
 
 export interface VolumeState {
-    volume: number;
     muted: boolean;
+    volume: number;
 }

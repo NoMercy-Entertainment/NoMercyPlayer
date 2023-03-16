@@ -1,4 +1,6 @@
 import type {
+	AudioEvent,
+	CaptionsEvent,
 	Chapter,
 	PlaybackState, PlaylistItem, VideoPlayer as Types, VideoPlayerOptions, VolumeState
 } from './nomercyplayer.d';
@@ -62,6 +64,71 @@ export default class Base {
 		} else {
 			throw new Error(`Invalid player type: ${this.playerId}`);
 		}
+
+		String.prototype.toTitleCase = function (): string {
+			let i: number;
+			let j: number;
+			let str: string;
+
+			str = this.replace(/([^\W_]+[^\s-]*) */gu, (txt) => {
+				return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+			});
+
+			// Certain minor words should be left lowercase unless
+			// they are the first or last words in the string
+
+			['a', 'for', 'so', 'an', 'in', 'the', 'and', 'nor', 'to', 'at', 'of', 'up', 'but', 'on', 'yet', 'by', 'or'];
+			const lowers = ['A', 'An', 'The', 'And', 'But', 'Or', 'For', 'Nor', 'As', 'At', 'By', 'For', 'From', 'In', 'Into', 'Near', 'Of', 'On', 'Onto', 'To', 'With'];
+			for (i = 0, j = lowers.length; i < j; i++) {
+				str = str.replace(new RegExp(`\\s${lowers[i]}\\s`, 'gu'), (txt) => {
+					return txt.toLowerCase();
+				});
+			}
+
+			// cSpell:disable
+			// Certain words such as initialisms or acronyms should be left uppercase
+			const uppers = ['Id', 'Tv'];
+			for (i = 0, j = uppers.length; i < j; i++) { str = str.replace(new RegExp(`\\b${uppers[i]}\\b`, 'gu'), uppers[i].toUpperCase()); }
+
+			return str;
+		};
+
+		/**
+		 * @param  {string} lang EN|NL|FR
+		 * @param  {boolean} withLowers true|false
+		 */
+		// cSpell:disable
+		String.prototype.titleCase = function (lang = navigator.language.split('-')[0], withLowers = true): string {
+			let string = '';
+			let lowers: string[] = [];
+
+			string = this.replace(/([^\s:\-'])([^\s:\-']*)/gu, (txt) => {
+				return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+			}).replace(/Mc(.)/gu, (_match, next) => {
+				return `Mc${next.toUpperCase()}`;
+			});
+
+			if (withLowers) {
+				lowers = ['A', 'An', 'The', 'At', 'By', 'For', 'In', 'Of', 'On', 'To', 'Up', 'And', 'As', 'But', 'Or', 'Nor', 'Not'];
+				if (lang == 'FR') {
+					lowers = ['Un', 'Une', 'Le', 'La', 'Les', 'Du', 'De', 'Des', 'À', 'Au', 'Aux', 'Par', 'Pour', 'Dans', 'Sur', 'Et', 'Comme', 'Mais', 'Ou', 'Où', 'Ne', 'Ni', 'Pas'];
+				} else if (lang == 'NL') {
+					lowers = ['De', 'Het', 'Een', 'En', 'Van', 'Naar', 'Op', 'Door', 'Voor', 'In', 'Als', 'Maar', 'Waar', 'Niet', 'Bij', 'Aan'];
+				}
+				for (let i = 0; i < lowers.length; i++) {
+					string = string.replace(new RegExp(`\\s${lowers[i]}\\s`, 'gu'), (txt) => {
+						return txt.toLowerCase();
+					});
+				}
+			}
+
+			const uppers = ['Id', 'R&d'];
+			for (let i = 0; i < uppers.length; i++) {
+				string = string.replace(new RegExp(`\\b${uppers[i]}\\b`, 'gu'), uppers[i].toUpperCase());
+			}
+
+			return string;
+		};
 	}
 
 	#loadJWPlayer() {
@@ -83,7 +150,7 @@ export default class Base {
 					'adStarted',
 					'adTime',
 					'audioTracks',
-					'audioTracksChanged',
+					'audioTrackChanged',
 					'beforePlay',
 					'buffer',
 					'captionsList',
@@ -124,6 +191,7 @@ export default class Base {
 	#loadVideoJS() {
 		this.#appendScriptFilesToDocument(this.options.scriptFiles ?? [
 			`https://vjs.zencdn.net/${this.videojsVersion}/video.min.js`,
+			// 'https://vjs.zencdn.net/8.0.4/video-js.css',
 			`https://cdn.jsdelivr.net/npm/videojs-playlist@${this.videojsPlaylistVersion}/dist/videojs-playlist.min.js`,
 			'https://cdn.jsdelivr.net/npm/videojs-landscape-fullscreen@11.1111.0/dist/videojs-landscape-fullscreen.min.js',
 			'https://cdn.jsdelivr.net/npm/webvtt-parser@2.2.0/parser.min.js',
@@ -194,10 +262,22 @@ export default class Base {
 		if (this.options.controls === undefined) {
 			this.options.controls = false;
 		}
+		if (this.options.playbackRates === undefined) {
+			this.options.playbackRates = [
+				0.25,
+				0.5,
+				0.75,
+				1,
+				1.25,
+				1.5,
+				1.75,
+				2,
+			];
+		}
 
 		if (this.playerType === 'jwplayer') {
-			if (this.options.playlistVersion !== undefined) {
-				this.videojsPlaylistVersion = this.options.playlistVersion;
+			if (this.options.playerVersion !== undefined) {
+				this.jwplayerVersion = this.options.playerVersion;
 			}
 			// @ts-ignore
 			this.options.autostart = this.options.autoplay;
@@ -214,10 +294,10 @@ export default class Base {
 			}
 		} else {
 			if (this.options.playerVersion !== undefined) {
-				this.jwplayerVersion = this.options.playerVersion;
-			}
-			if (this.options.playerVersion !== undefined) {
 				this.videojsVersion = this.options.playerVersion;
+			}
+			if (this.options.playlistVersion !== undefined) {
+				this.videojsPlaylistVersion = this.options.playlistVersion;
 			}
 
 			// @ts-ignore
@@ -246,7 +326,6 @@ export default class Base {
 		}
 	}
 
-
 	createStyles() {
 
 		this.addClasses(this.getElement(), ['nomercyplayer']);
@@ -260,6 +339,10 @@ export default class Base {
 		styleSheet.id = 'nomercyplayer-styles';
 
 		const styles = `
+			:root {
+				--nomercyplayer-primary: rgb(147, 51, 234);
+			}
+
             @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
             @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300;400;500&display=swap');
             
@@ -374,6 +457,28 @@ export default class Base {
 			.libassjs-canvas-parent {
 				position: absolute !important;
 			}
+
+			.menu-content {
+				max-height: 350px;
+			}
+
+			.nomercyplayer * {
+				scrollbar-width: thin;
+				scrollbar-color: var(--nomercyplayer-primary) transparent;
+			}
+
+			.nomercyplayer *::-webkit-scrollbar {
+				width: 8px;
+			}
+
+			.nomercyplayer *::-webkit-scrollbar-track {
+				background: transparent;
+			}
+
+			.nomercyplayer *::-webkit-scrollbar-thumb {
+				background-color: var(--nomercyplayer-primary);
+				border-radius: 10px;
+			}
         `;
 		styleSheet.innerHTML = styles
 			.replace(/[\t]{2,}/gu, '\t')
@@ -427,7 +532,8 @@ export default class Base {
 				case 'audioTracks':
 					this.dispatchEvent('audio', data);
 					break;
-				case 'audioTracksChanged':
+				case 'audioTrackChanged':
+					this.dispatchEvent('audio-change', data);
 					break;
 				case 'beforePlay':
 					break;
@@ -463,8 +569,8 @@ export default class Base {
 					break;
 				case 'loadedmetadata': // videojs
 					this.dispatchEvent('duration', this.#getTimeState(data));
-					this.dispatchEvent('audio', data);
-					this.dispatchEvent('captions', data);
+					this.dispatchEvent('audio', this.getAudioState());
+					this.dispatchEvent('captions', this.getCaptionState());
 					break;
 				case 'loadstart': // videojs
 					break;
@@ -513,6 +619,7 @@ export default class Base {
 					this.dispatchEvent('captions', data);
 					break;
 				case 'captionsChanged':
+					this.dispatchEvent('caption-change', data);
 					break;
 				case 'time': // JWPlayer
 				case 'timeupdate': // VideoJS
@@ -527,6 +634,36 @@ export default class Base {
 				}
 			});
 		});
+		if (this.isVideojs) {
+			const audioTrackList = this.player.audioTracks();
+			audioTrackList.addEventListener('change', () => {
+				this.dispatchEvent('audio-change', this.getAudioState());
+			});
+		}
+	}
+
+	getAudioState(): AudioEvent {
+		return {
+			// eslint-disable-next-line max-len
+			currentTrack: this.player.audioTracks().tracks_?.findIndex((track: any) =>
+				track.language == this.player.audioTracks().tracks_.find((t: any) => t.enabled).language) ?? 0,
+			tracks: this.player.audioTracks().tracks_,
+			type: 'audioTracks',
+		};
+	}
+
+	getCaptionState(manual = false): CaptionsEvent {
+		let index = -1;
+		for (const track of this.player.textTracks().tracks_) {
+			if (track.mode == 'showing') {
+				index = this.player.textTracks().tracks_.findIndex((t: TextTrack) => t.id == track.id);
+			}
+		}
+		return {
+			track: index,
+			tracks: this.player.textTracks().tracks_,
+			type: manual ? 'captionsChanged' : 'captionsList',
+		};
 	}
 
 	#getReadyState(data: { setupTime: number; viewable: number; }) {
@@ -665,9 +802,10 @@ export default class Base {
 		}));
 	}
 
-	on(event: 'resize', callback: (data: any) => void): void;
-	on(event: 'audio', callback: (data: any) => void): void;
-	on(event: 'captions', callback: () => void): void;
+	on(event: 'audio-change', callback: (data: AudioEvent) => void): void;
+	on(event: 'audio', callback: (data: AudioEvent) => void): void;
+	on(event: 'caption-change', callback: (data: CaptionsEvent) => void): void;
+	on(event: 'captions', callback: (data: CaptionsEvent) => void): void;
 	on(event: 'chapters', callback: (data: Chapter[]) => void): void;
 	on(event: 'controls', callback: (showing: boolean) => void): void;
 	on(event: 'duration', callback: (data: PlaybackState) => void): void;
@@ -680,11 +818,19 @@ export default class Base {
 	on(event: 'play', callback: () => void): void;
 	on(event: 'playing', callback: () => void): void;
 	on(event: 'pop-image', callback: (url: string) => void): void;
+	on(event: 'quality', callback: (data: number[]) => void): void;
 	on(event: 'ready', callback: () => void): void;
 	on(event: 'removeForward', callback: () => void): void;
 	on(event: 'removeRewind', callback: () => void): void;
+	on(event: 'resize', callback: (data: any) => void): void;
 	on(event: 'rewind', callback: (amount: number) => void): void;
 	on(event: 'seeked', callback: () => void): void;
+	on(event: 'show-language-menu', callback: (open: boolean) => void): void;
+	on(event: 'show-main-menu', callback: (open: boolean) => void): void;
+	on(event: 'show-menu', callback: (open: boolean) => void): void;
+	on(event: 'show-quality-menu', callback: (open: boolean) => void): void;
+	on(event: 'show-speed-menu', callback: (open: boolean) => void): void;
+	on(event: 'show-subtitles-menu', callback: (open: boolean) => void): void;
 	on(event: 'theaterMode', callback: (enabled: boolean) => void): void;
 	on(event: 'time', callback: (data: PlaybackState) => void): void;
 	on(event: 'volume', callback: (data: VolumeState) => void): void;
@@ -692,8 +838,9 @@ export default class Base {
 		this.getElement().parentElement?.addEventListener(event, (e: { detail: any; }) => callback(e.detail));
 	}
 
-	off(event: 'resize', callback: () => void): void;
+	off(event: 'audio-change', callback: () => void): void;
 	off(event: 'audio', callback: () => void): void;
+	off(event: 'caption-change', callback: () => void): void;
 	off(event: 'captions', callback: () => void): void;
 	off(event: 'chapters', callback: () => void): void;
 	off(event: 'controls', callback: () => void): void;
@@ -707,21 +854,30 @@ export default class Base {
 	off(event: 'play', callback: () => void): void;
 	off(event: 'playing', callback: () => void): void;
 	off(event: 'pop-image', callback: () => void): void;
+	off(event: 'quality', callback: () => void): void;
 	off(event: 'ready', callback: () => void): void;
 	off(event: 'removeForward', callback: () => void): void;
 	off(event: 'removeRewind', callback: () => void): void;
+	off(event: 'resize', callback: () => void): void;
 	off(event: 'rewind', callback: () => void): void;
 	off(event: 'seeked', callback: () => void): void;
+	off(event: 'show-language-menu', callback: () => void): void;
+	off(event: 'show-main-menu', callback: () => void): void;
+	off(event: 'show-menu', callback: () => void): void;
+	off(event: 'show-quality-menu', callback: () => void): void;
+	off(event: 'show-speed-menu', callback: () => void): void;
+	off(event: 'show-subtitles-menu', callback: () => void): void;
 	off(event: 'theaterMode', callback: () => void): void;
 	off(event: 'time', callback: () => void): void;
 	off(event: 'volume', callback: () => void): void;
 	off(event: any, callback: () => any) {
-		this.getElement().parentElement?.removeEventListener(event, (e: { detail: any; }) => callback(e.detail));
+		this.getElement().parentElement?.removeEventListener(event, () => callback());
 	}
 
-	once(event: 'resize', callback: (data: any) => void): void;
-	once(event: 'audio', callback: (data: any) => void): void;
-	once(event: 'captions', callback: () => void): void;
+	once(event: 'audio-change', callback: (data: AudioEvent) => void): void;
+	once(event: 'audio', callback: (data: AudioEvent) => void): void;
+	once(event: 'caption-change', callback: (data: CaptionsEvent) => void): void;
+	once(event: 'captions', callback: (data: CaptionsEvent) => void): void;
 	once(event: 'chapters', callback: (data: Chapter[]) => void): void;
 	once(event: 'controls', callback: (showing: boolean) => void): void;
 	once(event: 'duration', callback: (data: PlaybackState) => void): void;
@@ -734,11 +890,19 @@ export default class Base {
 	once(event: 'play', callback: () => void): void;
 	once(event: 'playing', callback: () => void): void;
 	once(event: 'pop-image', callback: (url: string) => void): void;
+	once(event: 'quality', callback: (data: number[]) => void): void;
 	once(event: 'ready', callback: () => void): void;
 	once(event: 'removeForward', callback: () => void): void;
 	once(event: 'removeRewind', callback: () => void): void;
+	once(event: 'resize', callback: (data: any) => void): void;
 	once(event: 'rewind', callback: (amount: number) => void): void;
 	once(event: 'seeked', callback: () => void): void;
+	once(event: 'show-language-menu', callback: (open: boolean) => void): void;
+	once(event: 'show-main-menu', callback: (open: boolean) => void): void;
+	once(event: 'show-menu', callback: (open: boolean) => void): void;
+	once(event: 'show-quality-menu', callback: (open: boolean) => void): void;
+	once(event: 'show-speed-menu', callback: (open: boolean) => void): void;
+	once(event: 'show-subtitles-menu', callback: (open: boolean) => void): void;
 	once(event: 'theaterMode', callback: (enabled: boolean) => void): void;
 	once(event: 'time', callback: (data: PlaybackState) => void): void;
 	once(event: 'volume', callback: (data: VolumeState) => void): void;
@@ -945,7 +1109,7 @@ export default class Base {
 
 	currentScriptPath = function () {
 		const scripts = document.querySelectorAll('link');
-		const currentScript = scripts[scripts.length - 1].href;
+		const currentScript = scripts[1].href;
 		const currentScriptChunks = currentScript.split('/');
 		const currentScriptFile = currentScriptChunks[currentScriptChunks.length - 1];
 		return currentScript.replace(currentScriptFile, '');

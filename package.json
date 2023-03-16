@@ -4,13 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsc --watch && copyfiles",
-    "build": "tsc && copyfiles",
+    "dev": "yarn copy-octopus && yarn copy-flags && tsc --watch",
+    "build": "tsc && yarn copy-octopus && yarn copy-flags",
     "tailwind": "tailwindcss -i ./src/index.scss -o ./dist/nomercyplayer.css --watch",
     "test": "jest",
     "lint": "eslint 'src/**/*.{js,ts,d.ts}'",
     "format": "eslint 'src/**/*.{js,ts,d.ts}' --fix",
-    "copy-files": "copyfiles -u 2 src/octopus/* dist/octopus"
+    "copy-octopus": "copyfiles -u 2 src/octopus/* dist/octopus",
+    "copy-flags": "copyfiles -u 2 src/flags/* dist/flags"
   },
   "keywords": [],
   "author": "",

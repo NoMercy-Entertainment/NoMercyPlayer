@@ -1,7 +1,7 @@
 import Base from './base.js';
 import SubtitlesOctopus from './octopus/subtitles-octopus.js';
 
-import type { VideoPlayerOptions, VideoPlayer as Types, TextTrack, AudioTrack } from './nomercyplayer.d';
+import type { VideoPlayerOptions, VideoPlayer as Types, TextTrack, AudioTrack, PlaylistItem } from './nomercyplayer.d';
 
 export default class Functions extends Base {
 	tapCount = 0;
@@ -47,15 +47,17 @@ export default class Functions extends Base {
 					}
 				}
 			});
-			this.once('audio', (data) => {
-				console.log(data);
+			this.once('audio', () => {
+				if (localStorage.getItem('audio-language')) {
+					this.setAudioTrack(this.getAudioTrackIndexByLanguage(localStorage.getItem('audio-language') as string));
+				} else {
+					this.setAudioTrack(0);
+				}
 				this.once('play', () => {
 					if (localStorage.getItem('audio-language')) {
-						console.log(this.getAudioTrackIndexBy(localStorage.getItem('audio-language') as string));
-
-						this.setAudioTrack(this.getAudioTrackIndexBy(localStorage.getItem('audio-language') as string));
+						this.setAudioTrack(this.getAudioTrackIndexByLanguage(localStorage.getItem('audio-language') as string));
 					} else {
-						this.setAudioTrack(-1);
+						this.setAudioTrack(0);
 					}
 				});
 			});
@@ -245,9 +247,9 @@ export default class Functions extends Base {
 	setEpisode(season: number, episode: number) {
 		const item = this.getPlaylist().findIndex((l: any) => l.season == season && l.episode == episode);
 		if (item == -1) {
-			this.setCurrentPlaylistItem(0);
+			this.setPlaylistItem(0);
 		} else {
-			this.setCurrentPlaylistItem(item);
+			this.setPlaylistItem(item);
 		}
 		this.play();
 	};
@@ -284,7 +286,7 @@ export default class Functions extends Base {
 		}
 	}
 
-	getCurrentPlaylistIndex() {
+	getPlaylistIndex() {
 		if (this.isJwplayer) {
 			return this.player.getPlaylistIndex();
 		}
@@ -292,15 +294,15 @@ export default class Functions extends Base {
 
 	}
 
-	getCurrentPlaylistItem() {
+	getPlaylistItem() {
 		if (this.isJwplayer) {
 			return this.player.getPlaylistItem();
 		}
-		return this.player.playlist()[this.getCurrentPlaylistIndex()];
+		return this.player.playlist()[this.getPlaylistIndex()];
 
 	}
 
-	setCurrentPlaylistItem(index: number) {
+	setPlaylistItem(index: number) {
 		if (this.isJwplayer) {
 			this.player.playlistItem(index);
 		} else {
@@ -316,7 +318,7 @@ export default class Functions extends Base {
 
 	}
 
-	setPlaylist(playlist: any) {
+	setPlaylist(playlist: PlaylistItem[]) {
 		if (this.isJwplayer) {
 			this.player.load(playlist);
 		} else {
@@ -325,11 +327,11 @@ export default class Functions extends Base {
 	}
 
 	isFirstPlaylistItem() {
-		return this.getCurrentPlaylistIndex() === 0;
+		return this.getPlaylistIndex() === 0;
 	}
 
 	isLastPlaylistItem() {
-		return this.getCurrentPlaylistIndex() === this.getPlaylist().length - 1;
+		return this.getPlaylistIndex() === this.getPlaylist().length - 1;
 	}
 
 	hasPlaylists() {
@@ -344,13 +346,13 @@ export default class Functions extends Base {
 
 	}
 
-	getCurrentAudioTrack() {
-		return this.getAudioTracks()[this.getCurrentAudioTrackIndex()];
+	getAudioTrack() {
+		return this.getAudioTracks()[this.getAudioTrackIndex()];
 	}
 
-	getCurrentAudioTrackIndex() {
+	getAudioTrackIndex() {
 		if (this.isJwplayer) {
-			return this.player.getCurrentAudioTrack();
+			return this.player.getAudioTrack();
 		}
 		let index = -1;
 		for (const track of this.player.audioTracks().tracks_) {
@@ -363,15 +365,15 @@ export default class Functions extends Base {
 	}
 
 	getAudioTrackLabel() {
-		return this.getCurrentAudioTrack().label;
+		return this.getAudioTrack().label;
 	}
 
 	getAudioTrackKind() {
-		return this.getCurrentAudioTrack().kind;
+		return this.getAudioTrack().kind;
 	}
 
 	getAudioTrackLanguage() {
-		return this.getCurrentAudioTrack().language;
+		return this.getAudioTrack().language;
 	}
 
 	setAudioTrack(index: number) {
@@ -384,7 +386,7 @@ export default class Functions extends Base {
 		}
 	}
 
-	getAudioTrackIndexBy(language: string) {
+	getAudioTrackIndexByLanguage(language: string) {
 		const index = this.getAudioTracks().findIndex((t: any) => t.language == language);
 		return index;
 	}
@@ -402,11 +404,11 @@ export default class Functions extends Base {
 
 	}
 
-	getCurrentTextTrack() {
+	getTextTrack() {
 		if (this.isJwplayer) {
 			return this.player.getCaptionsList()[this.player.getCurrentCaptions()];
 		}
-		return this.getTextTracks()[this.getCurrentTextTrackIndex() - 1];
+		return this.getTextTracks()[this.getTextTrackIndex() - 1];
 	}
 
 	getTextTrackIndexBy(language: string, type: string, ext: string) {
@@ -414,7 +416,7 @@ export default class Functions extends Base {
 		return index;
 	}
 
-	getCurrentTextTrackIndex() {
+	getTextTrackIndex() {
 		if (this.isJwplayer) {
 			return this.player.getCurrentCaptions();
 		}
@@ -430,25 +432,25 @@ export default class Functions extends Base {
 
 	getTextTrackSrc() {
 		if (this.isJwplayer) {
-			return this.getCurrentTextTrack().id;
+			return this.getTextTrack().id;
 		}
-		return this.getCurrentTextTrack().src;
+		return this.getTextTrack().src;
 	}
 
 	getTextTrackLabel() {
-		return this.getCurrentTextTrack().label;
+		return this.getTextTrack().label;
 	}
 
 	getTextTrackKind() {
-		return this.getCurrentTextTrack().kind;
+		return this.getTextTrack().kind;
 	}
 
 	getTextTrackMode() {
-		return this.getCurrentTextTrack().mode;
+		return this.getTextTrack().mode;
 	}
 
 	getTextTrackLanguage() {
-		return this.getCurrentTextTrack().language;
+		return this.getTextTrack().language;
 	}
 
 	setTextTrack(index: number) {
@@ -503,6 +505,7 @@ export default class Functions extends Base {
 					//
 				}
 			}
+			this.dispatchEvent('caption-change', this.getCaptionState(true));
 		}
 	}
 
@@ -520,11 +523,11 @@ export default class Functions extends Base {
 				video: this.getElement().querySelector('video'),
 				lossyRender: true,
 				subUrl: subtitleURL,
-				debug: this.options.debugEnabled_,
+				debug: this.options.debug,
 				blendRender: true,
 				lazyFileLoading: true,
 				targetFps: 120,
-				fonts: this.getCurrentPlaylistItem().fonts.map((f: any) => f.file),
+				fonts: this.getPlaylistItem().fonts.map((f: any) => f.file),
 				workerUrl: `${this.currentScriptPath()}octopus/subtitles-octopus-worker.js`,
 				legacyWorkerUrl: `${this.currentScriptPath()}octopus/subtitles-octopus-worker-legacy.js`,
 				onReady: async () => {
@@ -585,7 +588,7 @@ export default class Functions extends Base {
 
 	}
 
-	setQuality(index: number) {
+	setQualityLevel(index: number) {
 		if (this.isJwplayer) {
 			this.player.setCurrentQuality(index);
 		} else {
@@ -597,24 +600,24 @@ export default class Functions extends Base {
 		return this.getQualities().length > 1;
 	}
 
-	getCurrentTimeFile() {
-		let file = this.getCurrentPlaylistItem().metadata.find((t: { kind: string }) => t.kind === 'thumbnails')?.file;
+	getTimeFile() {
+		let file = this.getPlaylistItem().metadata.find((t: { kind: string }) => t.kind === 'spritesheet')?.file;
 		if (this.isJwplayer && !file) {
-			file = this.getCurrentPlaylistItem().tracks.find((t: { kind: string }) => t.kind === 'thumbnails')?.file;
+			file = this.getPlaylistItem().tracks.find((t: { kind: string }) => t.kind === 'spritesheet')?.file;
 		}
 		return file;
 	}
 
-	getCurrentSpriteFile() {
-		return this.getCurrentPlaylistItem().metadata?.find((t: { kind: string }) => t.kind === 'sprite')?.file;
+	getSpriteFile() {
+		return this.getPlaylistItem().metadata?.find((t: { kind: string }) => t.kind === 'sprite')?.file;
 	}
 
-	getCurrentChapterFile(): string {
-		return this.getCurrentPlaylistItem().metadata.find((t: { kind: string }) => t.kind === 'chapters')?.file;
+	getChapterFile(): string {
+		return this.getPlaylistItem().metadata.find((t: { kind: string }) => t.kind === 'chapters')?.file;
 	}
 
 	fetchChapterFile() {
-		const file = this.getCurrentChapterFile();
+		const file = this.getChapterFile();
 		if (file && this.currentChapterFile !== file) {
 			this.currentChapterFile = file;
 			this.getFileContents({
@@ -634,12 +637,34 @@ export default class Functions extends Base {
 	}
 
 	getChapters() {
-		return this.chapters?.cues?.map((c: { id: any; text: any; startTime: any; }) =>
-		 	({ id: c.id, title: c.text, time: c.startTime })) ?? [];
+		return this.chapters?.cues?.map((chapter: { id: any; text: any; startTime: any; }, index: number) => {
+			const endTime = this.chapters?.cues[index + 1]?.startTime ?? this.duration();
+			return {
+				id: `Chapter ${index}`,
+				title: chapter.text,
+				left: chapter.startTime / this.duration() * 100,
+				width: (endTime - chapter.startTime) / this.duration() * 100,
+				startTime: chapter.startTime,
+				endTime: endTime,
+			};
+		});
+	}
+
+	getChapter() {
+		return this.getChapters()?.find((chapter: { startTime: number; endTime: number; }) => {
+			return this.currentTime() >= chapter.startTime && this.currentTime() <= chapter.endTime;
+		});
+	}
+
+	getSpeeds() {
+		if (this.isJwplayer) {
+			return this.options.playbackRates;
+		}
+		return this.player.playbackRates();
 	}
 
 	hasSpeeds() {
-		return true;
+		return this.getSpeeds().length > 1;
 	}
 
 	hasPIP() {
@@ -649,7 +674,7 @@ export default class Functions extends Base {
 	setMediaAPI() {
 
 		if ('mediaSession' in navigator) {
-			const playlistItem = this.getCurrentPlaylistItem();
+			const playlistItem = this.getPlaylistItem();
 
 			const image = playlistItem.image ?? playlistItem.poster;
 
@@ -687,5 +712,9 @@ export default class Functions extends Base {
 
 	setTitle(value: string): void {
 		document.title = value;
+	}
+
+	setToken(token: string) {
+		this.options.token = token;
 	}
 }

@@ -1,79 +1,18 @@
 
-
-export const buttonBaseStyle = [
-	'flex',
-	'items-center',
-	'justify-center',
-	'h-10',
-	'w-10',
-];
-
-export const overlayStyles = [
-	'absolute',
-	'fill-white',
-	'font-[Poppins,sans-serif]',
-	'font-Poppins',
-	'group',
-	'h-full',
-	'inset-0',
-	'overflow-clip',
-	'overlay',
-	'text-white',
-	'text-xs',
-	'w-full',
-	'z-10',
-];
-
-export const topBarStyles = [
-	'-translate-y-full',
-	'absolute',
-	'bg-gradient-to-b',
-	'duration-300',
-	'flex',
-	'from-black/70',
-	'gap-1',
-	'items-center',
-	'p-1',
-	'pb-8',
-	'top-0',
-	'transition-transform',
-	'w-full',
-];
-
 export const bottomBarStyles = [
 	'absolute',
 	'bg-gradient-to-t',
 	'bottom-0',
 	'duration-300',
-	'flex-col',
 	'flex',
+	'flex-col',
 	'from-black/70',
 	'gap-1',
 	'p-1',
-	'pt-10',
+	'pt-16',
 	'transition-transform',
 	'translate-y-full',
 	'w-full',
-];
-
-export const topRowStyles = [
-	'flex',
-	'gap-1',
-	'h-2',
-	'items-center',
-	'pl-2',
-	'pr-2',
-	'relative',
-	'w-full',
-];
-
-export const centerStyles = [
-	'grid',
-	'relative',
-	'w-full',
-	'h-full',
-	'grid-rows-6',
-	'grid-cols-3',
 ];
 
 export const bottomRowStyles = [
@@ -85,12 +24,22 @@ export const bottomRowStyles = [
 	// 'gap-1',
 ];
 
+export const buttonBaseStyle = [
+	'flex',
+	'h-10',
+	'items-center',
+	'justify-center',
+	'w-10',
+];
+
 export const buttonStyles = [
 	'button',
 	'cursor-pointer',
 	'duration-700',
 	'fill-white',
 	'flex',
+	'focus:bg-white/20',
+	'focus:outline-none',
 	'group/button',
 	'h-10',
 	'hover:scale-110',
@@ -103,8 +52,17 @@ export const buttonStyles = [
 	'w-10',
 ];
 
-export const sliderBarStyles = [
-	'bg-white',
+export const centerStyles = [
+	'grid',
+	'grid-cols-3',
+	'grid-rows-6',
+	'h-full',
+	'relative',
+	'w-full',
+];
+
+export const chapterBarStyles = [
+	'bg-transparent',
 	'flex',
 	'h-2',
 	'outline-l-purple-400',
@@ -114,8 +72,188 @@ export const sliderBarStyles = [
 	'w-full',
 ];
 
-export const chapterBarStyles = [
+export const chapterMarkerBGStyles = [
+	'absolute',
 	'bg-white',
+	'h-full',
+	'left-0',
+	'rounded-md',
+	'w-full',
+	'z-0',
+];
+
+export const chapterMarkerBufferStyles = [
+	'absolute',
+	'bg-purple-300',
+	'h-full',
+	'left-0',
+	'origin-left',
+	'rounded-md',
+	'scale-x-0',
+	'w-full',
+	'z-10',
+];
+
+export const chapterMarkerProgressStyles = [
+	'absolute',
+	'bg-purple-500',
+	'h-full',
+	'left-0',
+	'origin-left',
+	'rounded-md',
+	'scale-x-0',
+	'w-full',
+	'z-20',
+];
+
+export const chapterMarkersStyles = [
+	'absolute',
+	'chapter-marker',
+	'h-full',
+	'overflow-clip',
+	'rounded-md',
+];
+
+export const chapterTextStyles = [];
+
+export const dividerStyles = [
+	'divider',
+	'flex',
+	'flex-1',
+];
+
+export const iconStyles = ['text-white'];
+
+export const languageButtonSpanStyles = [
+	'MuiSvgIcon-root',
+	'cursor-pointer',
+	'h-6',
+	'object-contain',
+	'rounded-sm',
+	'w-6',
+];
+
+export const mainMenuStyles = [
+	'duration-300',
+	'flex',
+	'flex-col',
+	'gap-1',
+	'main-menu',
+	'overflow-clip',
+	'p-2',
+	'transform-all',
+	'w-1/2',
+];
+
+export const menuButtonStyles = [
+	'cursor-pointer',
+	'flex',
+	'h-8',
+	'hover:bg-neutral-600/50',
+	'items-center',
+	'menu-button',
+	'min-h-[28px]',
+	'px-2',
+	'rounded-sm',
+	'text-white',
+	'w-full',
+];
+
+export const menuButtonTextStyles = [
+	'cursor-pointer',
+	'font-semibold',
+	'pl-2',
+];
+
+export const menuContentStyles = [
+	'duration-300',
+	'flex',
+	'flex-row',
+	'menu-content',
+	'overflow-clip',
+	'transform-all',
+	'w-[200%]',
+];
+
+export const menuFrameStyles = [
+	'absolute',
+	'bg-neutral-900/90',
+	'bottom-10',
+	'duration-300',
+	'flex',
+	'flex-col',
+	'hidden',
+	'menu-frame',
+	'overflow-clip',
+	'right-10',
+	'rounded-lg',
+	'transform-all',
+	'w-52',
+	'z-50',
+];
+
+export const menuHeaderButtonStyles = [
+	'cursor-pointer',
+	'flex',
+	'h-8',
+	'hover:bg-neutral-600/50',
+	'items-center',
+	'menu-button',
+	'min-h-[2rem]',
+	'px-2',
+	'rounded-sm',
+	'text-white',
+	'w-full',
+];
+
+export const menuHeaderButtonTextStyles = [
+	'cursor-pointer',
+	'font-semibold',
+	'pl-2',
+];
+
+export const menuHeaderStyles = [
+	'border-b-2',
+	'border-white',
+	'cursor-pointer',
+	'flex',
+	'h-8',
+	'items-center',
+	'menu-button',
+	'min-h-[2.5rem]',
+	'pb-1',
+	'text-white',
+	'w-full',
+];
+
+export const overlayStyles = [
+	'absolute',
+	'fill-white',
+	'font-Poppins',
+	'font-[Poppins,sans-serif]',
+	'group',
+	'h-full',
+	'inset-0',
+	'overflow-clip',
+	'overlay',
+	'text-white',
+	'text-xs',
+	'w-full',
+	'z-10',
+];
+
+export const scrollContainerStyles = [
+	'flex',
+	'flex-col',
+	'gap-1',
+	'language-scroll-container',
+	'overflow-x-hidden',
+	'overflow-y-auto',
+	'w-full',
+];
+
+export const sliderBarStyles = [
+	'bg-transparent',
 	'flex',
 	'h-2',
 	'outline-l-purple-400',
@@ -127,7 +265,6 @@ export const chapterBarStyles = [
 
 export const sliderBufferStyles = [
 	'absolute',
-	'bg-purple-300',
 	'flex',
 	'h-2',
 	'pointer-events-none',
@@ -135,20 +272,6 @@ export const sliderBufferStyles = [
 	'slider-buffer',
 	'z-0',
 ];
-
-export const sliderProgressStyles = [
-	'absolute',
-	'bg-purple-600',
-	'flex',
-	'h-2',
-	'pointer-events-none',
-	'rounded-r-full',
-	'rounded',
-	'slider-progress',
-	'z-10',
-];
-
-export const sliderThumbStyles = [];
 
 export const sliderNippleStyles = [
 	'-translate-x-1/2',
@@ -164,35 +287,77 @@ export const sliderNippleStyles = [
 	'z-20',
 ];
 
+export const sliderPopImageStyles = ['slider-pop-image'];
+
 export const sliderPopStyles = [
 	'-translate-x-1/2',
 	'absolute',
 	'bg-black/90',
 	'bottom-4',
 	'duration-300',
-	'flex-col',
 	'flex',
+	'flex-col',
 	'font-semibold',
 	'gap-1',
 	'hover:scale-110',
 	'overflow-clip',
 	'pb-1',
+	'pointer-events-none',
 	'rounded-md',
 	'slider-pop',
 	'text-center',
 	'transition-[opacity,transform]',
-	'pointer-events-none',
 	'z-20',
 ];
 
-export const sliderTextStyles = [
-	'slider-pop-text',
-	'font-mono',
+export const sliderProgressStyles = [
+	'absolute',
+	'flex',
+	'h-2',
+	'pointer-events-none',
+	'rounded',
+	'rounded-r-full',
+	'slider-progress',
+	'z-10',
 ];
 
-export const iconStyles = ['text-white'];
+export const sliderTextStyles = [
+	'font-mono',
+	'slider-pop-text',
+];
 
-export const sliderPopImageStyles = ['slider-pop-image'];
+export const sliderThumbStyles = [];
+
+export const speedButtonTextStyles = [
+	'cursor-pointer',
+	'font-semibold',
+	'pl-2',
+];
+
+export const subMenuContentStyles = [
+	'flex',
+	'flex-col',
+	'gap-1',
+	'hidden',
+	'max-h-available',
+	'sub-menu-content',
+	'w-full',
+];
+
+export const subMenuStyles = [
+	'duration-300',
+	'flex',
+	'flex-col',
+	'gap-1',
+	'p-2',
+	'sub-menu',
+	'transform-all',
+	'w-1/2',
+];
+export const svgSizeStyles = [
+	'h-5',
+	'w-5',
+];
 
 export const timeStyles = [
 	'flex',
@@ -204,19 +369,37 @@ export const timeStyles = [
 	'time',
 ];
 
-export const dividerStyles = [
-	'divider',
+export const topBarStyles = [
+	'-translate-y-full',
+	'absolute',
+	'bg-gradient-to-b',
+	'duration-300',
 	'flex',
+	'from-black/70',
+	'gap-1',
+	'items-center',
+	'p-1',
+	'pb-16',
+	'top-0',
+	'transition-transform',
+	'w-full',
 ];
 
-export const chapterMarkersStyles = [
-	'-left-10',
-	'absolute',
-	'bg-black/60',
-	'bottom-0',
-	'chapter-marker',
-	'h-full',
-	'pointer-events-none',
-	'w-1',
-	'z-10',
+export const topRowStyles = [
+	'flex',
+	'gap-1',
+	'h-2',
+	'items-center',
+	'pl-2',
+	'pr-2',
+	'relative',
+	'w-full',
+];
+
+export const touchPlaybackButtonStyles = ['pointer-events-none'];
+
+export const touchPlaybackStyles = [
+	'flex',
+	'items-center',
+	'justify-center',
 ];

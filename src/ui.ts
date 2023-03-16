@@ -2,10 +2,15 @@
 import { buttons, fluentIcons, Icon } from './buttons.js';
 import Functions from './functions.js';
 import {
-    bottomBarStyles, bottomRowStyles, buttonBaseStyle, buttonStyles, centerStyles, chapterBarStyles,
-    chapterMarkersStyles, dividerStyles, iconStyles, overlayStyles, sliderBarStyles,
-    sliderBufferStyles, sliderNippleStyles, sliderPopImageStyles, sliderPopStyles,
-    sliderProgressStyles, sliderTextStyles, timeStyles, topBarStyles, topRowStyles
+	bottomBarStyles, bottomRowStyles, buttonBaseStyle, buttonStyles, centerStyles, chapterBarStyles,
+	chapterMarkerBGStyles, chapterMarkerBufferStyles, chapterMarkerProgressStyles,
+	chapterMarkersStyles, chapterTextStyles, dividerStyles, iconStyles, languageButtonSpanStyles,
+	mainMenuStyles, menuButtonStyles, menuButtonTextStyles, menuContentStyles, menuFrameStyles,
+	menuHeaderButtonTextStyles, menuHeaderStyles, overlayStyles, scrollContainerStyles,
+	sliderBarStyles, sliderBufferStyles, sliderNippleStyles, sliderPopImageStyles, sliderPopStyles,
+	sliderProgressStyles, sliderTextStyles, speedButtonTextStyles, subMenuContentStyles,
+	subMenuStyles, svgSizeStyles, timeStyles, topBarStyles, topRowStyles, touchPlaybackButtonStyles,
+	touchPlaybackStyles
 } from './styles.js';
 
 import type { VideoPlayerOptions, VideoPlayer as Types, Chapter } from './nomercyplayer.d';
@@ -23,23 +28,18 @@ export interface Position {
 
 export default class UI extends Functions {
 
-	overlayStyles: string[] = [];
-	topBarStyles: string[] = [];
-	bottomBarStyles: string[] = [];
-
-	buttonBaseStyle: string[] = [];
-	fluentIcons: Icon = <Icon>{};
-	buttonStyles: string[] = [];
-	buttons: Icon = <Icon>{};
-	iconStyles: string[] = [];
-	topRowStyles: string[] = [];
-	bottomRowStyles: string[] = [];
 	timer: NodeJS.Timeout = <NodeJS.Timeout>{};
 	isMouseDown = false;
 	progressBar: HTMLDivElement = <HTMLDivElement>{}; // sliderBar
 
 	lock = false;
 	isScrubbing = false;
+	menuOpen = false;
+	mainMenuOpen = false;
+	languageMenuOpen = false;
+	subtitlesMenuOpen = false;
+	qualityMenuOpen = false;
+	speedMenuOpen = false;
 
 	previewTime: {
 		start: number;
@@ -50,58 +50,112 @@ export default class UI extends Functions {
 		h: number;
 	}[] = [];
 
-	sliderBarStyles: string[] = [];
-	sliderBufferStyles: string[] = [];
-	sliderProgressStyles: string[] = [];
-	sliderNippleStyles: string[] = [];
-	sliderPopStyles: string[] = [];
-	sliderPopImageStyles: string[] = [];
-	timeStyles: string[] = [];
-	dividerStyles: string[] = [];
-	chapterMarkersStyles: string[] = [];
-	sliderTextStyles: string[] = [];
-	chapterTextStyles: string[] = [];
 	sliderPopImage: any;
 	chapterBar: HTMLDivElement = <HTMLDivElement>{};
-	chapterBarStyles: string[] = [];
-	centerStyles: string[] = [];
 	bottomBar: HTMLDivElement = <HTMLDivElement>{};
 	topRow: HTMLDivElement = <HTMLDivElement>{};
 	currentTimeFile = '';
+	fluentIcons: Icon = <Icon>{};
+	buttons: Icon = <Icon>{};
+
+	bottomBarStyles: string[] = [];
+	bottomRowStyles: string[] = [];
+	buttonBaseStyles: string[] = [];
+	buttonStyles: string[] = [];
+	centerStyles: string[] = [];
+	chapterBarStyles: string[] = [];
+	chapterMarkerBGStyles: string[] = [];
+	chapterMarkerBufferStyles: string[] = [];
+	chapterMarkerProgressStyles: string[] = [];
+	chapterMarkersStyles: string[] = [];
+	chapterTextStyles: string[] = [];
+	dividerStyles: string[] = [];
+	iconStyles: string[] = [];
+	languageButtonSpanStyles: string[] = [];
+	languageButtonStyles: string[] = [];
+	mainMenuStyles: string[] = [];
+	menuButtonStyles: string[] = [];
+	menuButtonTextStyles: string[] = [];
+	menuContentStyles: string[] = [];
+	menuFrameStyles: string[] = [];
+	menuHeaderButtonTextStyles: string[] = [];
+	menuHeaderStyles: string[] = [];
+	overlayStyles: string[] = [];
+	scrollContainerStyles: string[] = [];
+	sliderBarStyles: string[] = [];
+	sliderBufferStyles: string[] = [];
+	sliderNippleStyles: string[] = [];
+	sliderPopImageStyles: string[] = [];
+	sliderPopStyles: string[] = [];
+	sliderProgressStyles: string[] = [];
+	sliderTextStyles: string[] = [];
+	speedButtonTextStyles: string[] = [];
+	subMenuStyles: string[] = [];
+	svgSizeStyles: string[] = [];
+	timeStyles: string[] = [];
+	topBarStyles: string[] = [];
+	topRowStyles: string[] = [];
+	touchPlaybackStyles: string[] = [];
+	touchPlayButtonStyles: string[] = [];
+	subMenuContentStyles: string[] = [];
 
 	constructor(playerType: Types['playerType'], options: VideoPlayerOptions, playerId: Types['playerId'] = '') {
 		super(playerType, options, playerId);
 
 		this.on('ready', () => {
 
-			this.overlayStyles = overlayStyles;
-			this.topBarStyles = topBarStyles;
-			this.bottomBarStyles = bottomBarStyles;
-			this.topRowStyles = topRowStyles;
-			this.centerStyles = centerStyles;
-			this.bottomRowStyles = bottomRowStyles;
+			this.bottomBarStyles = this.mergeStyles('bottomBarStyles', bottomBarStyles);
+			this.bottomRowStyles = this.mergeStyles('bottomRowStyles', bottomRowStyles);
+			this.buttonBaseStyles = this.mergeStyles('buttonBaseStyle', buttonBaseStyle);
+			this.buttonStyles = this.mergeStyles('buttonStyles', buttonStyles);
+			this.centerStyles = this.mergeStyles('centerStyles', centerStyles);
+			this.chapterBarStyles = this.mergeStyles('chapterBarStyles', chapterBarStyles);
+			this.chapterMarkerBGStyles = this.mergeStyles('chapterMarkerBGStyles', chapterMarkerBGStyles);
+			this.chapterMarkerBufferStyles = this.mergeStyles('chapterMarkerBufferStyles', chapterMarkerBufferStyles);
+			this.chapterMarkerProgressStyles = this.mergeStyles('chapterMarkerProgressStyles', chapterMarkerProgressStyles);
+			this.chapterMarkersStyles = this.mergeStyles('chapterMarkersStyles', chapterMarkersStyles);
+			this.chapterTextStyles = this.mergeStyles('chapterTextStyles', chapterTextStyles);
+			this.dividerStyles = this.mergeStyles('dividerStyles', dividerStyles);
+			this.iconStyles = this.mergeStyles('iconStyles', iconStyles);
+			this.languageButtonSpanStyles = this.mergeStyles('languageButtonSpanStyles', languageButtonSpanStyles);
+			this.menuButtonTextStyles = this.mergeStyles('menuButtonTextStyles', menuButtonTextStyles);
+			this.mainMenuStyles = this.mergeStyles('mainMenuStyles', mainMenuStyles);
+			this.menuButtonStyles = this.mergeStyles('menuButtonStyles', menuButtonStyles);
+			this.menuContentStyles = this.mergeStyles('menuContentStyles', menuContentStyles);
+			this.menuFrameStyles = this.mergeStyles('menuFrameStyles', menuFrameStyles);
+			this.menuHeaderButtonTextStyles = this.mergeStyles('menuHeaderButtonTextStyles', menuHeaderButtonTextStyles);
+			this.menuHeaderStyles = this.mergeStyles('menuHeaderStyles', menuHeaderStyles);
+			this.overlayStyles = this.mergeStyles('overlayStyles', overlayStyles);
+			this.scrollContainerStyles = this.mergeStyles('scrollContainerStyles', scrollContainerStyles);
+			this.sliderBarStyles = this.mergeStyles('sliderBarStyles', sliderBarStyles);
+			this.sliderBufferStyles = this.mergeStyles('sliderBufferStyles', sliderBufferStyles);
+			this.sliderNippleStyles = this.mergeStyles('sliderNippleStyles', sliderNippleStyles);
+			this.sliderPopImageStyles = this.mergeStyles('sliderPopImageStyles', sliderPopImageStyles);
+			this.sliderPopStyles = this.mergeStyles('sliderPopStyles', sliderPopStyles);
+			this.sliderProgressStyles = this.mergeStyles('sliderProgressStyles', sliderProgressStyles);
+			this.sliderTextStyles = this.mergeStyles('sliderTextStyles', sliderTextStyles);
+			this.speedButtonTextStyles = this.mergeStyles('speedButtonTextStyles', speedButtonTextStyles);
+			this.subMenuStyles = this.mergeStyles('subMenuStyles', subMenuStyles);
+			this.subMenuContentStyles = this.mergeStyles('subMenuContentStyles', subMenuContentStyles);
+			this.svgSizeStyles = this.mergeStyles('svgSizeStyles', svgSizeStyles);
+			this.timeStyles = this.mergeStyles('timeStyles', timeStyles);
+			this.topBarStyles = this.mergeStyles('topBarStyles', topBarStyles);
+			this.topRowStyles = this.mergeStyles('topRowStyles', topRowStyles);
+			this.touchPlaybackStyles = this.mergeStyles('touchPlaybackStyles', touchPlaybackStyles);
+			this.touchPlayButtonStyles = this.mergeStyles('touchPlaybackButtonStyles', touchPlaybackButtonStyles);
+			this.buttonStyles = this.mergeStyles('buttonStyles', buttonStyles);
 
-			this.sliderBarStyles = sliderBarStyles;
-			this.chapterBarStyles = chapterBarStyles;
-			this.sliderBufferStyles = sliderBufferStyles;
-			this.sliderProgressStyles = sliderProgressStyles;
-			this.sliderNippleStyles = sliderNippleStyles;
-			this.sliderPopStyles = sliderPopStyles;
-			this.sliderPopImageStyles = sliderPopImageStyles;
-			this.timeStyles = timeStyles;
-			this.dividerStyles = dividerStyles;
-			this.sliderTextStyles = sliderTextStyles;
-			this.chapterMarkersStyles = chapterMarkersStyles;
-
-			this.buttonBaseStyle = buttonBaseStyle;
 			this.fluentIcons = fluentIcons;
-			this.buttonStyles = buttonStyles;
-			this.iconStyles = iconStyles;
 			this.buttons = buttons(this.options);
 
 			this.buildUI();
 			this.#eventHandlers();
 		});
+	}
+
+	mergeStyles(styleName: string, defaultStyles: string[]) {
+		const styles = this.options.styles?.[styleName] || [];
+		return [...defaultStyles, ...styles];
 	}
 
 	#eventHandlers() {
@@ -119,6 +173,8 @@ export default class UI extends Functions {
 
 	unlockControls() {
 		this.lock = false;
+		this.getElement().querySelectorAll<HTMLDivElement>('*')
+			.forEach(el => el.blur());
 	}
 
 	lockControls() {
@@ -200,19 +256,21 @@ export default class UI extends Functions {
 		this.createDivider(bottomRow);
 		this.createTime(bottomRow, 'duration', ['mr-2']);
 
+		this.createTheaterButton(bottomRow);
+		this.createPIPButton(bottomRow);
+
 		this.createPlaylistsButton(bottomRow);
+		this.createSpeedButton(bottomRow);
 		this.createCaptionsButton(bottomRow);
 		this.createAudioButton(bottomRow);
 		this.createQualityButton(bottomRow);
-		this.createTheaterButton(bottomRow);
-
-		this.createPIPButton(bottomRow);
-
-		this.createSpeedButton(bottomRow);
-
 		this.createSettingsButton(bottomRow);
 
 		this.createFullscreenButton(bottomRow);
+
+		const frame = this.createMenuFrame(bottomRow);
+
+		this.createMainMenu(frame);
 	}
 
 	createContainer(parent: HTMLElement, classes: string[], id?: string) {
@@ -278,7 +336,7 @@ export default class UI extends Functions {
 	createTouchSeekBack(parent: HTMLElement, position: Position) {
 		if (!this.isMobile()) return;
 		const touchSeekBack = this.createTouchBox(parent, 'touchSeekBack', position);
-		['mouseup', 'touchend'].forEach((event) => {
+		['click'].forEach((event) => {
 			touchSeekBack.addEventListener(event, this.doubleTap(() => {
 				this.rewindVideo();
 			}));
@@ -306,12 +364,12 @@ export default class UI extends Functions {
 
 	createTouchPlayback(parent: HTMLElement, position: Position) {
 		const touchPlayback = this.createTouchBox(parent, 'touchPlayback', position);
-		this.addClasses(touchPlayback, ['flex', 'justify-center', 'items-center']);
+		this.addClasses(touchPlayback, this.touchPlaybackStyles);
 
 		// touchPlayback.addEventListener('click', () => {
 		// 	this.togglePlayback();
 		// });
-		['mouseup', 'touchend'].forEach((event) => {
+		['click'].forEach((event) => {
 			touchPlayback.addEventListener(event, this.doubleTap(
 				() => this.toggleFullscreen(),
 				() => this.togglePlayback()
@@ -320,7 +378,7 @@ export default class UI extends Functions {
 
 		if (this.isMobile()) {
 			const playButton = this.createSVGElement(touchPlayback, 'paused', this.buttons.bigPlay);
-			this.addClasses(playButton, ['pointer-events-none']);
+			this.addClasses(playButton, this.touchPlayButtonStyles);
 
 			this.on('pause', () => {
 				playButton.style.display = 'flex';
@@ -336,7 +394,7 @@ export default class UI extends Functions {
 	createTouchVolUp(parent: HTMLElement, position: Position) {
 		if (!this.isMobile()) return;
 		const touchVolUp = this.createTouchBox(parent, 'touchVolUp', position);
-		['mouseup', 'touchend'].forEach((event) => {
+		['click'].forEach((event) => {
 			touchVolUp.addEventListener(event, this.doubleTap(() => {
 				this.volumeUp();
 			}));
@@ -348,7 +406,7 @@ export default class UI extends Functions {
 	createTouchVolDown(parent: HTMLElement, position: Position) {
 		if (!this.isMobile()) return;
 		const touchVolDown = this.createTouchBox(parent, 'touchVolDown', position);
-		['mouseup', 'touchend'].forEach((event) => {
+		['click'].forEach((event) => {
 			touchVolDown.addEventListener(event, this.doubleTap(() => {
 				this.volumeDown();
 			}));
@@ -397,7 +455,7 @@ export default class UI extends Functions {
 				this.lockControls();
 			});
 		});
-		['mouseleave', 'touchend', 'mouseout'].forEach((event) => {
+		['mouseleave', 'touchend'].forEach((event) => {
 			bottomBar.addEventListener(event, () => {
 				this.unlockControls();
 			});
@@ -438,7 +496,7 @@ export default class UI extends Functions {
 		if (content) {
 			divider.innerHTML = content;
 		} else {
-			this.addClasses(divider, ['flex-1']);
+			this.addClasses(divider, this.dividerStyles);
 		}
 
 		parent.appendChild(divider);
@@ -455,8 +513,7 @@ export default class UI extends Functions {
 		this.addClasses(svg, [
 			...icon.classes,
 			id,
-			'w-5',
-			'h-5',
+			...this.svgSizeStyles,
 			hidden ? 'hidden' : 'flex',
 		]);
 
@@ -501,7 +558,18 @@ export default class UI extends Functions {
 		this.createSVGElement(settingsButton, 'settings', this.buttons.settings);
 
 		settingsButton.addEventListener('click', () => {
-			this.dispatchEvent('settings');
+			console.log('settings click', this.menuOpen, this.mainMenuOpen);
+			if (this.menuOpen && this.mainMenuOpen) {
+				this.dispatchEvent('show-menu', false);
+			} else if (!this.menuOpen && this.mainMenuOpen) {
+				this.dispatchEvent('show-menu', true);
+			} else if (this.menuOpen && !this.mainMenuOpen) {
+				this.dispatchEvent('show-main-menu', true);
+				this.dispatchEvent('show-menu', true);
+			} else {
+				this.dispatchEvent('show-main-menu', true);
+				this.dispatchEvent('show-menu', true);
+			}
 		});
 
 		this.on('pip', (data) => {
@@ -697,7 +765,6 @@ export default class UI extends Functions {
 		});
 
 		this.on('volume', (data) => {
-			console.log(data);
 			if (this.isMuted()) {
 				lowButton.style.display = 'none';
 				mediumButton.style.display = 'none';
@@ -739,7 +806,7 @@ export default class UI extends Functions {
 	}
 
 	createPreviousButton(parent: HTMLDivElement) {
-		if (this.isMobile()) return;
+		// if (this.isMobile()) return;
 		const previousButton = this.createButton(
 			parent,
 			'previous'
@@ -753,7 +820,7 @@ export default class UI extends Functions {
 			this.previous();
 		});
 		this.on('item', () => {
-			if (this.getCurrentPlaylistIndex() > 0) {
+			if (this.getPlaylistIndex() > 0) {
 				previousButton.style.display = 'flex';
 			} else {
 				previousButton.style.display = 'none';
@@ -763,7 +830,7 @@ export default class UI extends Functions {
 		this.on('pip', (data) => {
 			if (data) {
 				previousButton.style.display = 'none';
-			} else if (this.getCurrentPlaylistIndex() == 0) {
+			} else if (this.getPlaylistIndex() == 0) {
 				previousButton.style.display = 'flex';
 			}
 		});
@@ -819,25 +886,41 @@ export default class UI extends Functions {
 		captionButton.addEventListener('click', (event) => {
 			event.stopPropagation();
 
-			if (this.subsEnabled) {
-				this.subsEnabled = false;
-				onButton.style.display = 'none';
-				offButton.style.display = 'flex';
-				this.setTextTrack(-1);
+			if (this.subtitlesMenuOpen) {
+				this.dispatchEvent('show-menu', false);
 			} else {
-				this.subsEnabled = true;
-				offButton.style.display = 'none';
-				onButton.style.display = 'flex';
-				this.setTextTrack(this.getTextTrackIndexBy('eng', 'full', 'ass'));
+				this.dispatchEvent('show-subtitles-menu', true);
 			}
+
+			// if (this.subsEnabled) {
+			// 	this.subsEnabled = false;
+			// 	onButton.style.display = 'none';
+			// 	offButton.style.display = 'flex';
+			// 	this.setTextTrack(-1);
+			// } else {
+			// 	this.subsEnabled = true;
+			// 	offButton.style.display = 'none';
+			// 	onButton.style.display = 'flex';
+			// 	this.setTextTrack(this.getTextTrackIndexBy('eng', 'full', 'ass'));
+			// }
 
 			// this.toggleLanguage();
 		});
-		this.on('captions', () => {
-			if (this.hasTextTracks()) {
+
+		this.on('captions', (data) => {
+			if (data.tracks.length > 0) {
 				captionButton.style.display = 'flex';
 			} else {
 				captionButton.style.display = 'none';
+			}
+		});
+		this.on('caption-change', (data) => {
+			if (data.track == -1) {
+				onButton.style.display = 'none';
+				offButton.style.display = 'flex';
+			} else {
+				onButton.style.display = 'flex';
+				offButton.style.display = 'none';
 			}
 		});
 
@@ -861,29 +944,19 @@ export default class UI extends Functions {
 		audioButton.style.display = 'none';
 		audioButton.title = this.buttons.language?.title;
 
-		const offButton = this.createSVGElement(audioButton, 'audio', this.buttons.languageOff);
-		const onButton = this.createSVGElement(audioButton, 'audio-enable', this.buttons.language, true);
+		this.createSVGElement(audioButton, 'audio', this.buttons.languageOff);
 
 		audioButton.addEventListener('click', (event) => {
 			event.stopPropagation();
-			console.log(this.getAudioTracks());
 
-			if (this.audiosEnabled) {
-				this.audiosEnabled = false;
-				onButton.style.display = 'none';
-				offButton.style.display = 'flex';
-				this.setAudioTrack(0);
+			if (this.languageMenuOpen) {
+				this.dispatchEvent('show-menu', false);
 			} else {
-				this.audiosEnabled = true;
-				offButton.style.display = 'none';
-				onButton.style.display = 'flex';
-				this.setAudioTrack(1);
+				this.dispatchEvent('show-language-menu', true);
 			}
-
-			// this.toggleLanguage();
 		});
-		this.on('audio', () => {
-			if (this.hasAudioTracks()) {
+		this.on('audio', (data) => {
+			if (data.tracks.length > 1) {
 				audioButton.style.display = 'flex';
 			} else {
 				audioButton.style.display = 'none';
@@ -915,6 +988,12 @@ export default class UI extends Functions {
 		qualityButton.addEventListener('click', (event) => {
 			event.stopPropagation();
 			console.log(this.getQualities());
+
+			if (this.qualityMenuOpen) {
+				this.dispatchEvent('show-menu', false);
+			} else {
+				this.dispatchEvent('show-quality-menu', true);
+			}
 
 			if (this.highQuality) {
 				this.highQuality = false;
@@ -1075,21 +1154,22 @@ export default class UI extends Functions {
 			'speed'
 		);
 
-		speedButton.style.display = 'none';
+		if (this.hasSpeeds()) {
+			speedButton.style.display = 'flex';
+		} else {
+			speedButton.style.display = 'none';
+		}
 
 		this.createSVGElement(speedButton, 'speed', this.buttons.speed);
 
 		speedButton.addEventListener('click', (event) => {
 			event.stopPropagation();
-			// console.log(this.getPlaylist());
-			// this.togglePlaylists();
-		});
+			console.log(this.getSpeeds());
 
-		this.on('item', () => {
-			if (this.hasSpeeds()) {
-				speedButton.style.display = 'flex';
+			if (this.speedMenuOpen) {
+				this.dispatchEvent('show-menu', false);
 			} else {
-				speedButton.style.display = 'none';
+				this.dispatchEvent('show-speed-menu', true);
 			}
 		});
 
@@ -1112,7 +1192,12 @@ export default class UI extends Functions {
 			'pip'
 		);
 
-		pipButton.style.display = 'none';
+		if (this.hasPIP()) {
+			pipButton.style.display = 'flex';
+		} else {
+			pipButton.style.display = 'none';
+		}
+
 		pipButton.title = this.buttons.pipEnter?.title;
 
 		this.createSVGElement(pipButton, 'pip-enter', this.buttons.pipEnter);
@@ -1143,22 +1228,521 @@ export default class UI extends Functions {
 				pipButton.style.display = 'flex';
 			}
 		});
-		this.on('item', () => {
-			if (this.hasPIP()) {
-				pipButton.style.display = 'flex';
-			} else {
-				pipButton.style.display = 'none';
-			}
-		});
 
 		parent.appendChild(pipButton);
 		return pipButton;
 	}
 
+	createMenuFrame(parent: HTMLDivElement) {
+
+		const menuFrame = document.createElement('div');
+		menuFrame.id = 'menu-frame';
+		this.addClasses(menuFrame, this.menuFrameStyles);
+
+		const menuContent = document.createElement('div');
+		menuContent.id = 'menu-content';
+		this.addClasses(menuContent, this.menuContentStyles);
+
+		menuContent.style.height = this.growMenu(0);
+		menuContent.style.maxHeight = `${this.getElement().getBoundingClientRect().height - 40}px`;
+		this.on('resize', () => {
+			menuContent.style.maxHeight = `${this.getElement().getBoundingClientRect().height - 40}px`;
+		});
+
+		menuFrame.appendChild(menuContent);
+
+		this.on('show-menu', (showing) => {
+			this.menuOpen = showing;
+			if (showing) {
+				menuContent.style.height = this.growMenu(0);
+				menuFrame.style.display = 'flex';
+			} else {
+				menuFrame.style.display = 'none';
+			}
+			menuContent.classList.add('translate-x-0');
+			menuContent.classList.remove('-translate-x-[50%]');
+
+			this.dispatchEvent('show-language-menu', false);
+			this.dispatchEvent('show-subtitles-menu', false);
+			this.dispatchEvent('show-quality-menu', false);
+			this.dispatchEvent('show-speed-menu', false);
+		});
+		this.on('show-main-menu', (showing) => {
+			this.mainMenuOpen = showing;
+			if (showing) {
+				menuContent.style.height = this.growMenu(0);
+				this.dispatchEvent('show-language-menu', false);
+				this.dispatchEvent('show-subtitles-menu', false);
+				this.dispatchEvent('show-quality-menu', false);
+				this.dispatchEvent('show-speed-menu', false);
+				menuContent.classList.add('translate-x-0');
+				menuContent.classList.remove('-translate-x-[50%]');
+				menuFrame.style.display = 'flex';
+			}
+		});
+		this.on('show-language-menu', (showing) => {
+			this.languageMenuOpen = showing;
+			if (showing) {
+				menuContent.style.height = this.growMenu(this.getAudioTracks().length);
+				this.dispatchEvent('show-main-menu', false);
+				this.dispatchEvent('show-subtitles-menu', false);
+				this.dispatchEvent('show-quality-menu', false);
+				this.dispatchEvent('show-speed-menu', false);
+				menuContent.classList.remove('translate-x-0');
+				menuContent.classList.add('-translate-x-[50%]');
+				menuFrame.style.display = 'flex';
+			}
+		});
+		this.on('show-subtitles-menu', (showing) => {
+			this.subtitlesMenuOpen = showing;
+			if (showing) {
+				menuContent.style.height = this.growMenu(this.getTextTracks().length + 1);
+				this.dispatchEvent('show-main-menu', false);
+				this.dispatchEvent('show-language-menu', false);
+				this.dispatchEvent('show-quality-menu', false);
+				this.dispatchEvent('show-speed-menu', false);
+				menuContent.classList.remove('translate-x-0');
+				menuContent.classList.add('-translate-x-[50%]');
+				menuFrame.style.display = 'flex';
+			}
+		});
+		this.on('show-quality-menu', (showing) => {
+			this.qualityMenuOpen = showing;
+			if (showing) {
+				menuContent.style.height = this.growMenu(this.getQualities().length);
+				this.dispatchEvent('show-main-menu', false);
+				this.dispatchEvent('show-language-menu', false);
+				this.dispatchEvent('show-subtitles-menu', false);
+				this.dispatchEvent('show-speed-menu', false);
+				menuContent.classList.remove('translate-x-0');
+				menuContent.classList.add('-translate-x-[50%]');
+				menuFrame.style.display = 'flex';
+			}
+		});
+		this.on('show-speed-menu', (showing) => {
+			this.speedMenuOpen = showing;
+			if (showing) {
+				menuContent.style.height = this.growMenu(this.getSpeeds().length);
+				this.dispatchEvent('show-main-menu', false);
+				this.dispatchEvent('show-language-menu', false);
+				this.dispatchEvent('show-subtitles-menu', false);
+				this.dispatchEvent('show-quality-menu', false);
+				menuContent.classList.remove('translate-x-0');
+				menuContent.classList.add('-translate-x-[50%]');
+				menuFrame.style.display = 'flex';
+			}
+		});
+		this.on('controls', (showing) => {
+			if (!showing && !this.lock) {
+				this.dispatchEvent('show-menu', false);
+				this.dispatchEvent('show-main-menu', false);
+				this.dispatchEvent('show-language-menu', false);
+				this.dispatchEvent('show-subtitles-menu', false);
+				this.dispatchEvent('show-quality-menu', false);
+				this.dispatchEvent('show-speed-menu', false);
+			}
+		});
+
+		parent.appendChild(menuFrame);
+		return menuContent;
+	}
+
+	growMenu(childCount: number) {
+		const size = 2.35;
+		let height = 0;
+
+		if (childCount == 0) {
+			if (this.hasSpeeds()) {
+				height += size;
+			}
+			if (this.getAudioTracks().length > 1) {
+				height += size;
+			}
+			if (this.getTextTracks().length > 0) {
+				height += size;
+			}
+			if (this.getQualities().length > 1) {
+				height += size;
+			}
+		} else {
+			height += (childCount + 1) * size;
+		}
+
+		height += 0.5; // padding bottom
+
+		return `${height}rem`;
+	}
+
+	createMainMenu(parent: HTMLDivElement) {
+
+		const main = document.createElement('div');
+		main.id = 'main-menu';
+		main.style.transform = 'translateX(0)';
+
+		this.addClasses(main, this.mainMenuStyles);
+
+		this.createMenuButton(main, 'language');
+		this.createMenuButton(main, 'subtitles');
+		this.createMenuButton(main, 'quality');
+		this.createMenuButton(main, 'speed');
+
+		parent.appendChild(main);
+
+		this.createSubMenu(parent);
+
+		return main;
+	}
+
+	createSubMenu(parent: HTMLDivElement) {
+
+		const submenu = document.createElement('div');
+		submenu.id = 'sub-menu';
+		submenu.style.transform = 'translateX(0)';
+
+		this.addClasses(submenu, this.subMenuStyles);
+
+		this.createLanguageMenu(submenu);
+		this.createSubtitleMenu(submenu);
+		this.createQualityMenu(submenu);
+		this.createSpeedMenu(submenu);
+
+		parent.appendChild(submenu);
+
+		return submenu;
+	}
+
+	createMenuHeader(parent: HTMLDivElement, title: string) {
+		const menuHeader = document.createElement('div');
+		menuHeader.id = 'menu-header';
+
+		this.addClasses(menuHeader, this.menuHeaderStyles);
+
+		const back = this.createSVGElement(menuHeader, 'menu', this.buttons.chevronL);
+		back.classList.remove('w-5');
+		back.classList.add('w-8');
+
+		back.addEventListener('click', (event) => {
+			event.stopPropagation();
+			this.dispatchEvent('show-main-menu', true);
+
+			this.dispatchEvent('show-language-menu', false);
+			this.dispatchEvent('show-subtitles-menu', false);
+			this.dispatchEvent('show-quality-menu', false);
+			this.dispatchEvent('show-speed-menu', false);
+		});
+
+		const menuButtonText = document.createElement('span');
+		menuButtonText.classList.add('menu-button-text');
+		this.addClasses(menuButtonText, this.menuHeaderButtonTextStyles);
+		menuHeader.append(menuButtonText);
+		menuButtonText.textContent = this.localize(title).toTitleCase();
+
+		const close = this.createSVGElement(menuHeader, 'menu', this.buttons.close);
+		this.addClasses(close, ['ml-auto', 'w-8']);
+		back.classList.remove('w-5');
+
+		close.addEventListener('click', (event) => {
+			event.stopPropagation();
+			this.dispatchEvent('show-menu', false);
+		});
+
+		parent.append(menuHeader);
+	};
+
+	createMenuButton(parent: HTMLDivElement, item: string) {
+		const menuButton = document.createElement('div');
+		menuButton.id = `menu-button-${item}`;
+
+		this.addClasses(menuButton, this.menuButtonStyles);
+
+		if (item !== 'speed') {
+			menuButton.style.display = 'none';
+		} else if (this.hasSpeeds()) {
+			menuButton.style.display = 'flex';
+		} else {
+			menuButton.style.display = 'none';
+		}
+
+		this.createSVGElement(menuButton, 'menu', this.buttons[item]);
+
+		const menuButtonText = document.createElement('span');
+		menuButtonText.classList.add('menu-button-text');
+		this.addClasses(menuButtonText, this.menuButtonTextStyles);
+		menuButton.append(menuButtonText);
+		menuButtonText.textContent = this.localize(item).toTitleCase();
+
+		const chevron = this.createSVGElement(menuButton, 'menu', this.buttons.chevronR);
+		this.addClasses(chevron, ['ml-auto']);
+
+		menuButton.addEventListener('click', (event) => {
+			event.stopPropagation();
+			this.dispatchEvent(`show-${item}-menu`, true);
+		});
+
+		if (item === 'language') {
+			this.on('audio', () => {
+				if (this.getAudioTracks().length > 1) {
+					menuButton.style.display = 'flex';
+				} else {
+					menuButton.style.display = 'none';
+				}
+			});
+		} else if (item === 'subtitles') {
+			this.on('captions', () => {
+				if (this.getTextTracks().length > 0) {
+					menuButton.style.display = 'flex';
+				} else {
+					menuButton.style.display = 'none';
+				}
+			});
+
+		} else if (item === 'quality') {
+			this.on('quality', () => {
+				if (this.getQualities().length > 1) {
+					menuButton.style.display = 'flex';
+				} else {
+					menuButton.style.display = 'none';
+				}
+			});
+		}
+
+		parent.append(menuButton);
+	};
+
+	createLanguageMenu(parent: HTMLDivElement) {
+		const languageMenu = document.createElement('div');
+		languageMenu.id = 'language-menu';
+		this.addClasses(languageMenu, this.subMenuContentStyles);
+
+		this.createMenuHeader(languageMenu, 'Language');
+
+		const scrollContainer = document.createElement('div');
+		scrollContainer.id = 'language-scroll-container';
+		scrollContainer.style.transform = 'translateX(0)';
+
+		this.addClasses(scrollContainer, this.scrollContainerStyles);
+		languageMenu.appendChild(scrollContainer);
+
+		this.on('audio', (event) => {
+			scrollContainer.innerHTML = '';
+			for (const [index, track] of event.tracks?.entries() ?? []) {
+				this.createLanguageMenuButton(scrollContainer, {
+					language: track.language,
+					label: track.name ?? track.label,
+					type: 'audio',
+					index: track.hlsjsIndex ?? index,
+				});
+			}
+		});
+
+		this.on('show-language-menu', (showing) => {
+			if (showing) {
+				languageMenu.style.display = 'flex';
+			} else {
+				languageMenu.style.display = 'none';
+			}
+		});
+
+		parent.appendChild(languageMenu);
+		return languageMenu;
+	}
+
+	createSubtitleMenu(parent: HTMLDivElement) {
+		const subtitleMenu = document.createElement('div');
+		subtitleMenu.id = 'subtitle-menu';
+		this.addClasses(subtitleMenu, this.subMenuContentStyles);
+
+		this.createMenuHeader(subtitleMenu, 'subtitles');
+
+		const scrollContainer = document.createElement('div');
+		scrollContainer.id = 'language-scroll-container';
+		scrollContainer.style.transform = 'translateX(0)';
+
+		this.addClasses(scrollContainer, this.scrollContainerStyles);
+		subtitleMenu.appendChild(scrollContainer);
+
+		this.on('captions', (event) => {
+			scrollContainer.innerHTML = '';
+			for (const track of event.tracks ?? []) {
+				this.createLanguageMenuButton(scrollContainer, {
+					language: track.language,
+					label: track.label,
+					type: 'subtitle',
+					index: event.tracks.indexOf(track),
+					styled: (track.src ?? track.id).endsWith('.ass'),
+				});
+			}
+		});
+
+		this.on('show-subtitles-menu', (showing) => {
+			if (showing) {
+				subtitleMenu.style.display = 'flex';
+			} else {
+				subtitleMenu.style.display = 'none';
+			}
+		});
+
+		parent.appendChild(subtitleMenu);
+		return subtitleMenu;
+	}
+
+	createSpeedMenu(parent: HTMLDivElement) {
+		const speedMenu = document.createElement('div');
+		speedMenu.id = 'speed-menu';
+		this.addClasses(speedMenu, this.subMenuContentStyles);
+
+		this.createMenuHeader(speedMenu, 'speed');
+
+		const scrollContainer = document.createElement('div');
+		scrollContainer.id = 'speed-scroll-container';
+		scrollContainer.style.transform = 'translateX(0)';
+
+		this.addClasses(scrollContainer, this.scrollContainerStyles);
+		speedMenu.appendChild(scrollContainer);
+
+		for (const speed of this.getSpeeds() ?? []) {
+			const speedButton = document.createElement('div');
+			speedButton.id = `speed-button-${speed}`;
+
+			this.addClasses(speedButton, this.menuButtonStyles);
+
+			const spanChild = document.createElement('div');
+			speedButton.append(spanChild);
+
+			const speedButtonText = document.createElement('span');
+			speedButtonText.classList.add('menu-button-text');
+			this.addClasses(speedButtonText, this.speedButtonTextStyles);
+
+			speedButtonText.textContent = speed == 1 ? this.localize('Normal') : speed;
+			speedButton.append(speedButtonText);
+
+			const chevron = this.createSVGElement(speedButton, 'menu', this.buttons.checkmark);
+			this.addClasses(chevron, [
+				'ml-auto',
+				'hidden',
+			]);
+
+			speedButton.addEventListener('click', () => {
+				this.dispatchEvent('show-menu', false);
+				//
+			});
+
+			scrollContainer.append(speedButton);
+		}
+
+		this.on('show-speed-menu', (showing) => {
+			if (showing) {
+				speedMenu.style.display = 'flex';
+			} else {
+				speedMenu.style.display = 'none';
+			}
+		});
+
+		parent.appendChild(speedMenu);
+		return speedMenu;
+	}
+
+	createQualityMenu(parent: HTMLDivElement) {
+		const qualityMenu = document.createElement('div');
+		qualityMenu.id = 'quality-menu';
+		this.addClasses(qualityMenu, this.subMenuContentStyles);
+
+		this.createMenuHeader(qualityMenu, 'quality');
+
+		const scrollContainer = document.createElement('div');
+		scrollContainer.id = 'quality-scroll-container';
+		scrollContainer.style.transform = 'translateX(0)';
+
+		this.addClasses(scrollContainer, this.scrollContainerStyles);
+		qualityMenu.appendChild(scrollContainer);
+
+		this.on('show-quality-menu', (showing) => {
+			if (showing) {
+				qualityMenu.style.display = 'flex';
+			} else {
+				qualityMenu.style.display = 'none';
+			}
+		});
+
+		parent.appendChild(qualityMenu);
+		return qualityMenu;
+	}
+
+	createLanguageMenuButton(parent: HTMLDivElement, data: {language: string, label: string, type: string, index: number, styled?: boolean}) {
+		const languageButton = document.createElement('div');
+		languageButton.id = `language-button-${data.language}`;
+
+		this.addClasses(languageButton, this.menuButtonStyles);
+
+		const spanChild = document.createElement(data.language == 'off' || data.label.slice(0, 3) == 'Off' || data.label.slice(0, 3) == 'seg' ? 'span' : 'img');
+		this.addClasses(spanChild, [
+			`${data.type}-active`,
+			...this.languageButtonSpanStyles,
+		]);
+
+		if (data.language == 'off' || data.label.slice(0, 3) == 'Off' || data.label.slice(0, 3) == 'seg') {
+			spanChild.innerHTML = `
+				<svg id="${data.type}-${data.index}" class="MuiSvgIcon-root ${data.type}-active" focusable="false" viewBox="0 0 24 24" aria-hidden="true" style="width: inherit; height: inherit;">
+					<path d="M18.3 5.71a.9959.9959 0 0 0-1.41 0L12 10.59 7.11 5.7a.9959.9959 0 0 0-1.41 0c-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l4.89 4.89c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z" style="fill: currentColor;"></path>
+				</svg>
+			`;
+		} else {
+			(spanChild as HTMLImageElement).src = `./dist/flags/${data.language || data.label.slice(0, 3).toLocaleLowerCase()}.svg`;
+		}
+
+		languageButton.append(spanChild);
+
+		const languageButtonText = document.createElement('span');
+		languageButtonText.classList.add('menu-button-text');
+		this.addClasses(languageButtonText, this.menuButtonTextStyles);
+
+		languageButtonText.textContent = `${this.localize(data.label)
+			?.replace('segment-metadata', 'Off')} ${data.styled ? '🎨' : ''}`;
+		languageButton.append(languageButtonText);
+
+		const chevron = this.createSVGElement(languageButton, 'menu', this.buttons.checkmark);
+		this.addClasses(chevron, ['ml-auto']);
+
+		if (data.index > 0) {
+			chevron.classList.add('hidden');
+		}
+
+		if (data.type == 'audio') {
+			this.on('audio-change', (audio) => {
+				if (audio.currentTrack == data.index) {
+					chevron.classList.remove('hidden');
+				} else {
+					chevron.classList.add('hidden');
+				}
+			});
+		} else if (data.type == 'subtitle') {
+			this.on('caption-change', (track) => {
+				if (track.track == data.index || (track.track === -1 && data.index === 0)) {
+					chevron.classList.remove('hidden');
+				} else {
+					chevron.classList.add('hidden');
+				}
+			});
+		}
+
+		languageButton.addEventListener('click', (event) => {
+			event.stopPropagation();
+
+			if (data.type == 'audio') {
+				this.setAudioTrack(data.index);
+			} else if (data.type == 'subtitle') {
+				this.setTextTrack(data.index - 1);
+			}
+
+			this.dispatchEvent('show-menu', false);
+		});
+
+		parent.append(languageButton);
+	}
+
 	createSeekRipple(parent: HTMLDivElement, side: string) {
 		const seekRipple = document.createElement('div');
 		this.addClasses(seekRipple, ['seek-ripple', side]);
-		// seekRipple.style.height = `${(window.innerWidth / 16) * 9}px`;
 
 		const arrowHolder = document.createElement('div');
 		arrowHolder.classList.add('seek-ripple-arrow');
@@ -1255,54 +1839,22 @@ export default class UI extends Functions {
 
 		sliderBar.append(sliderPop);
 
-		this.on('seeked', () => {
-			sliderPop.style.setProperty('--visibility', '0');
-		});
 
-		this.on('item', () => {
-			this.previewTime = [];
-			this.chapters = [];
-		});
+		['mousemove', 'touchmove'].forEach((event) => {
+			this.bottomBar.addEventListener(event, (e: any) => {
+				const scrubTime = this.#getScrubTime(e, sliderBar);
+				this.#getSliderPopImage(scrubTime);
+				const sliderPopOffsetX = this.#getSliderPopOffsetX(e, sliderBar, sliderPop, scrubTime);
+				sliderPop.style.left = `${sliderPopOffsetX}%`;
+				sliderText.textContent = this.humanTime(scrubTime.scrubTimePlayer);
+				if (!this.isMouseDown) return;
 
-
-		['mouseover', 'mouseleave', 'mousemove', 'touchmove'].forEach((event) => {
-			switch (event) {
-			case 'mouseover':
-				sliderBar.addEventListener(event, (e) => {
-					const scrubTime = this.#getScrubTime(e, sliderBar);
-					this.#getSliderPopImage(scrubTime);
-					sliderText.textContent = this.humanTime(scrubTime.scrubTimePlayer);
-					chapterText.textContent = this.#getChapterText(scrubTime.scrubTimePlayer);
-					if (this.previewTime.length > 0) {
-						sliderPop.style.setProperty('--visibility', '1');
-						const sliderPopOffsetX = this.#getSliderPopOffsetX(e, sliderBar, sliderPop, scrubTime);
-						sliderPop.style.left = `${sliderPopOffsetX}%`;
-					}
-				});
-				break;
-			case 'mouseleave':
-				sliderBar.addEventListener(event, () => {
-					sliderPop.style.setProperty('--visibility', '0');
-				});
-				break;
-			case 'mousemove':
-			case 'touchmove':
-				this.bottomBar.addEventListener(event, (e: any) => {
-					const scrubTime = this.#getScrubTime(e, sliderBar);
-					this.#getSliderPopImage(scrubTime);
-					const sliderPopOffsetX = this.#getSliderPopOffsetX(e, sliderBar, sliderPop, scrubTime);
-					sliderPop.style.left = `${sliderPopOffsetX}%`;
-					sliderText.textContent = this.humanTime(scrubTime.scrubTimePlayer);
-					if (!this.isMouseDown) return;
-
-					chapterText.textContent = this.#getChapterText(scrubTime.scrubTimePlayer);
-					sliderNipple.style.left = `${scrubTime.scrubTime}%`;
-					if (this.previewTime.length > 0) {
-						sliderPop.style.setProperty('--visibility', '1');
-					}
-				});
-				break;
-			}
+				chapterText.textContent = this.#getChapterText(scrubTime.scrubTimePlayer);
+				sliderNipple.style.left = `${scrubTime.scrubTime}%`;
+				if (this.previewTime.length > 0) {
+					sliderPop.style.setProperty('--visibility', '1');
+				}
+			});
 		});
 		['mousedown', 'touchstart'].forEach((event) => {
 			sliderBar.addEventListener(event, () => {
@@ -1312,17 +1864,41 @@ export default class UI extends Functions {
 				this.isScrubbing = true;
 			});
 		});
-		['mouseup', 'touchend'].forEach((event) => {
-			this.bottomBar.addEventListener(event, (e: any) => {
-				if (!this.isMouseDown) return;
 
-				this.isMouseDown = false;
-				this.isScrubbing = false;
-				sliderPop.style.setProperty('--visibility', '0');
-				const scrubTime = this.#getScrubTime(e, sliderBar);
-				sliderNipple.style.left = `${scrubTime.scrubTime}%`;
-				this.seek(scrubTime.scrubTimePlayer);
-			});
+		sliderBar.addEventListener('mouseover', (e) => {
+			const scrubTime = this.#getScrubTime(e, sliderBar);
+			this.#getSliderPopImage(scrubTime);
+			sliderText.textContent = this.humanTime(scrubTime.scrubTimePlayer);
+			chapterText.textContent = this.#getChapterText(scrubTime.scrubTimePlayer);
+			if (this.previewTime.length > 0) {
+				sliderPop.style.setProperty('--visibility', '1');
+				const sliderPopOffsetX = this.#getSliderPopOffsetX(e, sliderBar, sliderPop, scrubTime);
+				sliderPop.style.left = `${sliderPopOffsetX}%`;
+			}
+		});
+
+		sliderBar.addEventListener('mouseleave', () => {
+			sliderPop.style.setProperty('--visibility', '0');
+		});
+
+		this.bottomBar.addEventListener('click', (e: any) => {
+			if (!this.isMouseDown) return;
+
+			this.isMouseDown = false;
+			this.isScrubbing = false;
+			sliderPop.style.setProperty('--visibility', '0');
+			const scrubTime = this.#getScrubTime(e, sliderBar);
+			sliderNipple.style.left = `${scrubTime.scrubTime}%`;
+			this.seek(scrubTime.scrubTimePlayer);
+		});
+
+		this.on('seeked', () => {
+			sliderPop.style.setProperty('--visibility', '0');
+		});
+
+		this.on('item', () => {
+			this.previewTime = [];
+			this.chapters = [];
 		});
 
 		this.on('time', (data) => {
@@ -1353,7 +1929,7 @@ export default class UI extends Functions {
 
 	#getChapterText(scrubTimePlayer: number): string | null {
 		const index = this.getChapters().findIndex((chapter: Chapter) => {
-			return chapter.time > scrubTimePlayer;
+			return chapter.startTime > scrubTimePlayer;
 		});
 		return this.getChapters()[index - 1]?.title ?? null;
 	}
@@ -1361,11 +1937,48 @@ export default class UI extends Functions {
 	createChapterMarker(chapter: Chapter) {
 		const chapterMarker = document.createElement('div');
 		chapterMarker.id = `chapter-marker-${chapter.id.replace(/\s/gu, '-')}`;
-		chapterMarker.style.left = `${chapter.time / this.duration() * 100}%`;
+		chapterMarker.style.left = `${chapter.left}%`;
+		chapterMarker.style.width = `calc(${chapter.width}% - 2px)`;
 
 		this.addClasses(chapterMarker, this.chapterMarkersStyles);
-
 		this.chapterBar.append(chapterMarker);
+
+		const chapterMarkerBG = document.createElement('div');
+		chapterMarker.id = `chapter-marker-bg-${chapter.id.replace(/\s/gu, '-')}`;
+		this.addClasses(chapterMarkerBG, this.chapterMarkerBGStyles);
+		chapterMarker.append(chapterMarkerBG);
+
+		const chapterMarkerBuffer = document.createElement('div');
+		chapterMarker.id = `chapter-marker-buffer-${chapter.id.replace(/\s/gu, '-')}`;
+		this.addClasses(chapterMarkerBuffer, this.chapterMarkerBufferStyles);
+		chapterMarker.append(chapterMarkerBuffer);
+
+		const chapterMarkerProgress = document.createElement('div');
+		chapterMarker.id = `chapter-marker-progress-${chapter.id.replace(/\s/gu, '-')}`;
+		this.addClasses(chapterMarkerProgress, this.chapterMarkerProgressStyles);
+		chapterMarker.append(chapterMarkerProgress);
+
+		const left = chapter.left;
+		const right = chapter.left + chapter.width;
+
+		this.on('time', (data) => {
+			if (data.percentage < left) {
+				chapterMarkerProgress.style.transform = 'scaleX(0)';
+			} else if (data.percentage > right) {
+				chapterMarkerProgress.style.transform = 'scaleX(1)';
+			} else {
+				chapterMarkerProgress.style.transform = `scaleX(${(data.percentage - left) / (right - left)})`;
+			}
+
+			if (data.buffered < left) {
+				chapterMarkerBuffer.style.transform = 'scaleX(0)';
+			} else if (data.buffered > right) {
+				chapterMarkerBuffer.style.transform = 'scaleX(1)';
+			} else {
+				chapterMarkerBuffer.style.transform = `scaleX(${(data.buffered - left) / (right - left)})`;
+			}
+		});
+
 		return chapterMarker;
 	}
 
@@ -1395,11 +2008,11 @@ export default class UI extends Functions {
 
 	#fetchSliderPopImage(scrubTime: any) {
 		if (this.previewTime.length === 0) {
-			const image = this.getCurrentSpriteFile();
+			const image = this.getSpriteFile();
 			if (image) {
 				this.sliderPopImage.style.backgroundImage = `url('${image}')`;
 			}
-			const file = this.getCurrentTimeFile();
+			const file = this.getTimeFile();
 			if (file && this.currentTimeFile !== file) {
 				this.currentTimeFile = file;
 				this.getFileContents({
