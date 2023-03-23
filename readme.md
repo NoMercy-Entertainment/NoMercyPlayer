@@ -260,5 +260,5 @@ You can also use this facade to use the JWPlayer playlist with VideoJS and vice 
 
 | Parameter | Type       | Description       |
 | :---      | :---       | :---              |
-| event     | `string`   | `audio-change`, `audio`, `caption-change`, `captions`, `chapters`, `controls`, `duration`, `forward`, `fullscreen`, `item`, `mute`, `pause`, `pip`, `play`, `playing`, `quality`, `ready`, `removeForward`, `removeRewind`, `resize`, `rewind`, `seeked`, `theaterMode`, `time`, `volume` |
+| event     | `string`   | `audio-change`, `audio`, `caption-change`, `captions`, `chapters`, `controls`, `duration`, `fullscreen`, `item`, `mute`, `pause`, `pip`, `play`, `playing`, `quality`, `ready`, `resize`, `seeked`, `theaterMode`, `time`, `volume` |
 | callback  | `function` | callback function |

@@ -6,14 +6,15 @@ import {
 	chapterMarkerBGStyles, chapterMarkerBufferStyles, chapterMarkerProgressStyles,
 	chapterMarkersStyles, chapterTextStyles, dividerStyles, iconStyles, languageButtonSpanStyles,
 	mainMenuStyles, menuButtonStyles, menuButtonTextStyles, menuContentStyles, menuFrameStyles,
-	menuHeaderButtonTextStyles, menuHeaderStyles, overlayStyles, scrollContainerStyles,
-	sliderBarStyles, sliderBufferStyles, sliderNippleStyles, sliderPopImageStyles, sliderPopStyles,
+	menuHeaderButtonTextStyles, menuHeaderStyles, overlayStyles, playerMessageStyles,
+	playlistMenuButtonStyles, playlistMenuStyles, scrollContainerStyles, sliderBarStyles,
+	sliderBufferStyles, sliderNippleStyles, sliderPopImageStyles, sliderPopStyles,
 	sliderProgressStyles, sliderTextStyles, speedButtonTextStyles, subMenuContentStyles,
 	subMenuStyles, svgSizeStyles, timeStyles, topBarStyles, topRowStyles, touchPlaybackButtonStyles,
-	touchPlaybackStyles
+	touchPlaybackStyles, volumeContainerStyles, volumeSliderStyles
 } from './styles.js';
 
-import type { VideoPlayerOptions, VideoPlayer as Types, Chapter } from './nomercyplayer.d';
+import type { VideoPlayerOptions, VideoPlayer as Types, Chapter, VolumeState, PlaylistItem } from './nomercyplayer.d';
 
 export interface Position {
 	x: {
@@ -32,7 +33,6 @@ export default class UI extends Functions {
 	isMouseDown = false;
 	progressBar: HTMLDivElement = <HTMLDivElement>{}; // sliderBar
 
-	lock = false;
 	isScrubbing = false;
 	menuOpen = false;
 	mainMenuOpen = false;
@@ -40,6 +40,7 @@ export default class UI extends Functions {
 	subtitlesMenuOpen = false;
 	qualityMenuOpen = false;
 	speedMenuOpen = false;
+	playlistMenuOpen = false;
 
 	previewTime: {
 		start: number;
@@ -83,11 +84,9 @@ export default class UI extends Functions {
 	overlayStyles: string[] = [];
 	scrollContainerStyles: string[] = [];
 	sliderBarStyles: string[] = [];
-	sliderBufferStyles: string[] = [];
 	sliderNippleStyles: string[] = [];
 	sliderPopImageStyles: string[] = [];
 	sliderPopStyles: string[] = [];
-	sliderProgressStyles: string[] = [];
 	sliderTextStyles: string[] = [];
 	speedButtonTextStyles: string[] = [];
 	subMenuStyles: string[] = [];
@@ -98,6 +97,13 @@ export default class UI extends Functions {
 	touchPlaybackStyles: string[] = [];
 	touchPlayButtonStyles: string[] = [];
 	subMenuContentStyles: string[] = [];
+	volumeSliderStyles: string[] = [];
+	volumeContainerStyles: string[] = [];
+	sliderBufferStyles: string[] = [];
+	sliderProgressStyles: string[] = [];
+	playerMessageStyles: string[] = [];
+	playlistMenuStyles: string[] = [];
+	playlistMenuButtonStyles: string[] = [];
 
 	constructor(playerType: Types['playerType'], options: VideoPlayerOptions, playerId: Types['playerId'] = '') {
 		super(playerType, options, playerId);
@@ -128,11 +134,9 @@ export default class UI extends Functions {
 			this.overlayStyles = this.mergeStyles('overlayStyles', overlayStyles);
 			this.scrollContainerStyles = this.mergeStyles('scrollContainerStyles', scrollContainerStyles);
 			this.sliderBarStyles = this.mergeStyles('sliderBarStyles', sliderBarStyles);
-			this.sliderBufferStyles = this.mergeStyles('sliderBufferStyles', sliderBufferStyles);
 			this.sliderNippleStyles = this.mergeStyles('sliderNippleStyles', sliderNippleStyles);
 			this.sliderPopImageStyles = this.mergeStyles('sliderPopImageStyles', sliderPopImageStyles);
 			this.sliderPopStyles = this.mergeStyles('sliderPopStyles', sliderPopStyles);
-			this.sliderProgressStyles = this.mergeStyles('sliderProgressStyles', sliderProgressStyles);
 			this.sliderTextStyles = this.mergeStyles('sliderTextStyles', sliderTextStyles);
 			this.speedButtonTextStyles = this.mergeStyles('speedButtonTextStyles', speedButtonTextStyles);
 			this.subMenuStyles = this.mergeStyles('subMenuStyles', subMenuStyles);
@@ -144,6 +148,13 @@ export default class UI extends Functions {
 			this.touchPlaybackStyles = this.mergeStyles('touchPlaybackStyles', touchPlaybackStyles);
 			this.touchPlayButtonStyles = this.mergeStyles('touchPlaybackButtonStyles', touchPlaybackButtonStyles);
 			this.buttonStyles = this.mergeStyles('buttonStyles', buttonStyles);
+			this.volumeContainerStyles = this.mergeStyles('volumeContainerStyles', volumeContainerStyles);
+			this.volumeSliderStyles = this.mergeStyles('volumeSliderStyles', volumeSliderStyles);
+			this.sliderBufferStyles = this.mergeStyles('sliderBufferStyles', sliderBufferStyles);
+			this.sliderProgressStyles = this.mergeStyles('sliderProgressStyles', sliderProgressStyles);
+			this.playerMessageStyles = this.mergeStyles('playerMessageStyles', playerMessageStyles);
+			this.playlistMenuStyles = this.mergeStyles('playlistMenuStyles', playlistMenuStyles);
+			this.playlistMenuButtonStyles = this.mergeStyles('playlistMenuButtonStyles', playlistMenuButtonStyles);
 
 			this.fluentIcons = fluentIcons;
 			this.buttons = buttons(this.options);
@@ -184,11 +195,13 @@ export default class UI extends Functions {
 	hideControls() {
 		if (!this.lock && this.isPlaying()) {
 			this.dispatchEvent('controls', false);
+			this.controlsVisible = false;
 		}
 	};
 
 	showControls() {
 		this.dispatchEvent('controls', true);
+		this.controlsVisible = true;
 	}
 
 	dynamicControls() {
@@ -205,7 +218,7 @@ export default class UI extends Functions {
 
 		this.addClasses(overlay, this.overlayStyles);
 
-		this.createStyles();
+		this.dispatchEvent('overlay', overlay);
 
 		this.overlay = overlay;
 
@@ -321,6 +334,7 @@ export default class UI extends Functions {
 			});
 		});
 
+		this.createOverlayCenterMessage(center);
 		this.createTouchSeekBack(center, { x: { start: 1, end: 1 }, y: { start: 2, end: 6 } });
 		this.createTouchPlayback(center, { x: { start: 2, end: 2 }, y: { start: 3, end: 5 } });
 		this.createTouchSeekForward(center, { x: { start: 3, end: 3 }, y: { start: 2, end: 6 } });
@@ -519,12 +533,19 @@ export default class UI extends Functions {
 
 		const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 		path.setAttribute('d', icon.normal);
-		this.addClasses(path, ['group-hover/button:hidden']);
+		this.addClasses(path, [
+			'group-hover/button:hidden',
+			'group-hover/volume:hidden',
+		]);
 		svg.appendChild(path);
 
 		const path2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 		path2.setAttribute('d', icon.hover);
-		this.addClasses(path2, ['hidden', 'group-hover/button:flex']);
+		this.addClasses(path2, [
+			'hidden',
+			'group-hover/button:flex',
+			'group-hover/volume:flex',
+		]);
 		svg.appendChild(path2);
 
 		parent.appendChild(svg);
@@ -558,7 +579,6 @@ export default class UI extends Functions {
 		this.createSVGElement(settingsButton, 'settings', this.buttons.settings);
 
 		settingsButton.addEventListener('click', () => {
-			console.log('settings click', this.menuOpen, this.mainMenuOpen);
 			if (this.menuOpen && this.mainMenuOpen) {
 				this.dispatchEvent('show-menu', false);
 			} else if (!this.menuOpen && this.mainMenuOpen) {
@@ -748,11 +768,28 @@ export default class UI extends Functions {
 
 	createVolumeButton(parent: HTMLDivElement) {
 		if (this.isMobile()) return;
+
+		const volumeContainer = document.createElement('div');
+
+		this.addClasses(volumeContainer, this.volumeContainerStyles);
+
 		const volumeButton = this.createButton(
-			parent,
+			volumeContainer,
 			'volume'
 		);
 		volumeButton.title = this.buttons.volumeHigh?.title;
+
+		const volumeSlider = document.createElement('input');
+		volumeSlider.type = 'range';
+		volumeSlider.min = '0';
+		volumeSlider.max = '100';
+		volumeSlider.step = '1';
+		volumeSlider.value = this.getVolume().toString();
+		volumeSlider.style.backgroundSize = `${this.getVolume()}% 100%`;
+
+		this.addClasses(volumeSlider, this.volumeSliderStyles);
+
+		volumeContainer.append(volumeSlider);
 
 		const mutedButton = this.createSVGElement(volumeButton, 'volumeMuted', this.buttons.volumeMuted, true);
 		const lowButton = this.createSVGElement(volumeButton, 'volumeLow', this.buttons.volumeLow, true);
@@ -764,45 +801,70 @@ export default class UI extends Functions {
 			this.toggleMute();
 		});
 
+		volumeSlider.addEventListener('input', (event) => {
+			event.stopPropagation();
+			volumeSlider.style.backgroundSize = `${volumeSlider.value}% 100%`;
+			this.setVolume(parseFloat(volumeSlider.value));
+		});
+
+		volumeContainer.addEventListener('wheel', (event) => {
+			event.preventDefault();
+			const delta = (event.deltaY === 0) ? -event.deltaX : -event.deltaY;
+			if (delta === 0) {
+				return;
+			}
+
+			volumeSlider.style.backgroundSize = `${volumeSlider.value}% 100%`;
+			volumeSlider.value = (parseFloat(volumeSlider.value) + (delta / 20)).toString();
+			this.setVolume(parseFloat(volumeSlider.value));
+		});
+
 		this.on('volume', (data) => {
-			if (this.isMuted()) {
-				lowButton.style.display = 'none';
-				mediumButton.style.display = 'none';
-				highButton.style.display = 'none';
-
-				mutedButton.style.display = 'flex';
-			} else if (data.volume <= 0.3) {
-				mediumButton.style.display = 'none';
-				highButton.style.display = 'none';
-				mutedButton.style.display = 'none';
-
-				lowButton.style.display = 'flex';
-			} else if (data.volume <= 0.6) {
-				lowButton.style.display = 'none';
-				highButton.style.display = 'none';
-				mutedButton.style.display = 'none';
-
-				mediumButton.style.display = 'flex';
-			} else {
-				lowButton.style.display = 'none';
-				mediumButton.style.display = 'none';
-				mutedButton.style.display = 'none';
-
-				highButton.style.display = 'flex';
-			}
+			this.volumeHandle(data, mutedButton, lowButton, mediumButton, highButton);
+			volumeSlider.style.backgroundSize = `${data.volume}% 100%`;
 		});
-		this.on('mute', () => {
-			if (this.isMuted()) {
-				highButton.style.display = 'none';
-				mutedButton.style.display = 'flex';
+
+		this.on('mute', (data) => {
+			this.volumeHandle(data, mutedButton, lowButton, mediumButton, highButton);
+			if (data.mute) {
+				volumeSlider.style.backgroundSize = `${0}% 100%`;
 			} else {
-				mutedButton.style.display = 'none';
-				highButton.style.display = 'flex';
+				volumeSlider.style.backgroundSize = `${this.getVolume()}% 100%`;
 			}
 		});
 
-		parent.append(volumeButton);
-		return volumeButton;
+		parent.append(volumeContainer);
+		return volumeContainer;
+	}
+
+	volumeHandle(
+		data: VolumeState,
+		mutedButton: SVGSVGElement,
+		lowButton: SVGSVGElement,
+		mediumButton: SVGSVGElement,
+		highButton: SVGSVGElement
+	) {
+		if (this.isMuted() || data.volume == 0) {
+			lowButton.style.display = 'none';
+			mediumButton.style.display = 'none';
+			highButton.style.display = 'none';
+			mutedButton.style.display = 'flex';
+		} else if (data.volume <= 30) {
+			mediumButton.style.display = 'none';
+			highButton.style.display = 'none';
+			mutedButton.style.display = 'none';
+			lowButton.style.display = 'flex';
+		} else if (data.volume <= 60) {
+			lowButton.style.display = 'none';
+			highButton.style.display = 'none';
+			mutedButton.style.display = 'none';
+			mediumButton.style.display = 'flex';
+		} else {
+			lowButton.style.display = 'none';
+			mediumButton.style.display = 'none';
+			mutedButton.style.display = 'none';
+			highButton.style.display = 'flex';
+		}
 	}
 
 	createPreviousButton(parent: HTMLDivElement) {
@@ -1123,8 +1185,12 @@ export default class UI extends Functions {
 
 		playlistButton.addEventListener('click', (event) => {
 			event.stopPropagation();
-			console.log(this.getPlaylist());
-			// this.togglePlaylists();
+
+			if (this.playlistMenuOpen) {
+				this.dispatchEvent('show-menu', false);
+			} else {
+				this.dispatchEvent('show-playlist-menu', true);
+			}
 		});
 
 		this.on('item', () => {
@@ -1164,7 +1230,6 @@ export default class UI extends Functions {
 
 		speedButton.addEventListener('click', (event) => {
 			event.stopPropagation();
-			console.log(this.getSpeeds());
 
 			if (this.speedMenuOpen) {
 				this.dispatchEvent('show-menu', false);
@@ -1218,6 +1283,7 @@ export default class UI extends Functions {
 				pipButton.querySelector<any>('.pip-exit').style.display = 'flex';
 				pipButton.title = this.buttons.pipExit?.title;
 				this.dispatchEvent('pip', true);
+				this.dispatchEvent('show-menu', false);
 			}
 		});
 
@@ -1266,6 +1332,7 @@ export default class UI extends Functions {
 			this.dispatchEvent('show-subtitles-menu', false);
 			this.dispatchEvent('show-quality-menu', false);
 			this.dispatchEvent('show-speed-menu', false);
+			this.dispatchEvent('show-playlist-menu', false);
 		});
 		this.on('show-main-menu', (showing) => {
 			this.mainMenuOpen = showing;
@@ -1275,6 +1342,7 @@ export default class UI extends Functions {
 				this.dispatchEvent('show-subtitles-menu', false);
 				this.dispatchEvent('show-quality-menu', false);
 				this.dispatchEvent('show-speed-menu', false);
+				this.dispatchEvent('show-playlist-menu', false);
 				menuContent.classList.add('translate-x-0');
 				menuContent.classList.remove('-translate-x-[50%]');
 				menuFrame.style.display = 'flex';
@@ -1288,6 +1356,7 @@ export default class UI extends Functions {
 				this.dispatchEvent('show-subtitles-menu', false);
 				this.dispatchEvent('show-quality-menu', false);
 				this.dispatchEvent('show-speed-menu', false);
+				this.dispatchEvent('show-playlist-menu', false);
 				menuContent.classList.remove('translate-x-0');
 				menuContent.classList.add('-translate-x-[50%]');
 				menuFrame.style.display = 'flex';
@@ -1301,6 +1370,7 @@ export default class UI extends Functions {
 				this.dispatchEvent('show-language-menu', false);
 				this.dispatchEvent('show-quality-menu', false);
 				this.dispatchEvent('show-speed-menu', false);
+				this.dispatchEvent('show-playlist-menu', false);
 				menuContent.classList.remove('translate-x-0');
 				menuContent.classList.add('-translate-x-[50%]');
 				menuFrame.style.display = 'flex';
@@ -1314,6 +1384,7 @@ export default class UI extends Functions {
 				this.dispatchEvent('show-language-menu', false);
 				this.dispatchEvent('show-subtitles-menu', false);
 				this.dispatchEvent('show-speed-menu', false);
+				this.dispatchEvent('show-playlist-menu', false);
 				menuContent.classList.remove('translate-x-0');
 				menuContent.classList.add('-translate-x-[50%]');
 				menuFrame.style.display = 'flex';
@@ -1327,9 +1398,27 @@ export default class UI extends Functions {
 				this.dispatchEvent('show-language-menu', false);
 				this.dispatchEvent('show-subtitles-menu', false);
 				this.dispatchEvent('show-quality-menu', false);
+				this.dispatchEvent('show-playlist-menu', false);
 				menuContent.classList.remove('translate-x-0');
 				menuContent.classList.add('-translate-x-[50%]');
 				menuFrame.style.display = 'flex';
+			}
+		});
+		this.on('show-playlist-menu', (showing) => {
+			this.playlistMenuOpen = showing;
+			if (showing) {
+				menuContent.style.height = this.growMenu(this.getSpeeds().length);
+				this.dispatchEvent('show-main-menu', false);
+				this.dispatchEvent('show-language-menu', false);
+				this.dispatchEvent('show-subtitles-menu', false);
+				this.dispatchEvent('show-quality-menu', false);
+				this.dispatchEvent('show-speed-menu', false);
+				menuContent.classList.remove('translate-x-0');
+				menuContent.classList.add('-translate-x-[50%]');
+				menuFrame.style.display = 'flex';
+				menuFrame.style.width = '80%';
+			} else {
+				menuFrame.style.width = '';
 			}
 		});
 		this.on('controls', (showing) => {
@@ -1340,6 +1429,7 @@ export default class UI extends Functions {
 				this.dispatchEvent('show-subtitles-menu', false);
 				this.dispatchEvent('show-quality-menu', false);
 				this.dispatchEvent('show-speed-menu', false);
+				this.dispatchEvent('show-playlist-menu', false);
 			}
 		});
 
@@ -1364,6 +1454,12 @@ export default class UI extends Functions {
 			if (this.getQualities().length > 1) {
 				height += size;
 			}
+
+            this.once('item', () => {
+				if (this.getPlaylist().length > 1) {
+					height += size;
+				}
+			});
 		} else {
 			height += (childCount + 1) * size;
 		}
@@ -1385,6 +1481,7 @@ export default class UI extends Functions {
 		this.createMenuButton(main, 'subtitles');
 		this.createMenuButton(main, 'quality');
 		this.createMenuButton(main, 'speed');
+		this.createMenuButton(main, 'playlist');
 
 		parent.appendChild(main);
 
@@ -1405,6 +1502,10 @@ export default class UI extends Functions {
 		this.createSubtitleMenu(submenu);
 		this.createQualityMenu(submenu);
 		this.createSpeedMenu(submenu);
+
+		this.once('item', () => {
+			this.createEpisodeMenu(submenu);
+		});
 
 		parent.appendChild(submenu);
 
@@ -1429,6 +1530,7 @@ export default class UI extends Functions {
 			this.dispatchEvent('show-subtitles-menu', false);
 			this.dispatchEvent('show-quality-menu', false);
 			this.dispatchEvent('show-speed-menu', false);
+			this.dispatchEvent('show-playlist-menu', false);
 		});
 
 		const menuButtonText = document.createElement('span');
@@ -1499,6 +1601,14 @@ export default class UI extends Functions {
 		} else if (item === 'quality') {
 			this.on('quality', () => {
 				if (this.getQualities().length > 1) {
+					menuButton.style.display = 'flex';
+				} else {
+					menuButton.style.display = 'none';
+				}
+			});
+		} else if (item === 'playlist') {
+            this.once('item', () => {
+				if (this.getPlaylist().length > 1) {
 					menuButton.style.display = 'flex';
 				} else {
 					menuButton.style.display = 'none';
@@ -1613,7 +1723,7 @@ export default class UI extends Functions {
 			speedButtonText.classList.add('menu-button-text');
 			this.addClasses(speedButtonText, this.speedButtonTextStyles);
 
-			speedButtonText.textContent = speed == 1 ? this.localize('Normal') : speed;
+			speedButtonText.textContent = speed == 1 ? this.localize('Normal') : speed.toString();
 			speedButton.append(speedButtonText);
 
 			const chevron = this.createSVGElement(speedButton, 'menu', this.buttons.checkmark);
@@ -1622,9 +1732,17 @@ export default class UI extends Functions {
 				'hidden',
 			]);
 
+			this.on('speed', (event) => {
+				if (event === speed) {
+					chevron.classList.remove('hidden');
+				} else {
+					chevron.classList.add('hidden');
+				}
+			});
+
 			speedButton.addEventListener('click', () => {
 				this.dispatchEvent('show-menu', false);
-				//
+				this.setSpeed(speed);
 			});
 
 			scrollContainer.append(speedButton);
@@ -1764,7 +1882,7 @@ export default class UI extends Functions {
 				text.textContent = `${Math.abs(val)} ${this.localize('seconds')}`;
 				seekRipple.style.display = 'flex';
 			});
-			this.on('removeRewind', () => {
+			this.on('remove-rewind', () => {
 				seekRipple.style.display = 'none';
 			});
 		} else if (side == 'right') {
@@ -1779,7 +1897,7 @@ export default class UI extends Functions {
 				text.textContent = `${Math.abs(val)} ${this.localize('seconds')}`;
 				seekRipple.style.display = 'flex';
 			});
-			this.on('removeForward', () => {
+			this.on('remove-forward', () => {
 				seekRipple.style.display = 'none';
 			});
 		}
@@ -1797,17 +1915,28 @@ export default class UI extends Functions {
 		sliderBuffer.id = 'slider-buffer';
 		this.addClasses(sliderBuffer, this.sliderBufferStyles);
 
+		sliderBar.append(sliderBuffer);
+
 		const sliderProgress = document.createElement('div');
 		sliderProgress.id = 'slider-progress';
 		this.addClasses(sliderProgress, this.sliderProgressStyles);
 		sliderBar.append(sliderProgress);
 
+		this.on('chapters', () => {
+			if (this.getChapters()?.length > 0) {
+				sliderProgress.classList.remove('bg-purple-600');
+				sliderBuffer.classList.remove('bg-purple-900/50');
+			} else {
+				sliderProgress.classList.add('bg-purple-600');
+				sliderBuffer.classList.add('bg-purple-900/50');
+			}
+		});
+
+
 		this.chapterBar = document.createElement('div');
 		this.chapterBar.id = 'chapter-progress';
 		this.addClasses(this.chapterBar, this.chapterBarStyles);
 		sliderBar.append(this.chapterBar);
-
-		sliderBar.append(sliderBuffer);
 
 		const sliderNipple = document.createElement('div');
 		this.addClasses(sliderNipple, this.sliderNippleStyles);
@@ -1901,6 +2030,14 @@ export default class UI extends Functions {
 			this.chapters = [];
 		});
 
+		this.on('chapters', () => {
+			if (this.getChapters()?.length > 0) {
+				sliderBar.classList.remove('bg-white/60');
+			} else {
+				sliderBar.classList.add('bg-white/60');
+			}
+		});
+
 		this.on('time', (data) => {
 			sliderBuffer.style.width = `${data.buffered}%`;
 			sliderProgress.style.width = `${data.percentage}%`;
@@ -1931,7 +2068,10 @@ export default class UI extends Functions {
 		const index = this.getChapters().findIndex((chapter: Chapter) => {
 			return chapter.startTime > scrubTimePlayer;
 		});
-		return this.getChapters()[index - 1]?.title ?? null;
+
+		return this.getChapters()[index - 1]?.title
+			?? this.getChapters()[this.getChapters().length - 1]?.title
+			?? null;
 	}
 
 	createChapterMarker(chapter: Chapter) {
@@ -2077,5 +2217,253 @@ export default class UI extends Functions {
 			scrubTime: (offsetX / sliderBar.offsetWidth) * 100,
 			scrubTimePlayer: (offsetX / sliderBar.offsetWidth) * this.duration(),
 		};
+	}
+
+	createOverlayCenterMessage (parent: HTMLDivElement) {
+		const playerMessage = document.createElement('div');
+
+		playerMessage.id = 'player-message';
+		this.addClasses(playerMessage, this.playerMessageStyles);
+		playerMessage.classList.add('player-message');
+
+		this.on('display-message', (val: string | null) => {
+			playerMessage.style.display = 'flex';
+			playerMessage.textContent = val;
+		});
+		this.on('remove-message', () => {
+			playerMessage.style.display = 'none';
+			playerMessage.textContent = '';
+		});
+
+		parent.append(playerMessage);
+
+		return playerMessage;
+	};
+
+
+	createEpisodeMenu(parent: HTMLDivElement) {
+		const playlistMenu = document.createElement('div');
+		playlistMenu.id = 'playlist-menu';
+		this.addClasses(playlistMenu, this.subMenuContentStyles);
+
+		this.createMenuHeader(playlistMenu, 'playlist');
+
+		const scrollContainer = document.createElement('div');
+		scrollContainer.id = 'playlist-scroll-container';
+		scrollContainer.style.transform = 'translateX(0)';
+
+		this.addClasses(scrollContainer, this.scrollContainerStyles);
+		playlistMenu.appendChild(scrollContainer);
+
+		scrollContainer.innerHTML = '';
+		for (const [index, item] of this.getPlaylist().entries() ?? []) {
+			this.createPlaylistMenuButton(scrollContainer, item, index);
+		}
+
+		this.on('show-playlist-menu', (showing) => {
+			if (showing) {
+				playlistMenu.style.display = 'flex';
+			} else {
+				playlistMenu.style.display = 'none';
+			}
+		});
+
+		parent.appendChild(playlistMenu);
+		return playlistMenu;
+	}
+
+	createPlaylistMenuButton(parent: HTMLDivElement, item: PlaylistItem, index: number) {
+		const button = document.createElement('button');
+		button.id = `playlist-${item.id}`;
+
+		console.log(item);
+
+		this.addClasses(button, this.playlistMenuButtonStyles);
+
+		// if (item.episode && item.season) {
+		// 	button.textContent = `S${this.pad(item.season)}S${this.pad(item.episode)} - ${item.title}`;
+		// } else {
+		// 	button.textContent = `${this.pad(index + 1, this.getPlaylist().length.toString().length)} - ${item.title}`;
+		// }
+
+		const imageBaseUrl = 'https://image.tmdb.org/t/p';
+
+		const leftSide = document.createElement('div');
+		leftSide.id = `playlist-${item.id}-left`;
+		this.addClasses(leftSide, [
+			'playlist-card-left',
+			'relative',
+			'rounded-md',
+			'w-1/4',
+			'overflow-clip',
+			'',
+			'',
+		]);
+		button.append(leftSide);
+
+		const shadow = document.createElement('div');
+		shadow.id = `episode-${item.id}-shadow`;
+		this.addClasses(shadow, [
+			'episode-card-shadow',
+			'bg-[linear-gradient(0deg,rgba(0,0,0,0.87)_0%,rgba(0,0,0,0.7)_25%,rgba(0,0,0,0)_50%,rgba(0,0,0,0)_100%)]',
+			'shadow-[inset_0px_1px_0px_rgba(255,255,255,0.24),inset_0px_-1px_0px_rgba(0,0,0,0.24),inset_0px_-2px_0px_rgba(0,0,0,0.24)]',
+			'bottom-0',
+			'left-0',
+			'absolute',
+			'!h-full',
+			'',
+			'',
+		]);
+		shadow.style.margin = item.video_type == 'movie' ? '0px 30%' : '0';
+		shadow.style.width = item.video_type == 'movie' ? 'calc(120px / 3 * 2)' : '100%';
+		leftSide.append(shadow);
+
+		const image = document.createElement('img');
+		image.id = `playlist-${item.id}-image`;
+		this.addClasses(image, [
+			'playlist-card-image',
+			'',
+		]);
+		image.setAttribute('loading', 'lazy');
+		image.src = item.image && item.image != '' ? `${imageBaseUrl}/w185${item.image}` : '';
+
+		leftSide.append(image);
+
+		const progressContainer = document.createElement('div');
+		progressContainer.id = `episode-${item.id}-progress-container`;
+		this.addClasses(progressContainer, [
+			'progress-container',
+			'absolute',
+			'bottom-0',
+			'w-full',
+			'flex',
+			'flex-col',
+			'',
+		]);
+		leftSide.append(progressContainer);
+
+		const progressContainerItemBox = document.createElement('div');
+		progressContainerItemBox.id = `episode-${item.id}-progress-box`;
+		this.addClasses(progressContainerItemBox, [
+			'progress-box',
+			'flex',
+			'justify-between',
+			'h-full',
+			'mx-2',
+			'mb-1',
+			'',
+		]);
+
+		const progressContainerItemText = document.createElement('div');
+		progressContainerItemText.id = `episode-${item.id}-progress-item`;
+		this.addClasses(progressContainerItemText, [
+			'progress-item',
+			'',
+		]);
+
+
+		progressContainer.append(progressContainerItemBox);
+		progressContainerItemText.innerText = `${this.localize('E')}${item.episode}`;
+		progressContainerItemBox.append(progressContainerItemText);
+
+		const progressContainerDurationText = document.createElement('div');
+		progressContainerDurationText.id = `episode-${item.id}-progress-duration`;
+		this.addClasses(progressContainerDurationText, [
+			'progress-duration',
+			'',
+			'',
+		]);
+		progressContainerDurationText.innerText = item.duration?.replace(/^00:/u, '');
+		progressContainerItemBox.append(progressContainerDurationText);
+
+		const sliderContainer = document.createElement('div');
+		sliderContainer.id = `episode-${item.id}-slider-container`;
+		this.addClasses(sliderContainer, [
+			'slider-container',
+			'rounded-md',
+			'overflow-clip',
+			'bg-white',
+			'h-1',
+			'mb-2',
+			'mx-2',
+			'',
+		]);
+		sliderContainer.style.display = item.progress ? 'flex' : 'none';
+		progressContainer.append(sliderContainer);
+
+		const progressBar = document.createElement('div');
+		progressBar.id = `episode-${item.id}-progress-bar`;
+		this.addClasses(progressBar, [
+			'progress-bar',
+			'bg-purple-400',
+			'w-1/2',
+		]);
+		if (item.progress) {
+			progressBar.style.width = `${item.progress > 99 ? 100 : item.progress}%`;
+		}
+		sliderContainer.append(progressBar);
+
+		const rightSide = document.createElement('div');
+		rightSide.id = `playlist-${item.id}-right-side`;
+		this.addClasses(rightSide, [
+			'playlist-card-right',
+			'w-3/4',
+			'flex',
+			'flex-col',
+			'text-left',
+			'gap-1',
+		]);
+		button.append(rightSide);
+
+		const title = document.createElement('span');
+		title.id = `playlist-${item.id}-title`;
+		this.addClasses(title, [
+			'playlist-card-title',
+			'font-bold',
+			'',
+		]);
+		title.textContent = this.lineBreakShowTitle(item.title.replace('%S', this.localize('S')).replace('%E', this.localize('E')));
+		rightSide.append(title);
+
+		const overview = document.createElement('span');
+		overview.id = `playlist-${item.id}-overview`;
+		this.addClasses(overview, [
+			'playlist-card-overview',
+			'text-sm',
+			'leading-[1rem]',
+			'',
+		]);
+		overview.textContent = this.limitSentenceByCharacters(item.description, 600);
+		rightSide.append(overview);
+
+		// this.on('playlistitem', () => {
+		// 	if (player.nomercy.current().item.season == item.season) {
+		// 		episode.style.display = 'flex';
+		// 	} else {
+		// 		episode.style.display = 'none';
+		// 	}
+
+		// 	if (player.nomercy.current().item.season == item.season && player.nomercy.current().item.episode == item.episode) {
+		// 		episode.style.background = 'rgba(255,255,255,.1)';
+		// 	} else {
+		// 		episode.style.background = 'transparent';
+		// 	}
+		// });
+
+		progressContainerItemText.innerText
+			= item.season ? `${this.localize('S')}${item.season}: ${this.localize('E')}${item.episode}` : `${item.episode}`;
+
+
+		button.addEventListener('click', () => {
+			if (item.episode && item.season) {
+				this.setEpisode(item.season, item.episode);
+			} else {
+				this.setPlaylistItem(index);
+			}
+			this.dispatchEvent('playlist-menu-button-clicked', item);
+		});
+
+		parent.appendChild(button);
+		return button;
 	}
 }

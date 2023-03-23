@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
         "autoadvance",
+        "autoload",
         "autoplay",
         "autoselect",
         "beforeplaylistitem",
@@ -26,6 +27,7 @@
         "seekbackward",
         "seekforward",
         "seekto",
+        "spritesheet",
         "tailwindcss",
         "thumbsheet",
         "tnum",

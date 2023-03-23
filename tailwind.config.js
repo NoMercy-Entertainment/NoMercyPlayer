@@ -1,3 +1,5 @@
+const plugin = require('tailwindcss/plugin')
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
 	mode: 'jit',
@@ -36,8 +38,27 @@ module.exports = {
 					'stretch',
 				],
 			},
+
+		},
+	},
+	variants: {
+		extend: {
+			last: ['translate-x', 'translate-y'],
 		},
 	},
 	plugins: [
+		require('@tailwindcss/forms'),
+		plugin(({ addVariant }) => {
+			addVariant('range-track', [
+				'&::-webkit-slider-runnable-track',
+				'&::-moz-range-track',
+				'&::-ms-track'
+			]);
+			addVariant('range-thumb', [
+				'&::-webkit-slider-thumb',
+				'&::-moz-range-thumb',
+				'&::-ms-thumb',
+			]);
+		}),
 	],
 };

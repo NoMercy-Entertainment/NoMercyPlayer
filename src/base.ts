@@ -25,6 +25,9 @@ export default class Base {
 	message: NodeJS.Timeout = <NodeJS.Timeout>{};
 	overlay: HTMLDivElement = <HTMLDivElement>{};
 
+	lock = false;
+	controlsVisible = true;
+
 	constructor(playerType: Types['playerType'], options: VideoPlayerOptions, playerId: Types['playerId'] = '') {
 
 		this.setupTime = Date.now();
@@ -42,7 +45,7 @@ export default class Base {
 
 		this.#overrides();
 
-		this.createStyles();
+		this.#createStyles();
 
 		if (playerType === 'videojs') {
 			this.isVideojs = true;
@@ -326,7 +329,7 @@ export default class Base {
 		}
 	}
 
-	createStyles() {
+	#createStyles() {
 
 		this.addClasses(this.getElement(), ['nomercyplayer']);
 		// reset jwplayer styles
@@ -569,13 +572,13 @@ export default class Base {
 					break;
 				case 'loadedmetadata': // videojs
 					this.dispatchEvent('duration', this.#getTimeState(data));
-					this.dispatchEvent('audio', this.getAudioState());
+					this.dispatchEvent('audio', this.#getAudioState());
 					this.dispatchEvent('captions', this.getCaptionState());
 					break;
 				case 'loadstart': // videojs
 					break;
 				case 'mute':
-					this.dispatchEvent('mute', data);
+					this.dispatchEvent('mute', this.#getPlaybackState(data));
 					break;
 				case 'pause':
 					this.dispatchEvent('pause', data);
@@ -599,6 +602,7 @@ export default class Base {
 				case 'playlistsorted':
 					break;
 				case 'ratechange':
+					this.dispatchEvent('speed', data);
 					break;
 				case 'resize':
 					break;
@@ -637,16 +641,17 @@ export default class Base {
 		if (this.isVideojs) {
 			const audioTrackList = this.player.audioTracks();
 			audioTrackList.addEventListener('change', () => {
-				this.dispatchEvent('audio-change', this.getAudioState());
+				this.dispatchEvent('audio-change', this.#getAudioState());
 			});
 		}
+		this.once('overlay', () => this.#createStyles());
 	}
 
-	getAudioState(): AudioEvent {
+	#getAudioState(): AudioEvent {
 		return {
 			// eslint-disable-next-line max-len
 			currentTrack: this.player.audioTracks().tracks_?.findIndex((track: any) =>
-				track.language == this.player.audioTracks().tracks_.find((t: any) => t.enabled).language) ?? 0,
+				track.language == this.player.audioTracks().tracks_.find((t: any) => t.enabled)?.language) ?? 0,
 			tracks: this.player.audioTracks().tracks_,
 			type: 'audioTracks',
 		};
@@ -713,6 +718,7 @@ export default class Base {
 
 	#getPlaybackState(data: any) {
 		if (this.isJwplayer) {
+			data.volume = this.player.getVolume();
 			return data;
 		}
 		return {
@@ -737,11 +743,11 @@ export default class Base {
 			this.#fetchPlaylist(this.options.playlist)
 				.then((json) => {
 					this.player.playlist(json, 0);
-					this.player.playlist.autoadvance(1);
+					this.player.playlist.autoadvance(0);
 				});
 		} else if (Array.isArray(this.options.playlist)) {
 			this.player.playlist(this.options.playlist, 0);
-			this.player.playlist.autoadvance(1);
+			this.player.playlist.autoadvance(0);
 		}
 	}
 
@@ -808,11 +814,14 @@ export default class Base {
 	on(event: 'captions', callback: (data: CaptionsEvent) => void): void;
 	on(event: 'chapters', callback: (data: Chapter[]) => void): void;
 	on(event: 'controls', callback: (showing: boolean) => void): void;
+	on(event: 'display-message', callback: (value: string) => void): void;
+	on(event: 'remove-message', callback: (value: string) => void): void;
 	on(event: 'duration', callback: (data: PlaybackState) => void): void;
 	on(event: 'forward', callback: (amount: number) => void): void;
 	on(event: 'fullscreen', callback: () => void): void;
 	on(event: 'item', callback: () => void): void;
-	on(event: 'mute', callback: () => void): void;
+	on(event: 'mute', callback: (data: VolumeState) => void): void;
+	on(event: 'overlay', callback: () => void): void;
 	on(event: 'pause', callback: () => void): void;
 	on(event: 'pip', callback: (enabled: boolean) => void): void;
 	on(event: 'play', callback: () => void): void;
@@ -820,8 +829,8 @@ export default class Base {
 	on(event: 'pop-image', callback: (url: string) => void): void;
 	on(event: 'quality', callback: (data: number[]) => void): void;
 	on(event: 'ready', callback: () => void): void;
-	on(event: 'removeForward', callback: () => void): void;
-	on(event: 'removeRewind', callback: () => void): void;
+	on(event: 'remove-forward', callback: () => void): void;
+	on(event: 'remove-rewind', callback: () => void): void;
 	on(event: 'resize', callback: (data: any) => void): void;
 	on(event: 'rewind', callback: (amount: number) => void): void;
 	on(event: 'seeked', callback: () => void): void;
@@ -831,6 +840,8 @@ export default class Base {
 	on(event: 'show-quality-menu', callback: (open: boolean) => void): void;
 	on(event: 'show-speed-menu', callback: (open: boolean) => void): void;
 	on(event: 'show-subtitles-menu', callback: (open: boolean) => void): void;
+	on(event: 'show-playlist-menu', callback: (open: boolean) => void): void;
+	on(event: 'speed', callback: (enabled: number) => void): void;
 	on(event: 'theaterMode', callback: (enabled: boolean) => void): void;
 	on(event: 'time', callback: (data: PlaybackState) => void): void;
 	on(event: 'volume', callback: (data: VolumeState) => void): void;
@@ -844,11 +855,14 @@ export default class Base {
 	off(event: 'captions', callback: () => void): void;
 	off(event: 'chapters', callback: () => void): void;
 	off(event: 'controls', callback: () => void): void;
+	off(event: 'display-message', callback: () => void): void;
+	off(event: 'remove-message', callback: () => void): void;
 	off(event: 'duration', callback: () => void): void;
 	off(event: 'forward', callback: () => void): void;
 	off(event: 'fullscreen', callback: () => void): void;
 	off(event: 'item', callback: () => void): void;
 	off(event: 'mute', callback: () => void): void;
+	off(event: 'overlay', callback: () => void): void;
 	off(event: 'pause', callback: () => void): void;
 	off(event: 'pip', callback: () => void): void;
 	off(event: 'play', callback: () => void): void;
@@ -856,8 +870,8 @@ export default class Base {
 	off(event: 'pop-image', callback: () => void): void;
 	off(event: 'quality', callback: () => void): void;
 	off(event: 'ready', callback: () => void): void;
-	off(event: 'removeForward', callback: () => void): void;
-	off(event: 'removeRewind', callback: () => void): void;
+	off(event: 'remove-forward', callback: () => void): void;
+	off(event: 'remove-rewind', callback: () => void): void;
 	off(event: 'resize', callback: () => void): void;
 	off(event: 'rewind', callback: () => void): void;
 	off(event: 'seeked', callback: () => void): void;
@@ -867,6 +881,8 @@ export default class Base {
 	off(event: 'show-quality-menu', callback: () => void): void;
 	off(event: 'show-speed-menu', callback: () => void): void;
 	off(event: 'show-subtitles-menu', callback: () => void): void;
+	off(event: 'show-playlist-menu', callback: () => void): void;
+	off(event: 'speed', callback: () => void): void;
 	off(event: 'theaterMode', callback: () => void): void;
 	off(event: 'time', callback: () => void): void;
 	off(event: 'volume', callback: () => void): void;
@@ -880,11 +896,14 @@ export default class Base {
 	once(event: 'captions', callback: (data: CaptionsEvent) => void): void;
 	once(event: 'chapters', callback: (data: Chapter[]) => void): void;
 	once(event: 'controls', callback: (showing: boolean) => void): void;
+	once(event: 'display-message', callback: (value: string) => void): void;
+	once(event: 'remove-message', callback: (value: string) => void): void;
 	once(event: 'duration', callback: (data: PlaybackState) => void): void;
 	once(event: 'forward', callback: (amount: number) => void): void;
 	once(event: 'fullscreen', callback: () => void): void;
 	once(event: 'item', callback: () => void): void;
-	once(event: 'mute', callback: () => void): void;
+	once(event: 'mute', callback: (data: VolumeState) => void): void;
+	once(event: 'overlay', callback: () => void): void;
 	once(event: 'pause', callback: () => void): void;
 	once(event: 'pip', callback: (enabled: boolean) => void): void;
 	once(event: 'play', callback: () => void): void;
@@ -892,8 +911,8 @@ export default class Base {
 	once(event: 'pop-image', callback: (url: string) => void): void;
 	once(event: 'quality', callback: (data: number[]) => void): void;
 	once(event: 'ready', callback: () => void): void;
-	once(event: 'removeForward', callback: () => void): void;
-	once(event: 'removeRewind', callback: () => void): void;
+	once(event: 'remove-forward', callback: () => void): void;
+	once(event: 'remove-rewind', callback: () => void): void;
 	once(event: 'resize', callback: (data: any) => void): void;
 	once(event: 'rewind', callback: (amount: number) => void): void;
 	once(event: 'seeked', callback: () => void): void;
@@ -903,6 +922,8 @@ export default class Base {
 	once(event: 'show-quality-menu', callback: (open: boolean) => void): void;
 	once(event: 'show-speed-menu', callback: (open: boolean) => void): void;
 	once(event: 'show-subtitles-menu', callback: (open: boolean) => void): void;
+	once(event: 'show-playlist-menu', callback: (open: boolean) => void): void;
+	once(event: 'speed', callback: (enabled: number) => void): void;
 	once(event: 'theaterMode', callback: (enabled: boolean) => void): void;
 	once(event: 'time', callback: (data: PlaybackState) => void): void;
 	once(event: 'volume', callback: (data: VolumeState) => void): void;
@@ -912,9 +933,9 @@ export default class Base {
 
 	displayMessage(data: string, time = 2000) {
 		clearTimeout(this.message);
-		this.dispatchEvent('displayMessage', data);
+		this.dispatchEvent('display-message', data);
 		this.message = setTimeout(() => {
-			this.dispatchEvent('removeMessage', data);
+			this.dispatchEvent('remove-message', data);
 		}, time);
 	}
 
@@ -1057,7 +1078,6 @@ export default class Base {
 					...item.tracks?.filter(t => t.kind !== 'captions') ?? [],
 				];
 			} else {
-				delete newItem.image;
 				delete newItem.file;
 				delete newItem.tracks;
 
@@ -1113,5 +1133,31 @@ export default class Base {
 		const currentScriptChunks = currentScript.split('/');
 		const currentScriptFile = currentScriptChunks[currentScriptChunks.length - 1];
 		return currentScript.replace(currentScriptFile, '');
+	};
+
+	limitSentenceByCharacters(str: string, characters = 360) {
+		if (!str) {
+			return '';
+		}
+		const arr: any = str.substring(0, characters).split('.');
+		arr.pop(arr.length);
+		return `${arr.join('.')}.`;
+	};
+
+	lineBreakShowTitle(str: string, removeShow = false) {
+		if (!str) {
+			return '';
+		}
+		const ep = str.match(/S\d{2}E\d{2}/u);
+
+		if (ep) {
+			const arr = str.split(/\sS\d{2}E\d{2}\s/u);
+			if (removeShow) {
+				return `${ep[0]} ${arr[1]}`;
+			}
+			return `${arr[0]} \n${ep[0]} ${arr[1]}`;
+		}
+
+		return str;
 	};
 }

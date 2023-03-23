@@ -25,15 +25,19 @@ export interface AudioEvent {
 }
 export interface AudioEventTrack {
     autoselect: boolean;
+    defaulttrack: boolean;
+    enabled: boolean;
     groupid: string;
     hlsjsIndex: number;
+    id: string;
+    kind: string;
     label: string;
     language: string;
     name: string;
-    defaulttrack: boolean;
 }
 export interface AudioTrack {
     [key: string]: any;
+    tracks_: AudioEventTrack[];
 };
 export interface CaptionsEvent {
     track: number;
@@ -42,20 +46,20 @@ export interface CaptionsEvent {
 }
 
 export interface CaptionsEventTrack {
-	src: string;
     id: string;
     label: string;
     language: string;
+    src: string;
 }
 
 export interface Chapter {
-	left: number;
     endTitle: number;
     id: string;
+    left: number;
+    startTime: number;
     time: number;
-	startTime: number;
-	title: string;
-	width: number;
+    title: string;
+    width: number;
 }
 
 export interface Font {
@@ -73,29 +77,138 @@ export interface PlaybackState {
     viewable: boolean;
 };
 
+export interface Player {
+    audioTracks: () => AudioTrack[] & {
+        addEventListener: (event: 'change', callback: (event: AudioEvent) => void) => void;
+        tracks_: AudioEventTrack[];
+    };
+    buffered: () => TimeRanges;
+    bufferedEnd: () => number;
+    captionsList: () => CaptionsEventTrack[];
+    currentTime: (() => number) & ((position: number) => void);
+    cycleAudioTracks: () => void;
+    cycleSubtitles: () => void;
+    duration: () => number;
+    el_: HTMLElement;
+    ended: () => boolean;
+    exitFullscreen: () => void;
+    forwardVideo: (arg?: number) => void,
+    getAudioTrack: () => AudioTrack;
+    getAudioTrackIndex: () => number;
+    getAudioTracks: () => AudioTrack[];
+    getBuffer: () => number;
+    getCaptionsList: () => CaptionsEventTrack[];
+    getCurrentAudioTrack: () => number;
+    getCurrentCaptions: () => number;
+    getCurrentQuality: () => number;
+    getDuration: () => number;
+    getFullscreen: () => boolean;
+    getMute: () => boolean;
+    getPlaybackRate: () => number;
+    getPlaylist: () => PlaylistItem[];
+    getPlaylistIndex: () => number;
+    getPlaylistItem: (index?: number) => PlaylistItem;
+    getPosition: () => number;
+    getQualityLevels: () => QualityTrack[];
+    getState: () => 'playing' | 'paused' | 'buffering' | 'idle';
+    getViewable: () => boolean;
+    getVisualQuality: () => QualityTrack;
+    getVolume: () => number;
+    isFullscreen: () => boolean;
+    landscapeFullscreen: (arg: {
+        fullscreen: {
+            alwaysInLandscapeMode: boolean,
+            enterOnRotate: boolean,
+            exitOnRotate: boolean,
+            iOS: boolean,
+        },
+    }) => void;
+    load: (playlist: PlaylistItem[]) => void;
+    loadItem: (index: number) => void;
+    muted: (value?: boolean) => boolean;
+    next: () => void;
+    off: (event: string, callback: (event: any) => void) => void;
+    on: (event: string, callback: (event: any) => void) => void;
+    once: (event: string, callback: (event: any) => void) => void;
+    one: (event: string, callback: (event: any) => void) => void;
+    pause: () => void;
+    paused: () => boolean;
+    play: () => void;
+    playbackRate: ((speed: number) => void) & (() => number);
+    playbackRates: () => number[];
+    played: () => TimeRanges;
+    playlist: ((playlist: PlaylistItem[], autoloadIndex?: number) => void)
+        & (() => PlaylistItem[])
+        & {
+            autoadvance: (delay?: number) => void;
+            currentItem: ((index?: number) => void) | (() => number);
+            previous: () => void;
+            next: () => void;
+            lastIndex: () => number;
+            currentIndex: () => number;
+        };
+    playlistItem: (index?: number) => PlaylistItem;
+    playlistNext: () => void;
+    playlistPrev: () => void;
+    previous: () => void;
+    qualityLevels: () => QualityTrack[] & {
+        addEventListener: (event: 'change', callback: (event: QualityEvent) => void) => void;
+        tracks_: QualityTrack[];
+        selectedIndex: number;
+    };
+    readyState: () => number;
+    requestFullscreen: () => void;
+    rewindVideo: () => void;
+    seek: (position: number) => void;
+    seekable: () => TimeRanges;
+    setCurrentAudioTrack: (index: number) => void;
+    setCurrentCaptions: (index: number) => void;
+    setCurrentQuality: (index: number) => void;
+    setFullscreen: (state: boolean) => void;
+    setMute: (state: boolean) => void;
+    setPlaybackRate: (rate: number) => void;
+    setPlaylist: (playlist: PlaylistItem[]) => void;
+    setPlaylistItem: (index: number) => void;
+    setup: (options: VideoPlayerOptions) => void;
+    setVolume: (volume: number) => void;
+    stop: () => void;
+    textTracks: () => TextTrack[] & {
+        addEventListener: (event: 'change', callback: (event: TextTrack) => void) => void;
+        tracks_: TextTrackTrack[];
+    };
+    toggleFullscreen: () => void;
+    toggleMute: () => void;
+    togglePlayback: () => void;
+    trigger: (event: string, callback: (event: any) => void) => void;
+    volume: (value?: number) => number;
+    volumeDown: () => void;
+    volumeUp: () => void;
+}
+
 export interface PlaylistItem {
     description: string;
     duration: string;
+    episode: number;
     file?: string;
+    fonts: Font[];
+    fonts: Font[];
+    fontsFile?: string;
     id: number;
     image?: string;
+    logo: string;
+    metadata: Track[];
     poster?: string;
     progress?: number;
+    rating: RatingClass;
+    season: number;
+    show: string;
     sources?: Source[];
-    title: string;
-
     textTracks?: TextTrack[];
+    title: string;
     tracks?: Track[];
-	metadata: Track[];
-
-    show?: string;
-    season?: number;
-    episode?: number;
-    year?: string;
-    logo?: string;
-    rating?: RatingClass;
-    fonts?: Font[];
-    fontsFile?: string;
+    year: string;
+    progress?: number;
+    video_type?: string;
 }
 
 export interface QualityTrack {
@@ -139,31 +252,31 @@ export interface Track {
 export interface VideoPlayer {
     events: string[];
     options: VideoPlayerOptions;
-    player: any;
+    player: Player;
     playerId: string;
-    playerType: 'jwplayer'|'videojs'|undefined;
+    playerType: 'jwplayer' | 'videojs' | undefined;
 }
 
 export interface VideoPlayerOptions {
-	debug?: boolean;
-	doubleClickDelay?: number;
     autoplay?: boolean;
-    buttonStyles?: any;
     buttons?: any;
+    buttonStyles?: any;
     controls?: boolean;
     controlsTimeout?: number;
+    debug?: boolean;
+    doubleClickDelay?: number;
+    playbackRates: number[];
     playerVersion?: string;
-    playlist: string| PlaylistItem[];
+    playlist: string | PlaylistItem[];
     playlistVersion?: string;
+    plugins?: any;
     scriptFiles?: string[];
     seekInterval?: number;
+    styles?: Style;
     token?: string;
-	playbackRates?: number[];
-	plugins?: any;
-	styles?: Style;
 }
 
 export interface VolumeState {
-    muted: boolean;
+    mute: boolean;
     volume: number;
 }

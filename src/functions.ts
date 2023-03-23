@@ -1,8 +1,8 @@
 import Base from './base.js';
+import { keyBindings } from './keyEvents.js';
 import SubtitlesOctopus from './octopus/subtitles-octopus.js';
 
-import type { VideoPlayerOptions, VideoPlayer as Types, TextTrack, AudioTrack, PlaylistItem } from './nomercyplayer.d';
-
+import type { VideoPlayerOptions, VideoPlayer as Types, TextTrack, PlaylistItem } from './nomercyplayer.d';
 export default class Functions extends Base {
 	tapCount = 0;
 	leftTap: NodeJS.Timeout = <NodeJS.Timeout>{};
@@ -25,6 +25,7 @@ export default class Functions extends Base {
 
 	#eventHandlers() {
 		this.on('item', () => {
+			this.dispatchEvent('speed', 1);
 			this.fetchChapterFile();
 			this.setMediaAPI();
 			this.once('play', () => {
@@ -62,6 +63,31 @@ export default class Functions extends Base {
 				});
 			});
 		});
+
+		this.keyEvents();
+	}
+
+	keyEvents() {
+		document.removeEventListener('keydown', this.keyHandler.bind(this), false);
+		document.addEventListener('keydown', this.keyHandler.bind(this), false);
+	};
+
+	keyHandler(event: KeyboardEvent) {
+		const keys = keyBindings(this);
+		let keyTimeout = false;
+
+		if (!keyTimeout && this.player) {
+			keyTimeout = true;
+
+			if (keys.some(k => k.key === event.key && k.control === event.ctrlKey)) {
+				event.preventDefault();
+				console.log(keys.find(k => k.key === event.key && k.control === event.ctrlKey));
+				keys.find(k => k.key === event.key && k.control === event.ctrlKey)?.function();
+			}
+		}
+		setTimeout(() => {
+			keyTimeout = false;
+		}, 300);
 	}
 
 	isPlaying() {
@@ -161,7 +187,7 @@ export default class Functions extends Base {
 	previous() {
 		if (this.isJwplayer) {
 			if (this.player.getPlaylistIndex() === 0) {
-				this.player.playlistItem(this.player.getPlaylist() - 1);
+				this.player.playlistItem(this.player.getPlaylistIndex() - 1);
 			} else {
 				this.player.playlistPrev();
 			}
@@ -352,12 +378,12 @@ export default class Functions extends Base {
 
 	getAudioTrackIndex() {
 		if (this.isJwplayer) {
-			return this.player.getAudioTrack();
+			return this.player.getCurrentAudioTrack();
 		}
 		let index = -1;
 		for (const track of this.player.audioTracks().tracks_) {
 			if (track.enabled) {
-				index = this.player.audioTracks().tracks_.findIndex((t: AudioTrack) => t.id == track.id);
+				index = this.player.audioTracks().tracks_.findIndex(t => t.id == track.id);
 			}
 		}
 		return index;
@@ -459,9 +485,9 @@ export default class Functions extends Base {
 			this.player.setCurrentCaptions(number);
 
 			if (index >= 0) {
-				const file = this.player.getCaptionsList()[this.player.getCurrentCaptions(number)]?.id;
+				const file = this.player.getCaptionsList()[this.player.getCurrentCaptions()]?.id;
 				if (file) {
-					const [language, type, ext] = file.match(/\w+\.\w+\.\w+$/u)[0].split('.');
+					const [language, type, ext] = file.match(/\w+\.\w+\.\w+$/u)?.[0]?.split('.') ?? [];
 					localStorage.setItem('subtitle-language', language);
 					localStorage.setItem('subtitle-type', type);
 					localStorage.setItem('subtitle-ext', ext);
@@ -489,7 +515,7 @@ export default class Functions extends Base {
 
 				const file = this.player.textTracks()[number]?.src;
 				if (file) {
-					const [language, type, ext] = file.match(/\w+\.\w+\.\w+$/u)[0].split('.');
+					const [language, type, ext] = file.match(/\w+\.\w+\.\w+$/u)?.[0]?.split('.') ?? [];
 					localStorage.setItem('subtitle-language', language);
 					localStorage.setItem('subtitle-type', type);
 					localStorage.setItem('subtitle-ext', ext);
@@ -558,7 +584,7 @@ export default class Functions extends Base {
 
 	getQuality(index: number) {
 		if (this.isJwplayer) {
-			return this.player.getQualityLevel(index);
+			return this.player.getVisualQuality();
 		}
 		return this.player.qualityLevels()[index];
 
@@ -603,7 +629,7 @@ export default class Functions extends Base {
 	getTimeFile() {
 		let file = this.getPlaylistItem().metadata.find((t: { kind: string }) => t.kind === 'spritesheet')?.file;
 		if (this.isJwplayer && !file) {
-			file = this.getPlaylistItem().tracks.find((t: { kind: string }) => t.kind === 'spritesheet')?.file;
+			file = this.getPlaylistItem().tracks?.find((t: { kind: string }) => t.kind === 'spritesheet')?.file;
 		}
 		return file;
 	}
@@ -612,7 +638,7 @@ export default class Functions extends Base {
 		return this.getPlaylistItem().metadata?.find((t: { kind: string }) => t.kind === 'sprite')?.file;
 	}
 
-	getChapterFile(): string {
+	getChapterFile() {
 		return this.getPlaylistItem().metadata.find((t: { kind: string }) => t.kind === 'chapters')?.file;
 	}
 
@@ -663,8 +689,24 @@ export default class Functions extends Base {
 		return this.player.playbackRates();
 	}
 
+	getSpeed() {
+		if (this.isJwplayer) {
+			return this.player.getPlaybackRate();
+		}
+		return this.player.playbackRate();
+	}
+
 	hasSpeeds() {
 		return this.getSpeeds().length > 1;
+	}
+
+	setSpeed(speed: number) {
+		if (this.isJwplayer) {
+			this.player.setPlaybackRate(speed);
+		} else {
+			this.player.playbackRate(speed);
+		}
+		this.dispatchEvent('speed', speed);
 	}
 
 	hasPIP() {
@@ -688,12 +730,12 @@ export default class Functions extends Base {
 				title: parsedTitle,
 				artist: playlistItem.show,
 				album: playlistItem.season ? `S${this.pad(playlistItem.season, 2)}E${this.pad(playlistItem.episode, 2)}` : '',
-				artwork: [
+				artwork: image ? [
 					{
 						src: image,
 						type: 'image/jpg',
 					},
-				],
+				] : [],
 			});
 
 			navigator.mediaSession.setActionHandler('previoustrack', this.previous.bind(this));
