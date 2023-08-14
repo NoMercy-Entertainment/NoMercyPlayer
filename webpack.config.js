@@ -1,22 +1,29 @@
 const path = require('path');
 
 module.exports = {
-    context: path.resolve(__dirname, 'client'),
+    context: path.resolve(__dirname, 'src'),
     devtool: 'inline-source-map',
-    entry: './main.tsx',
+    entry: './nomercyplayer.ts',
     mode: 'development',
     module: {
-        rules: [{
-            test: /\.tsx?$/,
-            use: 'ts-loader',
-            exclude: /node_modules/
-        }]
+        rules: [
+            {
+                test: /\.tsx?$/,
+                use: 'ts-loader',
+                exclude: /node_modules/
+            },
+            {
+              test: /\.css$/i,
+              include: path.resolve(__dirname, 'src'),
+              use: ['style-loader', 'css-loader', 'postcss-loader'],
+            },
+        ]
     },
     output: {
-        filename: 'client.js',
-        path: path.resolve(__dirname, 'static/js')
+        filename: 'nomercyplayer.js',
+        path: path.resolve(__dirname, 'static')
     },
     resolve: {
-        extensions: ['.tsx', '.ts', '.jsx', '.js']
+        extensions: ['.ts']
     },
 };

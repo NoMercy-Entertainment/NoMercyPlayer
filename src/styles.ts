@@ -1,3 +1,4 @@
+/* eslint-disable no-irregular-whitespace */
 
 export const bottomBarStyles = [
 	'bottom-bar',
@@ -7,10 +8,10 @@ export const bottomBarStyles = [
 	'duration-300',
 	'flex',
 	'flex-col',
-	'from-black/70',
+	'from-black/90',
 	'gap-1',
 	'p-1',
-	'pt-16',
+	'pt-[10%]',
 	'transition-transform',
 	'translate-y-full',
 	'w-full',
@@ -20,6 +21,7 @@ export const bottomRowStyles = [
 	'bottom-row',
 	'flex',
 	'h-10',
+	'my-2',
 	'items-center',
 	'relative',
 	'w-full',
@@ -169,6 +171,9 @@ export const menuButtonTextStyles = [
 	'cursor-pointer',
 	'font-semibold',
 	'pl-2',
+	'flex',
+	'gap-2',
+	'',
 ];
 
 export const menuContentStyles = [
@@ -184,14 +189,15 @@ export const menuContentStyles = [
 export const menuFrameStyles = [
 	'menu-frame',
 	'absolute',
-	'bg-neutral-900/90',
-	'bottom-11',
+	'bg-neutral-900/95',
+	'bottom-10',
 	'duration-300',
+	'max-w-[1200px]',
 	'flex',
 	'flex-col',
 	'hidden',
 	'overflow-clip',
-	'right-10',
+	'right-[2%]',
 	'rounded-lg',
 	'transform-all',
 	'w-52',
@@ -318,7 +324,7 @@ export const sliderPopStyles = [
 	'slider-pop',
 	'-translate-x-1/2',
 	'absolute',
-	'bg-black/90',
+	'bg-neutral-900/95',
 	'bottom-4',
 	'duration-300',
 	'flex',
@@ -395,11 +401,11 @@ export const topBarStyles = [
 	'bg-gradient-to-b',
 	'duration-300',
 	'flex',
-	'from-black/70',
+	'from-black/90',
 	'gap-1',
 	'items-center',
 	'p-1',
-	'pb-16',
+	'pb-[10%]',
 	'top-0',
 	'transition-transform',
 	'w-full',
@@ -475,7 +481,7 @@ export const playerMessageStyles = [
 	'hidden',
 	'absolute',
 	'rounded-md',
-	'bg-neutral-600',
+	'bg-neutral-900/95',
 	'left-1/2',
 	'px-4',
 	'py-2',
@@ -501,3 +507,326 @@ export const playlistMenuButtonStyles = [
 	'hover:bg-white/10',
 	'rounded-lg',
 ];
+
+export const styles = `
+	@font-face {
+		font-family: 'Inter';
+		font-style: normal;
+		font-weight: 400;
+		font-display: swap;
+		src: url(https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff2) format('woff2');
+		unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+	}
+
+	@font-face {
+		font-family: 'Source Code Pro';
+		font-style: normal;
+		font-weight: 400;
+		font-display: swap;
+		src: url(https://fonts.gstatic.com/s/sourcecodepro/v22/HI_diYsKILxRpg3hIP6sJ7fM7PqPMcMnZFqUwX28DMyQtMlrTA.woff2) format('woff2');
+		unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+	}
+
+	:root {
+		--nomercyplayer-primary: rgb(147, 51, 234);
+	}
+
+	* {
+		font-family: 'Inter', sans-serif;
+		font-feature-settings: 'tnum' on, 'lnum' on;
+	}
+	.font-mono {
+		font-family: 'Source Code Pro', monospace;
+	}
+	.nomercyplayer {
+		display: flex;
+		position: relative;
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+		aspect-ratio: 16/9;
+	}
+	.nomercyplayer * {
+		user-select: none;
+	}
+	.slider-pop-image {
+		min-height: 80px;
+		min-width: 144px;
+	}
+	.vjs-poster, 
+	.vjs-loading-spinner,
+	.vjs-big-play-button,
+	.vjs-control-bar,
+	.vjs-hidden {
+		display: none !important;
+	}
+
+	.seek-ripple {
+		--deg: 90deg;
+		align-items: center;
+		background: linear-gradient(var(--deg), #ffffff10 10%, #ffffff10 45%, #ffffff05 100%);
+		display: none;
+		flex-direction: column;
+		height: 100%;
+		justify-content: center;
+		pointer-events: none;
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 28%;
+	}
+	.seek-ripple.left {
+		--deg: 90deg;
+	}
+	.seek-ripple.right {
+		--deg: 270deg;
+	}
+	.seek-ripple-arrow {
+		align-items: center;
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		pointer-events: none;
+		position: relative;
+		width: 600px;
+	}
+
+	.seek-ripple-text {
+		font-size: 0.8rem;
+		font-weight: 700;
+		pointer-events: none;
+		position: relative;
+		text-align: center;
+		width: 600px;
+	}
+
+	.arrow {
+		--size: 0.7;
+		border-bottom: calc(var(--size) * 1rem) solid transparent;
+		border-top: calc(var(--size) * 1rem) solid transparent;
+		float: left;
+		height: calc((var(--size) * 1rem) * 2);
+		margin-bottom: .5rem;
+		width: calc((var(--size) * 1rem) * 2);
+	}
+
+	.arrow-right {
+		border-left: calc((var(--size) * 1rem) + 5px) solid white;
+	}
+
+	.arrow-left {
+		border-right: calc((var(--size) * 1rem) + 5px) solid white;
+	}
+
+	.arrow1 {
+		animation: flash 0.75s infinite;
+	}
+
+	.arrow2 {
+		animation: flash 0.75s infinite 0.25s;
+	}
+
+	.arrow3 {
+		animation: flash 0.75s infinite 0.5s;
+	}
+
+	@keyframes flash {
+		0% {
+			opacity: 1;
+		}
+
+		100% {
+			opacity: 0;
+		}
+	}
+
+	.libassjs-canvas-parent {
+		position: absolute !important;
+	}
+
+	.menu-content {
+		max-height: 90%;
+	}
+
+	.nomercyplayer * {
+		scrollbar-width: thin;
+		scrollbar-color: var(--nomercyplayer-primary) transparent;
+	}
+
+	.nomercyplayer *::-webkit-scrollbar {
+		width: 8px;
+	}
+
+	.nomercyplayer *::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	.nomercyplayer *::-webkit-scrollbar-thumb {
+		background-color: var(--nomercyplayer-primary);
+		border-radius: 10px;
+	}
+
+	@media (max-width: 900px) {
+		.tooltip {
+			display: none !important;
+		}
+	}
+
+	.next-button {
+		--duration: 5;
+		position: relative;
+		display: flex;
+		font-size: 0.75em;
+		height: 2rem;
+		justify-content: center;
+		padding: 0em 1em;
+		border-radius: 0.5em;
+		background-color: rgb(24 24 27);
+		color: rgb(180 180 180);
+		overflow: hidden;
+		counter-reset: next-counter var(--duration);
+		-webkit-appearance: none;
+		-moz-appearance: none;
+				appearance: none;
+		border: none;
+		cursor: pointer;
+		transition: all 0.25s;
+		-webkit-animation: next-text calc(var(--duration) * 1s) linear infinite forwards;
+				animation: next-text calc(var(--duration) * 1s) linear infinite forwards;
+	}
+	.next-button.animated:hover {
+		background-color: rgb(20 20 23);
+	}
+	.next-button.animated:active {
+		color: rgb(24 24 27);
+	}
+	.next-button.animated:active, .next-button.animated:active:after, .next-button.animated:active:before {
+		-webkit-animation: none;
+				animation: none;
+	}
+	.next-button.animated:active:before {
+		background-color: rgb(180 180 180);
+		width: calc(100% + 1em);
+		counter-reset: next-counter 0;
+	}
+	.next-button.animated:before, .next-button.animated:after {
+		pointer-events: none;
+	}
+	.next-button.animated:before {
+		content: attr(data-icon);
+		font-size: 2em;
+		line-height: 1.1;
+		position: absolute;
+		width: 0%;
+		height: 100%;
+		left: 0em;
+		top: 0;
+		z-index: 0;
+		text-align: left;
+		padding: 0.25em;
+		text-indent: 0.5em;
+		-webkit-animation: next calc(var(--duration) * 1s) linear infinite forwards;
+				animation: next calc(var(--duration) * 1s) linear infinite forwards;
+	}
+	.next-button.animated:after {
+		content: attr(data-label) " " counter(next-counter);
+		font-weight: 700;
+		display: block;
+		font-size: 1.6em;
+		line-height: 1;
+		padding: 0.5em 1em 0.5em 2em;
+		position: relative;
+		white-space: nowrap;
+		-webkit-animation: next-countdown calc(var(--duration) * 1s) linear infinite forwards;
+				animation: next-countdown calc(var(--duration) * 1s) linear infinite forwards;
+	}
+	.next-button[data-icon]:not([data-icon=""]):after {
+		padding-left: 2.5em;
+	}
+	
+	@-webkit-keyframes next {
+		0% {
+			width: 0%;
+			background-color: rgb(54 54 57);
+		}
+		89% {
+			width: calc(100% + .5em);
+			background-color: rgb(54 54 57);
+		}
+		89.5%, 100% {
+			width: calc(100% + .5em);
+			background-color: rgb(180 180 180);
+		}
+	}
+	
+	@keyframes next {
+		0% {
+			width: 0%;
+			background-color: rgb(54 54 57);
+		}
+		89% {
+			width: calc(100% + .5em);
+			background-color: rgb(54 54 57);
+		}
+		89.5%, 100% {
+			width: calc(100% + .5em);
+			background-color: rgb(180 180 180);
+		}
+	}
+	@-webkit-keyframes next-countdown {
+		0% {
+			counter-increment: next-counter 0;
+		}
+		20% {
+			counter-increment: next-counter -1;
+		}
+		40% {
+			counter-increment: next-counter -2;
+		}
+		60% {
+			counter-increment: next-counter -3;
+		}
+		80% {
+			counter-increment: next-counter -4;
+		}
+		100% {
+			counter-increment: next-counter -5;
+		}
+	}
+	@keyframes next-countdown {
+		0% {
+			counter-increment: next-counter 0;
+		}
+		20% {
+			counter-increment: next-counter -1;
+		}
+		40% {
+			counter-increment: next-counter -2;
+		}
+		60% {
+			counter-increment: next-counter -3;
+		}
+		80% {
+			counter-increment: next-counter -4;
+		}
+		100% {
+			counter-increment: next-counter -5;
+		}
+	}
+	@-webkit-keyframes next-text {
+		0%, 89% {
+			color: rgb(180 180 180);
+		}
+		89.5%, 100% {
+			color: rgb(24 24 27);
+		}
+	}
+	@keyframes next-text {
+		0%, 89% {
+			color: rgb(180 180 180);
+		}
+		89.5%, 100% {
+			color: rgb(24 24 27);
+		}
+	}
+`;

@@ -280,3 +280,17 @@ export interface VolumeState {
     mute: boolean;
     volume: number;
 }
+
+export interface toolTooltip {
+    text: string;
+    position: 'bottom' | 'top';
+    x: string;
+    y: string;
+};
+
+export interface EpisodeTooltip {
+    direction: 'previous' | 'next';
+    position: 'bottom' | 'top';
+    x: string;
+    y: string;
+};

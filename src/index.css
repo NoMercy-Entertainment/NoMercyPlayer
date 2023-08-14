@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: 'BBC';
+    font-style:  normal;
+    font-weight: 100;
+    font-display: swap;
+    src: url("./BBCReithSans_W_Bd.woff2") format("woff2");
+}
+
+* {
+    font-family: "BBC" !important;
+}
+
+:root {
+    --custom-50: 248, 245, 254;
+    --custom-100: 238, 231, 254;
+    --custom-200: 220, 207, 252;
+    --custom-300: 193, 168, 250;
+    --custom-400: 130, 81, 246;
+    --custom-500: 75, 12, 223;
+    --custom-600: 54, 8, 160;
+    --custom-700: 39, 6, 116;
+    --custom-800: 23, 4, 68;
+    --custom-900: 11, 2, 34;
+    --custom-950: 7, 1, 19;
+    --primary-deg: 258.312deg;
+    --primary-sat: 62.6016%;
+}
+
+
+.spinner {
+    background-clip: padding-box;
+    border: none;
+    border-radius: 0px;
+    box-sizing: border-box;
+    display: none;
+    height: 70px;
+    left: 50%;
+    margin: 0px;
+    opacity: 0.85;
+    position: absolute;
+    text-align: left;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    visibility: hidden;
+    max-width: 600px;
+    outline: transparent;
+    line-height: 1 !important;
+}
+
+.spinner:before {
+    display: none !important;
+}
+
+.spinner .loading {
+    align-items: center;
+    border-radius: 10em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    left: 50%;
+    outline: transparent;
+    padding: 1em;
+    position: absolute;
+    text-align: center;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 600px;
+    z-index: 99999999;
+    word-break: keep-all;
+    white-space: nowrap;
+}
+
+.spinner .loading .loader {
+    background: rgba(15, 15, 15, 0.7);
+    border-radius: 8px;
+    display: flex;
+    font-size: 1.2rem;
+    justify-content: center;
+    margin-bottom: 8px;
+    opacity: 1;
+    outline: transparent;
+    padding: 0.5rem 1rem;
+    text-align: center;
+    word-wrap: nowrap;
+}
+
+.spinner .loading span {
+    display: inline-block;
+    vertical-align: middle;
+    width: 10px;
+    height: 10px;
+    margin: 3px;
+    background: #fff;
+    border-radius: 50%;
+    animation: loading 1s infinite alternate;
+}
+
+.spinner .loading span:nth-of-type(1) {
+    background: rgb(var(--custom-700));
+}
+
+.spinner .loading span:nth-of-type(2) {
+    background: rgb(var(--custom-600));
+    animation-delay: 0.2s;
+}
+
+.spinner .loading span:nth-of-type(3) {
+    background: rgb(var(--custom-500));
+    animation-delay: 0.4s;
+}
+
+.spinner .loading span:nth-of-type(4) {
+    background: rgb(var(--custom-400));
+    animation-delay: 0.6s;
+}
+
+.spinner .loading span:nth-of-type(5) {
+    background: rgb(var(--custom-300));
+    animation-delay: 0.8s;
+}
+
+.spinner .loading span:nth-of-type(6) {
+    background: rgb(var(--custom-100));
+    animation-delay: 1s;
+}
+
+.spinner .loading span:nth-of-type(7) {
+    background: rgb(var(--custom-50));
+    animation-delay: 1.2s;
+}
+
+.vjs-text-track-cue > *,
+.jw-text-track-cue,
+::cue {
+    background: transparent !important;
+    text-shadow: black 0px 0px 4px, black 0px 0px 4px, black 0px 0px 4px, black 0px 0px 4px, black 0px 0px 4px, black 0px 0px 4px,
+    black 0px 0px 4px !important;
+}

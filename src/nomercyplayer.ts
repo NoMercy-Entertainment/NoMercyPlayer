@@ -1,5 +1,5 @@
 import type { VideoPlayerOptions, VideoPlayer as Types } from './nomercyplayer.d';
-import UI from './ui.js';
+import UI from './ui';
 
 export default class VideoPlayer extends UI {
 
@@ -7,3 +7,6 @@ export default class VideoPlayer extends UI {
 		super(playerType, options, playerId);
 	}
 }
+
+// @ts-ignore
+window.VideoPlayer = VideoPlayer;

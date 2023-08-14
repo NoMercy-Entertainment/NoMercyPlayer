@@ -1,6 +1,7 @@
+import './index.css';
 /* eslint-disable indent */
-import { buttons, fluentIcons, Icon } from './buttons.js';
-import Functions from './functions.js';
+import { buttons, fluentIcons, Icon } from './buttons';
+import Functions from './functions';
 import {
 	bottomBarStyles, bottomRowStyles, buttonBaseStyle, buttonStyles, centerStyles, chapterBarStyles,
 	chapterMarkerBGStyles, chapterMarkerBufferStyles, chapterMarkerProgressStyles,
@@ -12,7 +13,7 @@ import {
 	sliderProgressStyles, sliderTextStyles, speedButtonTextStyles, subMenuContentStyles,
 	subMenuStyles, svgSizeStyles, timeStyles, topBarStyles, topRowStyles, touchPlaybackButtonStyles,
 	touchPlaybackStyles, volumeContainerStyles, volumeSliderStyles
-} from './styles.js';
+} from './styles';
 
 import type { VideoPlayerOptions, VideoPlayer as Types, Chapter, VolumeState, PlaylistItem } from './nomercyplayer.d';
 
@@ -95,7 +96,7 @@ export default class UI extends Functions {
 	topBarStyles: string[] = [];
 	topRowStyles: string[] = [];
 	touchPlaybackStyles: string[] = [];
-	touchPlayButtonStyles: string[] = [];
+	touchPlaybackButtonStyles: string[] = [];
 	subMenuContentStyles: string[] = [];
 	volumeSliderStyles: string[] = [];
 	volumeContainerStyles: string[] = [];
@@ -104,6 +105,9 @@ export default class UI extends Functions {
 	playerMessageStyles: string[] = [];
 	playlistMenuStyles: string[] = [];
 	playlistMenuButtonStyles: string[] = [];
+	tooltip: any;
+	hasNextTip = false;
+	sliderBar: any;
 
 	constructor(playerType: Types['playerType'], options: VideoPlayerOptions, playerId: Types['playerId'] = '') {
 		super(playerType, options, playerId);
@@ -146,7 +150,7 @@ export default class UI extends Functions {
 			this.topBarStyles = this.mergeStyles('topBarStyles', topBarStyles);
 			this.topRowStyles = this.mergeStyles('topRowStyles', topRowStyles);
 			this.touchPlaybackStyles = this.mergeStyles('touchPlaybackStyles', touchPlaybackStyles);
-			this.touchPlayButtonStyles = this.mergeStyles('touchPlaybackButtonStyles', touchPlaybackButtonStyles);
+			this.touchPlaybackButtonStyles = this.mergeStyles('touchPlaybackButtonStyles', touchPlaybackButtonStyles);
 			this.buttonStyles = this.mergeStyles('buttonStyles', buttonStyles);
 			this.volumeContainerStyles = this.mergeStyles('volumeContainerStyles', volumeContainerStyles);
 			this.volumeSliderStyles = this.mergeStyles('volumeSliderStyles', volumeSliderStyles);
@@ -170,7 +174,15 @@ export default class UI extends Functions {
 	}
 
 	#eventHandlers() {
+		this.on('item', () => {
+			this.createChapterMarkers();
+		});
 		this.on('chapters', () => {
+			if (this.duration() == 0) {
+				return setTimeout(() => {
+					this.createChapterMarkers();
+				}, 500);
+			}
 			this.createChapterMarkers();
 		});
 
@@ -179,6 +191,16 @@ export default class UI extends Functions {
 		});
 		this.on('pause', () => {
 			this.showControls();
+		});
+		this.on('volume', (data) => {
+			this.displayMessage(`Volume: ${Math.floor(data.volume)}%`);
+		});
+		this.on('mute', (data) => {
+			if (data.mute) {
+				this.displayMessage('Muted');
+			} else {
+				this.displayMessage(`Volume: ${data.volume}%`);
+			}
 		});
 	}
 
@@ -195,13 +217,18 @@ export default class UI extends Functions {
 	hideControls() {
 		if (!this.lock && this.isPlaying()) {
 			this.dispatchEvent('controls', false);
-			this.controlsVisible = false;
+			this.dispatchEvent('show-menu', false);
+			setTimeout(() => {
+				this.controlsVisible = false;
+			}, 100);
 		}
 	};
 
 	showControls() {
 		this.dispatchEvent('controls', true);
-		this.controlsVisible = true;
+		setTimeout(() => {
+			this.controlsVisible = true;
+		}, 600);
 	}
 
 	dynamicControls() {
@@ -229,9 +256,15 @@ export default class UI extends Functions {
 		overlay.onmousemove = () => {
 			this.dynamicControls();
 		};
-		overlay.onmouseout = () => {
+
+		overlay.onmouseout = (e) => {
+			const playerRect = this.getElement().getBoundingClientRect();
+
+			if (e.x > playerRect.left && e.x < playerRect.right && e.y > playerRect.top && e.y < playerRect.bottom) return;
+
 			this.hideControls();
 		};
+
 		overlay.ondragstart = () => {
 			return false;
 		};
@@ -248,6 +281,17 @@ export default class UI extends Functions {
 		this.topRow = this.createTopRow(this.bottomBar);
 
 		const bottomRow = this.createBottomRow(this.bottomBar);
+
+		['mouseover', 'touchstart'].forEach((event) => {
+			bottomRow.addEventListener(event, () => {
+				this.lockControls();
+			});
+		});
+		['mouseleave', 'touchend'].forEach((event) => {
+			bottomRow.addEventListener(event, () => {
+				this.unlockControls();
+			});
+		});
 
 		this.createBackButton(topBar);
 
@@ -267,13 +311,13 @@ export default class UI extends Functions {
 
 		this.createTime(bottomRow, 'current', ['ml-2']);
 		this.createDivider(bottomRow);
-		this.createTime(bottomRow, 'duration', ['mr-2']);
+		this.createTime(bottomRow, 'remaining', ['mr-2']);
 
 		this.createTheaterButton(bottomRow);
 		this.createPIPButton(bottomRow);
 
 		this.createPlaylistsButton(bottomRow);
-		this.createSpeedButton(bottomRow);
+		// this.createSpeedButton(bottomRow);
 		this.createCaptionsButton(bottomRow);
 		this.createAudioButton(bottomRow);
 		this.createQualityButton(bottomRow);
@@ -284,6 +328,14 @@ export default class UI extends Functions {
 		const frame = this.createMenuFrame(bottomRow);
 
 		this.createMainMenu(frame);
+
+		this.createToolTip(overlay);
+
+		this.createEpisodeTip(overlay);
+
+		this.createNextUp(overlay);
+
+		this.modifySpinner(overlay);
 	}
 
 	createContainer(parent: HTMLElement, classes: string[], id?: string) {
@@ -386,13 +438,15 @@ export default class UI extends Functions {
 		['click'].forEach((event) => {
 			touchPlayback.addEventListener(event, this.doubleTap(
 				() => this.toggleFullscreen(),
-				() => this.togglePlayback()
+				() => {
+					this.controlsVisible && this.togglePlayback();
+				}
 			));
 		});
 
-		if (this.isMobile()) {
-			const playButton = this.createSVGElement(touchPlayback, 'paused', this.buttons.bigPlay);
-			this.addClasses(playButton, this.touchPlayButtonStyles);
+		// if (this.isMobile()) {
+			const playButton = this.createSVGElement(touchPlayback, 'bigPlay', this.buttons.bigPlay);
+			this.addClasses(playButton, this.touchPlaybackButtonStyles);
 
 			this.on('pause', () => {
 				playButton.style.display = 'flex';
@@ -400,7 +454,7 @@ export default class UI extends Functions {
 			this.on('play', () => {
 				playButton.style.display = 'none';
 			});
-		}
+		// }
 
 		return touchPlayback;
 	}
@@ -462,17 +516,6 @@ export default class UI extends Functions {
 			} else {
 				bottomBar.style.transform = '';
 			}
-		});
-
-		['mouseover', 'touchstart'].forEach((event) => {
-			bottomBar.addEventListener(event, () => {
-				this.lockControls();
-			});
-		});
-		['mouseleave', 'touchend'].forEach((event) => {
-			bottomBar.addEventListener(event, () => {
-				this.unlockControls();
-			});
 		});
 
 		return bottomBar;
@@ -548,18 +591,95 @@ export default class UI extends Functions {
 		]);
 		svg.appendChild(path2);
 
-		parent.appendChild(svg);
+		if (!parent.classList.contains('menu-button')) {
+			parent.addEventListener('mouseenter', () => {
+				if (icon.title.length == 0 || (['Next', 'Previous'].includes(icon.title) && this.hasNextTip)) return;
 
+				const text = `${icon.title} ${this.getButtonKeyCode(id)}`;
+				const playerRect = this.getElement().getBoundingClientRect();
+				const tipRect = parent.getBoundingClientRect();
+
+				let x = Math.abs(playerRect.left - (tipRect.left + (tipRect.width * 0.5)) - (text.length * 0.5));
+				const y = Math.abs(playerRect.bottom - (tipRect.bottom + (tipRect.height * 1.2)));
+
+				if (x < 30) {
+					x = 30;
+				}
+
+				if (x > playerRect.right - 110) {
+					x = playerRect.right - 110;
+				}
+
+				this.dispatchEvent('show-tooltip', {
+					text: text,
+					position: 'bottom',
+					x: `${x}px`,
+					y: `-${y}px`,
+				});
+
+			});
+
+			parent.addEventListener('mouseleave', () => {
+				this.dispatchEvent('hide-tooltip');
+			});
+		}
+
+		parent.appendChild(svg);
 		return svg;
 
 	}
+
+	getButtonKeyCode(id: string) {
+
+		switch (id) {
+			case 'play':
+			case 'pause':
+				return `(${this.localize('SPACE')})`;
+			case 'volumeMuted':
+				return '(m)';
+			case 'volumeLow':
+			case 'volumeMedium':
+			case 'volumeHigh':
+				return '(^v)';
+			case 'seekBack':
+				return '(<)';
+			case 'seekForward':
+				return '(>)';
+			case 'next':
+				return '(n)';
+			case 'theater':
+				return '(t)';
+			case 'theater-enabled':
+				return '(t)';
+			case 'pip-enter':
+			case 'pip-exit':
+				return '(i)';
+			case 'playlist':
+				return '';
+			case 'previous':
+				return '(p)';
+			case 'speed':
+				return '';
+			case 'subtitle':
+			case 'subtitled':
+				return '(c)';
+			case 'settings':
+				return '';
+			case 'fullscreen-enable':
+			case 'fullscreen':
+				return '(f)';
+			default:
+				return '';
+		}
+
+	};
 
 	createButton(parent: HTMLElement, icon: string) {
 		const button = document.createElement('button');
 
 		button.id = icon;
 		button.type = 'button';
-		button.title = this.buttons[icon]?.title;
+		button.ariaLabel = this.buttons[icon]?.title;
 
 		const classes = this.buttonStyles;
 		classes.push(icon);
@@ -579,6 +699,7 @@ export default class UI extends Functions {
 		this.createSVGElement(settingsButton, 'settings', this.buttons.settings);
 
 		settingsButton.addEventListener('click', () => {
+			this.dispatchEvent('hide-tooltip');
 			if (this.menuOpen && this.mainMenuOpen) {
 				this.dispatchEvent('show-menu', false);
 			} else if (!this.menuOpen && this.mainMenuOpen) {
@@ -613,6 +734,7 @@ export default class UI extends Functions {
 		this.createSVGElement(backButton, 'back', this.buttons.back);
 
 		backButton.addEventListener('click', () => {
+			this.dispatchEvent('hide-tooltip');
 			this.dispatchEvent('back');
 		});
 
@@ -630,7 +752,7 @@ export default class UI extends Functions {
 			parent,
 			'playback'
 		);
-		playbackButton.title = this.buttons.play?.title;
+		playbackButton.ariaLabel = this.buttons.play?.title;
 
 		const pausedButton = this.createSVGElement(playbackButton, 'paused', this.buttons.play);
 		const playButton = this.createSVGElement(playbackButton, 'playing', this.buttons.pause, true);
@@ -638,6 +760,7 @@ export default class UI extends Functions {
 		playbackButton.addEventListener('click', (event) => {
 			event.stopPropagation();
 			this.togglePlayback();
+			this.dispatchEvent('hide-tooltip');
 		});
 		this.on('pause', () => {
 			playButton.style.display = 'none';
@@ -662,6 +785,7 @@ export default class UI extends Functions {
 		this.createSVGElement(seekBack, 'seekBack', this.buttons.seekBack);
 
 		seekBack.addEventListener('click', () => {
+			this.dispatchEvent('hide-tooltip');
 			this.rewindVideo();
 		});
 
@@ -687,6 +811,7 @@ export default class UI extends Functions {
 		this.createSVGElement(seekForward, 'seekForward', this.buttons.seekForward);
 
 		seekForward.addEventListener('click', () => {
+			this.dispatchEvent('hide-tooltip');
 			this.forwardVideo();
 		});
 
@@ -702,13 +827,12 @@ export default class UI extends Functions {
 		return seekForward;
 	}
 
-	createTime(parent: HTMLDivElement, type: string, classes: string[]) {
+	createTime(parent: HTMLDivElement, type: 'current' | 'remaining' | 'duration', classes: string[]) {
 		const time = document.createElement('div');
 		time.textContent = '00:00';
 
 		this.addClasses(time, [
 			...classes,
-			...this.buttonStyles,
 			...this.timeStyles,
 			`${type}-time`,
 		]);
@@ -777,7 +901,7 @@ export default class UI extends Functions {
 			volumeContainer,
 			'volume'
 		);
-		volumeButton.title = this.buttons.volumeHigh?.title;
+		volumeButton.ariaLabel = this.buttons.volumeHigh?.title;
 
 		const volumeSlider = document.createElement('input');
 		volumeSlider.type = 'range';
@@ -799,12 +923,14 @@ export default class UI extends Functions {
 		volumeButton.addEventListener('click', (event) => {
 			event.stopPropagation();
 			this.toggleMute();
+			this.dispatchEvent('hide-tooltip');
 		});
 
 		volumeSlider.addEventListener('input', (event) => {
 			event.stopPropagation();
-			volumeSlider.style.backgroundSize = `${volumeSlider.value}% 100%`;
-			this.setVolume(parseFloat(volumeSlider.value));
+			const newVolume = Math.floor(parseInt(volumeSlider.value, 10));
+			volumeSlider.style.backgroundSize = `${newVolume}% 100%`;
+			this.setVolume(newVolume);
 		});
 
 		volumeContainer.addEventListener('wheel', (event) => {
@@ -815,7 +941,7 @@ export default class UI extends Functions {
 			}
 
 			volumeSlider.style.backgroundSize = `${volumeSlider.value}% 100%`;
-			volumeSlider.value = (parseFloat(volumeSlider.value) + (delta / 20)).toString();
+			volumeSlider.value = (parseFloat(volumeSlider.value) + (delta * 0.50)).toString();
 			this.setVolume(parseFloat(volumeSlider.value));
 		});
 
@@ -868,7 +994,7 @@ export default class UI extends Functions {
 	}
 
 	createPreviousButton(parent: HTMLDivElement) {
-		// if (this.isMobile()) return;
+		if (this.isMobile()) return;
 		const previousButton = this.createButton(
 			parent,
 			'previous'
@@ -880,6 +1006,7 @@ export default class UI extends Functions {
 		previousButton.addEventListener('click', (event) => {
 			event.stopPropagation();
 			this.previous();
+			this.dispatchEvent('hide-tooltip');
 		});
 		this.on('item', () => {
 			if (this.getPlaylistIndex() > 0) {
@@ -897,6 +1024,34 @@ export default class UI extends Functions {
 			}
 		});
 
+		previousButton.addEventListener('mouseenter', () => {
+			const playerRect = previousButton.getBoundingClientRect();
+			const tipRect = parent.getBoundingClientRect();
+
+			let x = Math.abs((tipRect.left - playerRect.left) + 100);
+			const y = Math.abs((tipRect.bottom - playerRect.bottom) - 60);
+
+			if (x < 30) {
+				x = 30;
+			}
+
+			if (x > playerRect.right - 60) {
+				x = playerRect.right - 60;
+			}
+
+			this.dispatchEvent('show-episode-tip', {
+				direction: 'previous',
+				position: 'bottom',
+				x: `${x}px`,
+				y: `-${y}px`,
+			});
+
+		});
+
+		previousButton.addEventListener('mouseleave', () => {
+			this.dispatchEvent('hide-episode-tip');
+		});
+
 		parent.appendChild(previousButton);
 		return previousButton;
 	}
@@ -907,12 +1062,14 @@ export default class UI extends Functions {
 			'next'
 		);
 		nextButton.style.display = 'none';
+		this.hasNextTip = true;
 
 		this.createSVGElement(nextButton, 'next', this.buttons.next);
 
 		nextButton.addEventListener('click', (event) => {
 			event.stopPropagation();
 			this.next();
+			this.dispatchEvent('hide-tooltip');
 		});
 		this.on('item', () => {
 			if (this.isLastPlaylistItem()) {
@@ -930,6 +1087,35 @@ export default class UI extends Functions {
 			}
 		});
 
+		nextButton.addEventListener('mouseenter', () => {
+
+			const playerRect = nextButton.getBoundingClientRect();
+			const tipRect = parent.getBoundingClientRect();
+
+			let x = Math.abs((tipRect.left - playerRect.left) + 100);
+			const y = Math.abs((tipRect.bottom - playerRect.bottom) - 60);
+
+			if (x < 30) {
+				x = 30;
+			}
+
+			if (x > playerRect.right - 60) {
+				x = playerRect.right - 60;
+			}
+
+			this.dispatchEvent('show-episode-tip', {
+				direction: 'next',
+				position: 'bottom',
+				x: `${x}px`,
+				y: `-${y}px`,
+			});
+
+		});
+
+		nextButton.addEventListener('mouseleave', () => {
+			this.dispatchEvent('hide-episode-tip');
+		});
+
 		parent.appendChild(nextButton);
 		return nextButton;
 	}
@@ -940,13 +1126,14 @@ export default class UI extends Functions {
 			'subtitles'
 		);
 		captionButton.style.display = 'none';
-		captionButton.title = this.buttons.subtitles?.title;
+		captionButton.ariaLabel = this.buttons.subtitles?.title;
 
 		const offButton = this.createSVGElement(captionButton, 'subtitle', this.buttons.subtitlesOff);
 		const onButton = this.createSVGElement(captionButton, 'subtitled', this.buttons.subtitles, true);
 
 		captionButton.addEventListener('click', (event) => {
 			event.stopPropagation();
+			this.dispatchEvent('hide-tooltip');
 
 			if (this.subtitlesMenuOpen) {
 				this.dispatchEvent('show-menu', false);
@@ -1004,12 +1191,13 @@ export default class UI extends Functions {
 			'audio'
 		);
 		audioButton.style.display = 'none';
-		audioButton.title = this.buttons.language?.title;
+		audioButton.ariaLabel = this.buttons.language?.title;
 
 		this.createSVGElement(audioButton, 'audio', this.buttons.languageOff);
 
 		audioButton.addEventListener('click', (event) => {
 			event.stopPropagation();
+			this.dispatchEvent('hide-tooltip');
 
 			if (this.languageMenuOpen) {
 				this.dispatchEvent('show-menu', false);
@@ -1049,7 +1237,7 @@ export default class UI extends Functions {
 
 		qualityButton.addEventListener('click', (event) => {
 			event.stopPropagation();
-			console.log(this.getQualities());
+			this.dispatchEvent('hide-tooltip');
 
 			if (this.qualityMenuOpen) {
 				this.dispatchEvent('show-menu', false);
@@ -1102,17 +1290,20 @@ export default class UI extends Functions {
 
 		theaterButton.addEventListener('click', (event) => {
 			event.stopPropagation();
+			this.dispatchEvent('hide-tooltip');
 
 			if (this.theaterModeEnabled) {
 				this.theaterModeEnabled = false;
 				theaterButton.querySelector<any>('.theater-enabled').style.display = 'none';
 				theaterButton.querySelector<any>('.theater').style.display = 'flex';
 				this.dispatchEvent('theaterMode', false);
+				this.dispatchEvent('resize');
 			} else {
 				this.theaterModeEnabled = true;
 				theaterButton.querySelector<any>('.theater').style.display = 'none';
 				theaterButton.querySelector<any>('.theater-enabled').style.display = 'flex';
 				this.dispatchEvent('theaterMode', true);
+				this.dispatchEvent('resize');
 			}
 
 			// this.toggleLanguage();
@@ -1149,6 +1340,7 @@ export default class UI extends Functions {
 		fullscreenButton.addEventListener('click', (event) => {
 			event.stopPropagation();
 			this.toggleFullscreen();
+			this.dispatchEvent('hide-tooltip');
 		});
 		this.on('fullscreen', () => {
 			if (this.isFullscreen()) {
@@ -1185,6 +1377,7 @@ export default class UI extends Functions {
 
 		playlistButton.addEventListener('click', (event) => {
 			event.stopPropagation();
+			this.dispatchEvent('hide-tooltip');
 
 			if (this.playlistMenuOpen) {
 				this.dispatchEvent('show-menu', false);
@@ -1230,6 +1423,7 @@ export default class UI extends Functions {
 
 		speedButton.addEventListener('click', (event) => {
 			event.stopPropagation();
+			this.dispatchEvent('hide-tooltip');
 
 			if (this.speedMenuOpen) {
 				this.dispatchEvent('show-menu', false);
@@ -1263,25 +1457,26 @@ export default class UI extends Functions {
 			pipButton.style.display = 'none';
 		}
 
-		pipButton.title = this.buttons.pipEnter?.title;
+		pipButton.ariaLabel = this.buttons.pipEnter?.title;
 
 		this.createSVGElement(pipButton, 'pip-enter', this.buttons.pipEnter);
 		this.createSVGElement(pipButton, 'pip-exit', this.buttons.pipExit, true);
 
 		pipButton.addEventListener('click', (event) => {
 			event.stopPropagation();
+			this.dispatchEvent('hide-tooltip');
 
 			if (this.pipEnabled) {
 				this.pipEnabled = false;
 				pipButton.querySelector<any>('.pip-exit').style.display = 'none';
 				pipButton.querySelector<any>('.pip-enter').style.display = 'flex';
-				pipButton.title = this.buttons.pipEnter?.title;
+				pipButton.ariaLabel = this.buttons.pipEnter?.title;
 				this.dispatchEvent('pip', false);
 			} else {
 				this.pipEnabled = true;
 				pipButton.querySelector<any>('.pip-enter').style.display = 'none';
 				pipButton.querySelector<any>('.pip-exit').style.display = 'flex';
-				pipButton.title = this.buttons.pipExit?.title;
+				pipButton.ariaLabel = this.buttons.pipExit?.title;
 				this.dispatchEvent('pip', true);
 				this.dispatchEvent('show-menu', false);
 			}
@@ -1309,10 +1504,12 @@ export default class UI extends Functions {
 		menuContent.id = 'menu-content';
 		this.addClasses(menuContent, this.menuContentStyles);
 
-		menuContent.style.height = this.growMenu(0);
-		menuContent.style.maxHeight = `${this.getElement().getBoundingClientRect().height - 40}px`;
+		menuContent.style.maxHeight = `${this.getElement().getBoundingClientRect().height - 80}px`;
 		this.on('resize', () => {
-			menuContent.style.maxHeight = `${this.getElement().getBoundingClientRect().height - 40}px`;
+			this.calcMenu(menuContent);
+		});
+		this.on('fullscreen', () => {
+			this.calcMenu(menuContent);
 		});
 
 		menuFrame.appendChild(menuContent);
@@ -1320,7 +1517,7 @@ export default class UI extends Functions {
 		this.on('show-menu', (showing) => {
 			this.menuOpen = showing;
 			if (showing) {
-				menuContent.style.height = this.growMenu(0);
+				// menuContent.style.height = this.growMenu(0);
 				menuFrame.style.display = 'flex';
 			} else {
 				menuFrame.style.display = 'none';
@@ -1337,7 +1534,7 @@ export default class UI extends Functions {
 		this.on('show-main-menu', (showing) => {
 			this.mainMenuOpen = showing;
 			if (showing) {
-				menuContent.style.height = this.growMenu(0);
+				// menuContent.style.height = this.growMenu(0);
 				this.dispatchEvent('show-language-menu', false);
 				this.dispatchEvent('show-subtitles-menu', false);
 				this.dispatchEvent('show-quality-menu', false);
@@ -1351,7 +1548,7 @@ export default class UI extends Functions {
 		this.on('show-language-menu', (showing) => {
 			this.languageMenuOpen = showing;
 			if (showing) {
-				menuContent.style.height = this.growMenu(this.getAudioTracks().length);
+				// menuContent.style.height = this.growMenu(this.getAudioTracks().length);
 				this.dispatchEvent('show-main-menu', false);
 				this.dispatchEvent('show-subtitles-menu', false);
 				this.dispatchEvent('show-quality-menu', false);
@@ -1365,7 +1562,7 @@ export default class UI extends Functions {
 		this.on('show-subtitles-menu', (showing) => {
 			this.subtitlesMenuOpen = showing;
 			if (showing) {
-				menuContent.style.height = this.growMenu(this.getTextTracks().length + 1);
+				// menuContent.style.height = this.growMenu(this.getTextTracks().length + 1);
 				this.dispatchEvent('show-main-menu', false);
 				this.dispatchEvent('show-language-menu', false);
 				this.dispatchEvent('show-quality-menu', false);
@@ -1379,7 +1576,7 @@ export default class UI extends Functions {
 		this.on('show-quality-menu', (showing) => {
 			this.qualityMenuOpen = showing;
 			if (showing) {
-				menuContent.style.height = this.growMenu(this.getQualities().length);
+				// menuContent.style.height = this.growMenu(this.getQualities().length);
 				this.dispatchEvent('show-main-menu', false);
 				this.dispatchEvent('show-language-menu', false);
 				this.dispatchEvent('show-subtitles-menu', false);
@@ -1393,7 +1590,7 @@ export default class UI extends Functions {
 		this.on('show-speed-menu', (showing) => {
 			this.speedMenuOpen = showing;
 			if (showing) {
-				menuContent.style.height = this.growMenu(this.getSpeeds().length);
+				// menuContent.style.height = this.growMenu(this.getSpeeds().length);
 				this.dispatchEvent('show-main-menu', false);
 				this.dispatchEvent('show-language-menu', false);
 				this.dispatchEvent('show-subtitles-menu', false);
@@ -1405,9 +1602,9 @@ export default class UI extends Functions {
 			}
 		});
 		this.on('show-playlist-menu', (showing) => {
+			this.calcMenu(menuContent);
 			this.playlistMenuOpen = showing;
 			if (showing) {
-				menuContent.style.height = this.growMenu(this.getSpeeds().length);
 				this.dispatchEvent('show-main-menu', false);
 				this.dispatchEvent('show-language-menu', false);
 				this.dispatchEvent('show-subtitles-menu', false);
@@ -1416,7 +1613,7 @@ export default class UI extends Functions {
 				menuContent.classList.remove('translate-x-0');
 				menuContent.classList.add('-translate-x-[50%]');
 				menuFrame.style.display = 'flex';
-				menuFrame.style.width = '80%';
+				menuFrame.style.width = '96%';
 			} else {
 				menuFrame.style.width = '';
 			}
@@ -1437,6 +1634,14 @@ export default class UI extends Functions {
 		return menuContent;
 	}
 
+	calcMenu(menuContent: HTMLElement) {
+		setTimeout(() => {
+			menuContent.style.maxHeight = `${this.getElement().getBoundingClientRect().height - 80}px`;
+			// menuContent.style.height = `${this.getElement().getBoundingClientRect().height - 80}px`;
+			this.dispatchEvent('hide-tooltip');
+		}, 0);
+	}
+
 	growMenu(childCount: number) {
 		const size = 2.35;
 		let height = 0;
@@ -1452,6 +1657,9 @@ export default class UI extends Functions {
 				height += size;
 			}
 			if (this.getQualities().length > 1) {
+				height += size;
+			}
+			if (this.getPlaylist().length > 1) {
 				height += size;
 			}
 
@@ -1518,20 +1726,26 @@ export default class UI extends Functions {
 
 		this.addClasses(menuHeader, this.menuHeaderStyles);
 
-		const back = this.createSVGElement(menuHeader, 'menu', this.buttons.chevronL);
-		back.classList.remove('w-5');
-		back.classList.add('w-8');
+		if (title !== 'Episodes') {
+			const back = this.createButton(
+				menuHeader,
+				'back'
+			);
+			this.createSVGElement(back, 'menu', this.buttons.chevronL);
+			this.addClasses(back, ['w-8']);
+			back.classList.remove('w-5');
 
-		back.addEventListener('click', (event) => {
-			event.stopPropagation();
-			this.dispatchEvent('show-main-menu', true);
+			back.addEventListener('click', (event) => {
+				event.stopPropagation();
+				this.dispatchEvent('show-main-menu', true);
 
-			this.dispatchEvent('show-language-menu', false);
-			this.dispatchEvent('show-subtitles-menu', false);
-			this.dispatchEvent('show-quality-menu', false);
-			this.dispatchEvent('show-speed-menu', false);
-			this.dispatchEvent('show-playlist-menu', false);
-		});
+				this.dispatchEvent('show-language-menu', false);
+				this.dispatchEvent('show-subtitles-menu', false);
+				this.dispatchEvent('show-quality-menu', false);
+				this.dispatchEvent('show-speed-menu', false);
+				this.dispatchEvent('show-playlist-menu', false);
+			});
+		}
 
 		const menuButtonText = document.createElement('span');
 		menuButtonText.classList.add('menu-button-text');
@@ -1539,17 +1753,29 @@ export default class UI extends Functions {
 		menuHeader.append(menuButtonText);
 		menuButtonText.textContent = this.localize(title).toTitleCase();
 
-		const close = this.createSVGElement(menuHeader, 'menu', this.buttons.close);
-		this.addClasses(close, ['ml-auto', 'w-8']);
-		back.classList.remove('w-5');
+		// if (title == 'playlist') {
+		// 	this.createDropdown(menuHeader, title, `${this.localize('Season')} ${this.getPlaylistItem().season}`);
+		// }
 
-		close.addEventListener('click', (event) => {
-			event.stopPropagation();
-			this.dispatchEvent('show-menu', false);
-		});
+		if (title !== 'Seasons') {
+			const close = this.createButton(
+				menuHeader,
+				'close'
+			);
+
+			this.createSVGElement(close, 'menu', this.buttons.close);
+			this.addClasses(close, ['ml-auto', 'w-8']);
+			close.classList.remove('w-5');
+
+			close.addEventListener('click', (event) => {
+				event.stopPropagation();
+				this.dispatchEvent('show-menu', false);
+			});
+		}
 
 		parent.append(menuHeader);
-	};
+		return menuHeader;
+	}
 
 	createMenuButton(parent: HTMLDivElement, item: string) {
 		const menuButton = document.createElement('div');
@@ -1808,17 +2034,22 @@ export default class UI extends Functions {
 			(spanChild as HTMLImageElement).src = `./dist/flags/${data.language || data.label.slice(0, 3).toLocaleLowerCase()}.svg`;
 		}
 
-		languageButton.append(spanChild);
+		// languageButton.append(spanChild);
 
 		const languageButtonText = document.createElement('span');
 		languageButtonText.classList.add('menu-button-text');
 		this.addClasses(languageButtonText, this.menuButtonTextStyles);
 
 		languageButtonText.textContent = `${this.localize(data.label)
-			?.replace('segment-metadata', 'Off')} ${data.styled ? '🎨' : ''}`;
+			?.replace('segment-metadata', 'Off')}`;
+			// ?.replace('segment-metadata', 'Off')} ${data.styled ? '🎨' : ''}`;
 		languageButton.append(languageButtonText);
 
-		const chevron = this.createSVGElement(languageButton, 'menu', this.buttons.checkmark);
+		if (data.styled) {
+			this.createSVGElement(languageButtonText, 'styled', this.buttons.styled);
+		}
+
+		const chevron = this.createSVGElement(languageButton, 'checkmark', this.buttons.checkmark);
 		this.addClasses(chevron, ['ml-auto']);
 
 		if (data.index > 0) {
@@ -1907,20 +2138,20 @@ export default class UI extends Functions {
 
 	createProgressBar(parent: HTMLDivElement) {
 
-		const sliderBar = document.createElement('div');
-		this.addClasses(sliderBar, this.sliderBarStyles);
-		this.progressBar = sliderBar;
+		this.sliderBar = document.createElement('div');
+		this.addClasses(this.sliderBar, this.sliderBarStyles);
+		this.progressBar = this.sliderBar;
 
 		const sliderBuffer = document.createElement('div');
 		sliderBuffer.id = 'slider-buffer';
 		this.addClasses(sliderBuffer, this.sliderBufferStyles);
 
-		sliderBar.append(sliderBuffer);
+		this.sliderBar.append(sliderBuffer);
 
 		const sliderProgress = document.createElement('div');
 		sliderProgress.id = 'slider-progress';
 		this.addClasses(sliderProgress, this.sliderProgressStyles);
-		sliderBar.append(sliderProgress);
+		this.sliderBar.append(sliderProgress);
 
 		this.on('chapters', () => {
 			if (this.getChapters()?.length > 0) {
@@ -1936,12 +2167,12 @@ export default class UI extends Functions {
 		this.chapterBar = document.createElement('div');
 		this.chapterBar.id = 'chapter-progress';
 		this.addClasses(this.chapterBar, this.chapterBarStyles);
-		sliderBar.append(this.chapterBar);
+		this.sliderBar.append(this.chapterBar);
 
 		const sliderNipple = document.createElement('div');
 		this.addClasses(sliderNipple, this.sliderNippleStyles);
 		sliderNipple.id = 'slider-nipple';
-		sliderBar.append(sliderNipple);
+		this.sliderBar.append(sliderNipple);
 
 		const sliderPop = document.createElement('div');
 		sliderPop.id = 'slider-pop';
@@ -1966,14 +2197,14 @@ export default class UI extends Functions {
 		this.addClasses(chapterText, this.chapterTextStyles);
 		sliderPop.append(chapterText);
 
-		sliderBar.append(sliderPop);
+		this.sliderBar.append(sliderPop);
 
 
 		['mousemove', 'touchmove'].forEach((event) => {
 			this.bottomBar.addEventListener(event, (e: any) => {
-				const scrubTime = this.#getScrubTime(e, sliderBar);
+				const scrubTime = this.#getScrubTime(e);
 				this.#getSliderPopImage(scrubTime);
-				const sliderPopOffsetX = this.#getSliderPopOffsetX(e, sliderBar, sliderPop, scrubTime);
+				const sliderPopOffsetX = this.#getSliderPopOffsetX(e, this.sliderBar, sliderPop, scrubTime);
 				sliderPop.style.left = `${sliderPopOffsetX}%`;
 				sliderText.textContent = this.humanTime(scrubTime.scrubTimePlayer);
 				if (!this.isMouseDown) return;
@@ -1986,7 +2217,7 @@ export default class UI extends Functions {
 			});
 		});
 		['mousedown', 'touchstart'].forEach((event) => {
-			sliderBar.addEventListener(event, () => {
+			this.sliderBar.addEventListener(event, () => {
 				if (this.isMouseDown) return;
 
 				this.isMouseDown = true;
@@ -1994,29 +2225,30 @@ export default class UI extends Functions {
 			});
 		});
 
-		sliderBar.addEventListener('mouseover', (e) => {
-			const scrubTime = this.#getScrubTime(e, sliderBar);
+		this.sliderBar.addEventListener('mouseover', (e: MouseEvent) => {
+			const scrubTime = this.#getScrubTime(e);
 			this.#getSliderPopImage(scrubTime);
 			sliderText.textContent = this.humanTime(scrubTime.scrubTimePlayer);
 			chapterText.textContent = this.#getChapterText(scrubTime.scrubTimePlayer);
 			if (this.previewTime.length > 0) {
 				sliderPop.style.setProperty('--visibility', '1');
-				const sliderPopOffsetX = this.#getSliderPopOffsetX(e, sliderBar, sliderPop, scrubTime);
+				const sliderPopOffsetX = this.#getSliderPopOffsetX(e, this.sliderBar, sliderPop, scrubTime);
 				sliderPop.style.left = `${sliderPopOffsetX}%`;
 			}
 		});
 
-		sliderBar.addEventListener('mouseleave', () => {
+		this.sliderBar.addEventListener('mouseleave', () => {
 			sliderPop.style.setProperty('--visibility', '0');
 		});
 
 		this.bottomBar.addEventListener('click', (e: any) => {
+			this.dispatchEvent('hide-tooltip');
 			if (!this.isMouseDown) return;
 
 			this.isMouseDown = false;
 			this.isScrubbing = false;
 			sliderPop.style.setProperty('--visibility', '0');
-			const scrubTime = this.#getScrubTime(e, sliderBar);
+			const scrubTime = this.#getScrubTime(e);
 			sliderNipple.style.left = `${scrubTime.scrubTime}%`;
 			this.seek(scrubTime.scrubTimePlayer);
 		});
@@ -2026,21 +2258,24 @@ export default class UI extends Functions {
 		});
 
 		this.on('item', () => {
+			this.sliderBar.classList.add('bg-white/60');
 			this.previewTime = [];
 			this.chapters = [];
 		});
 
 		this.on('chapters', () => {
 			if (this.getChapters()?.length > 0) {
-				sliderBar.classList.remove('bg-white/60');
+				this.sliderBar.classList.remove('bg-white/60');
 			} else {
-				sliderBar.classList.add('bg-white/60');
+				this.sliderBar.classList.add('bg-white/60');
 			}
 		});
 
 		this.on('time', (data) => {
-			sliderBuffer.style.width = `${data.buffered}%`;
-			sliderProgress.style.width = `${data.percentage}%`;
+			if (this.getChapters()?.length == 0) {
+				sliderBuffer.style.width = `${data.buffered}%`;
+				sliderProgress.style.width = `${data.percentage}%`;
+			}
 			if (!this.isScrubbing) {
 				sliderNipple.style.left = `${data.percentage}%`;
 			}
@@ -2060,17 +2295,19 @@ export default class UI extends Functions {
 			}
 		});
 
-		parent.append(sliderBar);
-		return sliderBar;
+		parent.append(this.sliderBar);
+		return this.sliderBar;
 	}
 
 	#getChapterText(scrubTimePlayer: number): string | null {
-		const index = this.getChapters().findIndex((chapter: Chapter) => {
+		if (this.getChapters().length == 0) return null;
+
+		const index = this.getChapters()?.findIndex((chapter: Chapter) => {
 			return chapter.startTime > scrubTimePlayer;
 		});
 
 		return this.getChapters()[index - 1]?.title
-			?? this.getChapters()[this.getChapters().length - 1]?.title
+			?? this.getChapters()[this.getChapters()?.length - 1]?.title
 			?? null;
 	}
 
@@ -2081,20 +2318,19 @@ export default class UI extends Functions {
 		chapterMarker.style.width = `calc(${chapter.width}% - 2px)`;
 
 		this.addClasses(chapterMarker, this.chapterMarkersStyles);
-		this.chapterBar.append(chapterMarker);
 
 		const chapterMarkerBG = document.createElement('div');
-		chapterMarker.id = `chapter-marker-bg-${chapter.id.replace(/\s/gu, '-')}`;
+		chapterMarkerBG.id = `chapter-marker-bg-${chapter.id.replace(/\s/gu, '-')}`;
 		this.addClasses(chapterMarkerBG, this.chapterMarkerBGStyles);
 		chapterMarker.append(chapterMarkerBG);
 
 		const chapterMarkerBuffer = document.createElement('div');
-		chapterMarker.id = `chapter-marker-buffer-${chapter.id.replace(/\s/gu, '-')}`;
+		chapterMarkerBuffer.id = `chapter-marker-buffer-${chapter.id.replace(/\s/gu, '-')}`;
 		this.addClasses(chapterMarkerBuffer, this.chapterMarkerBufferStyles);
 		chapterMarker.append(chapterMarkerBuffer);
 
 		const chapterMarkerProgress = document.createElement('div');
-		chapterMarker.id = `chapter-marker-progress-${chapter.id.replace(/\s/gu, '-')}`;
+		chapterMarkerProgress.id = `chapter-marker-progress-${chapter.id.replace(/\s/gu, '-')}`;
 		this.addClasses(chapterMarkerProgress, this.chapterMarkerProgressStyles);
 		chapterMarker.append(chapterMarkerProgress);
 
@@ -2119,22 +2355,24 @@ export default class UI extends Functions {
 			}
 		});
 
+		this.chapterBar.append(chapterMarker);
 		return chapterMarker;
 	}
 
 	createChapterMarkers() {
 		this.chapterBar.querySelectorAll('.chapter-marker').forEach((element) => {
+			this.sliderBar.classList.add('bg-white/60');
 			element.remove();
 		});
-		this.getChapters().forEach((chapter: Chapter) => {
+		this.getChapters()?.forEach((chapter: Chapter) => {
 			this.createChapterMarker(chapter);
 		});
 	}
 
 	#getSliderPopOffsetX(e: any, sliderBar: HTMLDivElement, sliderPop: HTMLDivElement, scrubTime: any) {
-		const sliderBarRect = sliderBar.getBoundingClientRect();
+		const sliderBarRect = this.sliderBar.getBoundingClientRect();
 		const sliderPopRect = sliderPop.getBoundingClientRect();
-		const sliderPopPercentageWidth = ((sliderPopRect.width / 2) / sliderBarRect.width) * 100;
+		const sliderPopPercentageWidth = ((sliderPopRect.width * 0.5) / sliderBarRect.width) * 100;
 		let offsetX = scrubTime.scrubTime;
 		if (offsetX <= sliderPopPercentageWidth) {
 			offsetX = sliderPopPercentageWidth;
@@ -2205,8 +2443,8 @@ export default class UI extends Functions {
 		}
 	}
 
-	#getScrubTime(e: any, sliderBar: HTMLDivElement) {
-		const elementRect = sliderBar.getBoundingClientRect();
+	#getScrubTime(e: any) {
+		const elementRect = this.sliderBar.getBoundingClientRect();
 
 		const x = e.clientX ?? e.touches?.[0]?.clientX ?? e.changedTouches?.[0]?.clientX ?? 0;
 
@@ -2214,8 +2452,8 @@ export default class UI extends Functions {
 		if (offsetX <= 0) offsetX = 0;
 		if (offsetX >= elementRect.width) offsetX = elementRect.width;
 		return {
-			scrubTime: (offsetX / sliderBar.offsetWidth) * 100,
-			scrubTimePlayer: (offsetX / sliderBar.offsetWidth) * this.duration(),
+			scrubTime: (offsetX / this.sliderBar.offsetWidth) * 100,
+			scrubTimePlayer: (offsetX / this.sliderBar.offsetWidth) * this.duration(),
 		};
 	}
 
@@ -2242,22 +2480,66 @@ export default class UI extends Functions {
 
 
 	createEpisodeMenu(parent: HTMLDivElement) {
+
 		const playlistMenu = document.createElement('div');
 		playlistMenu.id = 'playlist-menu';
-		this.addClasses(playlistMenu, this.subMenuContentStyles);
+		this.addClasses(playlistMenu, [
+			...this.subMenuContentStyles,
+			'!flex-row',
+			'!gap-0',
+			'',
+			'',
+		]);
+		parent.appendChild(playlistMenu);
 
-		this.createMenuHeader(playlistMenu, 'playlist');
+		const seasonsMenu = document.createElement('div');
+		seasonsMenu.id = 'season-menu';
+		this.addClasses(seasonsMenu, [
+			...this.subMenuContentStyles,
+			'!flex',
+			'!w-1/3',
+			'border-r-2',
+			'border-gray-500/20',
+			'',
+		]);
+		playlistMenu.appendChild(seasonsMenu);
+
+		this.createMenuHeader(seasonsMenu, 'Seasons');
+
+		const seasonScrollContainer = document.createElement('div');
+		seasonScrollContainer.id = 'playlist-scroll-container';
+		seasonScrollContainer.style.transform = 'translateX(0)';
+
+		this.addClasses(seasonScrollContainer, this.scrollContainerStyles);
+		seasonsMenu.appendChild(seasonScrollContainer);
+
+		seasonScrollContainer.innerHTML = '';
+		for (const [, item] of this.unique(this.getPlaylist(), 'season').entries() ?? []) {
+			this.createSeasonMenuButton(seasonScrollContainer, item);
+		}
+
+		const episodeMenu = document.createElement('div');
+		episodeMenu.id = 'episode-menu';
+		this.addClasses(episodeMenu, [
+			...this.subMenuContentStyles,
+			'!flex',
+			'!w/2/3',
+			'',
+		]);
+		playlistMenu.appendChild(episodeMenu);
+
+		this.createMenuHeader(episodeMenu, 'Episodes');
 
 		const scrollContainer = document.createElement('div');
 		scrollContainer.id = 'playlist-scroll-container';
 		scrollContainer.style.transform = 'translateX(0)';
 
 		this.addClasses(scrollContainer, this.scrollContainerStyles);
-		playlistMenu.appendChild(scrollContainer);
+		episodeMenu.appendChild(scrollContainer);
 
 		scrollContainer.innerHTML = '';
 		for (const [index, item] of this.getPlaylist().entries() ?? []) {
-			this.createPlaylistMenuButton(scrollContainer, item, index);
+			this.createEpisodeMenuButton(scrollContainer, item, index);
 		}
 
 		this.on('show-playlist-menu', (showing) => {
@@ -2268,25 +2550,69 @@ export default class UI extends Functions {
 			}
 		});
 
-		parent.appendChild(playlistMenu);
 		return playlistMenu;
 	}
 
-	createPlaylistMenuButton(parent: HTMLDivElement, item: PlaylistItem, index: number) {
+	createSeasonMenuButton(parent: HTMLDivElement, item: PlaylistItem) {
+		const seasonButton = document.createElement('button');
+		seasonButton.id = `season-${item.id}`;
+		this.addClasses(seasonButton, this.languageButtonStyles);
+
+		if (this.getPlaylistItem().season === item.season) {
+			seasonButton.classList.add('active');
+			seasonButton.style.backgroundColor = 'rgb(82 82 82 / 0.5)';
+		} else {
+			seasonButton.classList.remove('active');
+			seasonButton.style.backgroundColor = '';
+		}
+
+		this.on('item', () => {
+			if (this.getPlaylistItem().season === item.season) {
+				seasonButton.classList.add('active');
+				seasonButton.style.backgroundColor = 'rgb(82 82 82 / 0.5)';
+			} else {
+				seasonButton.classList.remove('active');
+				seasonButton.style.backgroundColor = '';
+			}
+		});
+		this.on('switch-season', (season) => {
+			if (season === item.season) {
+				seasonButton.classList.add('active');
+				seasonButton.style.backgroundColor = 'rgb(82 82 82 / 0.5)';
+			} else {
+				seasonButton.classList.remove('active');
+				seasonButton.style.backgroundColor = '';
+			}
+		});
+
+		const buttonSpan = document.createElement('span');
+		buttonSpan.id = `season-${item.id}-span`;
+		this.addClasses(seasonButton, this.menuButtonStyles);
+		seasonButton.appendChild(buttonSpan);
+
+		buttonSpan.innerText = `Season ${item.season}`;
+
+		const chevron = this.createSVGElement(seasonButton, 'menu', this.buttons.chevronR);
+		this.addClasses(chevron, ['ml-auto']);
+
+		seasonButton.addEventListener('click', () => {
+			this.dispatchEvent('switch-season', item.season);
+		});
+
+		parent.appendChild(seasonButton);
+		return seasonButton;
+	}
+
+	createEpisodeMenuButton(parent: HTMLDivElement, item: PlaylistItem, index: number) {
 		const button = document.createElement('button');
 		button.id = `playlist-${item.id}`;
-
-		console.log(item);
+		if (this.getPlaylistItem().season !== 1) {
+			button.style.display = 'none';
+		}
 
 		this.addClasses(button, this.playlistMenuButtonStyles);
 
-		// if (item.episode && item.season) {
-		// 	button.textContent = `S${this.pad(item.season)}S${this.pad(item.episode)} - ${item.title}`;
-		// } else {
-		// 	button.textContent = `${this.pad(index + 1, this.getPlaylist().length.toString().length)} - ${item.title}`;
-		// }
-
-		const imageBaseUrl = 'https://image.tmdb.org/t/p';
+		const imageBaseUrl = 'https://image.tmdb.org/t/p/w185';
 
 		const leftSide = document.createElement('div');
 		leftSide.id = `playlist-${item.id}-left`;
@@ -2294,9 +2620,9 @@ export default class UI extends Functions {
 			'playlist-card-left',
 			'relative',
 			'rounded-md',
-			'w-1/4',
+			'w-[30%]',
 			'overflow-clip',
-			'',
+			'self-center',
 			'',
 		]);
 		button.append(leftSide);
@@ -2322,10 +2648,14 @@ export default class UI extends Functions {
 		image.id = `playlist-${item.id}-image`;
 		this.addClasses(image, [
 			'playlist-card-image',
+			'w-full',
+			'h-auto',
+			'aspect-video',
+			'object-cover',
 			'',
 		]);
 		image.setAttribute('loading', 'lazy');
-		image.src = item.image && item.image != '' ? `${imageBaseUrl}/w185${item.image}` : '';
+		image.src = item.image && item.image != '' ? `${imageBaseUrl}${item.image}` : '';
 
 		leftSide.append(image);
 
@@ -2349,7 +2679,8 @@ export default class UI extends Functions {
 			'flex',
 			'justify-between',
 			'h-full',
-			'mx-2',
+			'mx-1',
+			'sm:mx-2',
 			'mb-1',
 			'',
 		]);
@@ -2358,6 +2689,7 @@ export default class UI extends Functions {
 		progressContainerItemText.id = `episode-${item.id}-progress-item`;
 		this.addClasses(progressContainerItemText, [
 			'progress-item',
+			'text-[0.7rem]',
 			'',
 		]);
 
@@ -2370,7 +2702,7 @@ export default class UI extends Functions {
 		progressContainerDurationText.id = `episode-${item.id}-progress-duration`;
 		this.addClasses(progressContainerDurationText, [
 			'progress-duration',
-			'',
+			'text-[0.7rem]',
 			'',
 		]);
 		progressContainerDurationText.innerText = item.duration?.replace(/^00:/u, '');
@@ -2385,7 +2717,8 @@ export default class UI extends Functions {
 			'bg-white',
 			'h-1',
 			'mb-2',
-			'mx-2',
+			'mx-1',
+			'sm:mx-2',
 			'',
 		]);
 		sliderContainer.style.display = item.progress ? 'flex' : 'none';
@@ -2429,32 +2762,43 @@ export default class UI extends Functions {
 		overview.id = `playlist-${item.id}-overview`;
 		this.addClasses(overview, [
 			'playlist-card-overview',
-			'text-sm',
+			'text-[0.7rem]',
 			'leading-[1rem]',
+			'line-clamp-4',
 			'',
 		]);
 		overview.textContent = this.limitSentenceByCharacters(item.description, 600);
 		rightSide.append(overview);
 
-		// this.on('playlistitem', () => {
-		// 	if (player.nomercy.current().item.season == item.season) {
-		// 		episode.style.display = 'flex';
-		// 	} else {
-		// 		episode.style.display = 'none';
-		// 	}
+		this.on('item', () => {
+			if (this.getPlaylistItem().season == item.season) {
+				button.style.display = 'flex';
+			} else {
+				button.style.display = 'none';
+			}
 
-		// 	if (player.nomercy.current().item.season == item.season && player.nomercy.current().item.episode == item.episode) {
-		// 		episode.style.background = 'rgba(255,255,255,.1)';
-		// 	} else {
-		// 		episode.style.background = 'transparent';
-		// 	}
-		// });
+			if (this.getPlaylistItem().season == item.season && this.getPlaylistItem().episode == item.episode) {
+				button.style.background = 'rgba(255,255,255,.1)';
+			} else {
+				button.style.background = 'transparent';
+			}
+		});
+
+		this.on('switch-season', (season) => {
+			if (season == item.season) {
+				button.style.display = 'flex';
+			} else {
+				button.style.display = 'none';
+			}
+		});
 
 		progressContainerItemText.innerText
-			= item.season ? `${this.localize('S')}${item.season}: ${this.localize('E')}${item.episode}` : `${item.episode}`;
+			= item.season == undefined ? `${item.episode}` : `${this.localize('S')}${item.season}: ${this.localize('E')}${item.episode}`;
 
 
 		button.addEventListener('click', () => {
+			this.dispatchEvent('show-menu', false);
+
 			if (item.episode && item.season) {
 				this.setEpisode(item.season, item.episode);
 			} else {
@@ -2466,4 +2810,357 @@ export default class UI extends Functions {
 		parent.appendChild(button);
 		return button;
 	}
+
+	createToolTip(parent: HTMLDivElement) {
+		this.tooltip = document.createElement('div');
+		this.tooltip.id = 'tooltip';
+		this.addClasses(this.tooltip, [
+			'tooltip',
+			'hidden',
+			'absolute',
+			'left-0',
+			'bottom-0',
+			'z-50',
+			'px-3',
+			'py-2',
+			'text-xs',
+			'text-white',
+			'rounded-lg',
+			'font-medium',
+			'bg-neutral-900/95',
+		]);
+
+		this.tooltip.style.transform = 'translateX(10px)';
+		this.tooltip.innerText = 'Play (space)';
+
+		this.on('show-tooltip', (data) => {
+			this.tooltip.innerText = data.text;
+			this.tooltip.style.display = 'block';
+			this.tooltip.style.transform = `translate(calc(${data.x} - 50%), calc(${data.y} - 50%))`;
+			if (data.position == 'top') {
+				this.tooltip.classList.add('top-0');
+				this.tooltip.classList.remove('bottom-0');
+			} else {
+				this.tooltip.classList.remove('top-0');
+				this.tooltip.classList.add('bottom-0');
+			}
+		});
+
+		this.on('hide-tooltip', () => {
+			this.tooltip.style.display = 'none';
+		});
+
+		parent.appendChild(this.tooltip);
+		return this.tooltip;
+	}
+
+	createEpisodeTip(parent: HTMLDivElement) {
+
+		const nextTip = document.createElement('div');
+		nextTip.id = 'episode-tip';
+		this.addClasses(nextTip, [
+			'episode-tip',
+			'hidden',
+			'absolute',
+			'left-0',
+			'bottom-10',
+			'z-50',
+			'!w-96',
+			'h-24',
+			'px-2',
+			'py-2',
+			'text-xs',
+			'text-white',
+			'rounded-lg',
+			'font-medium',
+			'bg-neutral-900/95',
+		]);
+
+		this.addClasses(nextTip, this.playlistMenuButtonStyles);
+
+		const leftSide = document.createElement('div');
+		leftSide.id = 'next-tip-left';
+		this.addClasses(leftSide, [
+			'playlist-card-left',
+			'relative',
+			'rounded-sm',
+			'w-[40%]',
+			'overflow-clip',
+			'self-center',
+			'',
+		]);
+		nextTip.append(leftSide);
+
+		const image = document.createElement('img');
+		image.id = 'next-tip-image';
+		this.addClasses(image, [
+			'playlist-card-image',
+			'w-full',
+			'h-auto',
+			'aspect-video',
+			'object-cover',
+			'rounded-md',
+			'',
+		]);
+		image.setAttribute('loading', 'eager');
+
+		leftSide.append(image);
+
+		const rightSide = document.createElement('div');
+		rightSide.id = 'next-tip-right-side';
+		this.addClasses(rightSide, [
+			'playlist-card-right',
+			'w-[60%]',
+			'flex',
+			'flex-col',
+			'text-left',
+			'gap-1',
+		]);
+		nextTip.append(rightSide);
+
+		const header = document.createElement('span');
+		header.id = 'next-tip-header';
+		this.addClasses(header, [
+			'playlist-card-header',
+			'font-bold',
+			'',
+		]);
+
+		rightSide.append(header);
+
+		const title = document.createElement('span');
+		title.id = 'next-tip-title';
+		this.addClasses(title, [
+			'playlist-card-title',
+			'font-bold',
+			'',
+		]);
+
+		rightSide.append(title);
+
+		this.on('show-episode-tip', (data) => {
+			this.getTipData({ direction: data.direction, header, title, image });
+			nextTip.style.display = 'flex';
+			nextTip.style.transform = `translate(${data.x}, calc(${data.y} - 50%))`;
+		});
+
+		this.on('hide-episode-tip', () => {
+			nextTip.style.display = 'none';
+		});
+
+		parent.appendChild(nextTip);
+		return nextTip;
+	}
+
+	getTipData({ direction, header, title, image }:
+		{ direction: string; header: HTMLSpanElement; title: HTMLSpanElement; image: HTMLImageElement; }) {
+
+		const imageBaseUrl = 'https://image.tmdb.org/t/p/w185';
+
+		let index = 0;
+		if (direction == 'previous') {
+			index = this.getPlaylistIndex() - 1;
+		} else {
+			index = this.getPlaylistIndex() + 1;
+		}
+		const item = this.getPlaylist().at(index);
+		if (!item) return;
+
+		image.src = item.image && item.image != '' ? `${imageBaseUrl}${item.image}` : '';
+		header.textContent = `${this.localize(`${direction.toTitleCase()} Episode`)}: ${this.getButtonKeyCode(direction)}`;
+		title.textContent = `${this.localize('S')}${item.season} ${this.localize('E')}${item.episode}: ${this.lineBreakShowTitle(item.title.replace('%S', this.localize('S')).replace('%E', this.localize('E')))}`;
+
+		this.on('item', () => {
+			let index = 0;
+			if (direction == 'previous') {
+				index = this.getPlaylistIndex() - 1;
+			} else {
+				index = this.getPlaylistIndex() + 1;
+			}
+			const item = this.getPlaylist().at(index);
+			if (!item) return;
+
+			image.src = item.image && item.image != '' ? `${imageBaseUrl}${item.image}` : '';
+			header.textContent = `${this.localize(`${direction.toTitleCase()} Episode`)}: ${this.getButtonKeyCode(direction)}`;
+			title.textContent = `${this.localize('S')}${item.season} ${this.localize('E')}${item.episode}: ${this.lineBreakShowTitle(item.title.replace('%S', this.localize('S')).replace('%E', this.localize('E')))}`;
+
+		});
+	}
+
+	createNextUp(parent: HTMLDivElement) {
+
+		const nextUp = document.createElement('div');
+		nextUp.id = 'episode-tip';
+		this.addClasses(nextUp, [
+			'episode-tip',
+			'flex',
+			'gap-2',
+			'absolute',
+			'right-4',
+			'bottom-8',
+			'!w-80',
+			'h-24',
+			'px-2',
+			'py-2',
+		]);
+		parent.appendChild(nextUp);
+		nextUp.style.display = 'none';
+
+		const creditsButton = document.createElement('button');
+		creditsButton.id = 'next-up';
+		this.addClasses(creditsButton, [
+			'next-up',
+			'next-button',
+			'bg-neutral-900/95',
+			'block',
+			'!text-[0.9rem]',
+			'font-bold',
+			'!color-neutral-100',
+			'!py-1.5',
+			'w-[45%]',
+			'',
+		]);
+
+		creditsButton.innerText = this.localize('Watch credits');
+
+		nextUp.appendChild(creditsButton);
+
+		const nextButton = document.createElement('button');
+		nextButton.id = 'next-up';
+		this.addClasses(nextButton, [
+			'next-up',
+			'next-button',
+			'animated',
+			'bg-neutral-100',
+			'w-[55%]',
+			'',
+		]);
+
+		nextButton.setAttribute('data-label', this.localize('Next'));
+		nextButton.setAttribute('data-icon', '▶︎');
+
+		nextUp.appendChild(nextButton);
+
+		let timeout: NodeJS.Timeout;
+		this.on('show-next-up', () => {
+			nextUp.style.display = 'flex';
+			timeout = setTimeout(() => {
+				nextUp.style.display = 'none';
+				this.next();
+			}, 4500);
+		});
+
+		creditsButton.addEventListener('click', () => {
+			clearTimeout(timeout);
+			nextUp.style.display = 'none';
+		});
+
+		nextButton.addEventListener('click', () => {
+			clearTimeout(timeout);
+			nextUp.style.display = 'none';
+			this.next();
+		});
+
+		let enabled = false;
+		this.on('item', () => {
+			enabled = false;
+		});
+		this.on('time', (data) => {
+			if (data.position > (this.duration() - 5) && enabled == false) {
+				this.dispatchEvent('show-next-up');
+				enabled = true;
+			}
+		});
+
+		return nextUp;
+	}
+
+	modifySpinner(parent: HTMLDivElement) {
+
+	const h2 = document.createElement('h2');
+	h2.id = 'loader';
+	h2.classList.add('loader');
+	h2.textContent = `${this.localize('Loading playlist')}...`;
+
+	const loader = document.createElement('div');
+	loader.id = 'loading';
+	loader.classList.add('loading');
+	loader.innerHTML = `
+		<div style="display:flex">
+			<span></span>
+			<span></span>
+			<span></span>
+			<span></span>
+			<span></span>
+			<span></span>
+			<span></span>
+		</div>
+	`;
+	loader.prepend(h2);
+
+	const loadingSpinner = document.createElement('div');
+
+	loadingSpinner.id = 'spinner';
+	loadingSpinner.innerHTML = '';
+	loadingSpinner.classList.add('spinner');
+	this.addClasses(loadingSpinner, [
+		'flex',
+		'justify-center',
+		'items-center',
+		'absolute',
+		'left-0',
+		'right-0',
+		'top-0',
+		'bottom-0',
+
+	]);
+
+	loadingSpinner.append(loader);
+
+	this.on('duringplaylistchange', () => {
+		h2.textContent = `${this.localize('Loading playlist')}...`;
+		loadingSpinner.style.display = 'flex';
+		loadingSpinner.style.visibility = 'visible';
+	});
+	this.on('beforeplaylistitem', () => {
+		h2.textContent = `${this.localize('Loading playlist item')}...`;
+		loadingSpinner.style.display = 'flex';
+		loadingSpinner.style.visibility = 'visible';
+	});
+
+	this.on('item', () => {
+		loadingSpinner.style.display = 'none';
+		loadingSpinner.style.visibility = 'hidden';
+	});
+
+	this.on('time', () => {
+		loadingSpinner.style.display = 'none';
+		loadingSpinner.style.visibility = 'hidden';
+	});
+
+	this.on('bufferedEnd', () => {
+		loadingSpinner.style.display = 'none';
+		loadingSpinner.style.visibility = 'hidden';
+	});
+
+	this.on('waiting', () => {
+		h2.textContent = `${this.localize('Buffering')}...`;
+		loadingSpinner.style.display = 'flex';
+		loadingSpinner.style.visibility = 'visible';
+	});
+
+	this.on('error', () => {
+		h2.style.display = 'flex';
+		h2.textContent = this.localize('Something went wrong trying to play this item');
+		loadingSpinner.style.display = 'flex';
+		loadingSpinner.style.visibility = 'visible';
+		// setTimeout(() => {
+		//     window.location.reload();
+		// }, 2500);
+	});
+
+	parent.appendChild(loadingSpinner);
+	return loadingSpinner;
+};
+
 }

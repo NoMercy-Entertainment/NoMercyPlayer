@@ -36,7 +36,7 @@ You can also use this facade to use the JWPlayer playlist with VideoJS and vice 
     </div>
 
     <script type="module">
-        import VideoPlayer from './js/nomercyplayer.js?v=kw4n5l2n45';
+        import VideoPlayer from './js/nomercyplayer.js';
 
         const config = {
             muted: false,
@@ -67,11 +67,11 @@ You can also use this facade to use the JWPlayer playlist with VideoJS and vice 
 
 #### `constructor(player, config, id)`
 
-| Parameter | Type              | Description                                                                                                                                                                                    |
-| :---      | :---              | :---                                                                                                                                                                                           |
-| player    | `string`          | `jwplayer` or `videojs`                                                                                                                                                                        |
+| Parameter | Type              | Description |
+| :---      | :---              | :---        |
+| player    | `string`          | `jwplayer` or videojs` |
 | config    | `object <Config>` | [JWPlayer](https://developer.jwplayer.com/jwplayer/docs/jw8-player-configuration-reference) or [VideoJS](https://docs.videojs.com/tutorial-options.html) configuration with our custom options |
-| id        | `string`          | ID of the element to attach the player to                                                                                                                                                      |
+| id        | `string`          | ID of the element to attach the player to |
 
 ### `<Config>`
 
@@ -103,7 +103,7 @@ You can also use this facade to use the JWPlayer playlist with VideoJS and vice 
 | sources              | `Source[]`        | Video source(s)       |
 | tracks (JWPlayer)    | `Track[]`         | Text tracks           |
 | textTracks (videoJS) | `TextTrack[]`     | Text tracks           |
-| metadata (both)      | `TextTrack<sprite | fonts                 | chapters | spritesheet>[]` | Text tracks |
+| metadata (both)      | `TextTrack< sprite | fonts | chapters | spritesheet >[]` | Text tracks |
 
 #### `<Source>`
 

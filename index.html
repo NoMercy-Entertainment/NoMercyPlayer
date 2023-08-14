@@ -3,66 +3,79 @@
 
     <head>
         <meta charset="UTF-8" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon"
+              type="image/svg+xml"
+              href="/favicon.ico" />
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1.0" />
         <title>NoMercyPlayer API</title>
 
-        <script src="./dist/app.js?v=kw4n5l2n45" defer></script>
-        <link href="./dist/nomercyplayer.css?v=kw4n5l2n45" rel="stylesheet">
+        <script src="/static/nomercyplayer.js"
+                defer></script>
 
     </head>
 
     <body class="flex flex-col items-center justify-center w-screen h-screen gap-4 text-white bg-zinc-900">
 
-        <div id="container" class="flex flex-col justify-center w-full gap-8 sm:flex-row">
-            <div id="wrapper2" class="flex flex-col items-center w-full max-w-4xl gap-2 text-center">
+        <div id="container"
+             class="flex flex-col justify-center w-full gap-8 p-8 sm:flex-row">
+            <!-- <div id="wrapper2"
+                 class="flex flex-col items-center w-full max-w-4xl gap-2 text-center">
                 <span>JWPlayer</span>
                 <video id="player2"></video>
-            </div>
+            </div> -->
 
-            <div id="wrapper1" class="flex flex-col items-center w-full max-w-4xl gap-2 text-center">
+            <div id="wrapper1"
+                 class="flex flex-col items-center w-full max-w-4xl gap-2 text-center aspect-video">
+
                 <span>VideoJS</span>
-                <video id="player1" class="video-js"></video>
+                <div class="relative w-full pt-[56.25%]">
+                    <div class="absolute w-full h-full top-0 left-0">
+                        <video id="player1"
+                               class="video-js"></video>
+                    </div>
+                </div>
             </div>
         </div>
+
         <div class="flex flex-wrap items-center justify-center gap-4">
             <button type="button"
-                class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
-                onClick="play()">
+                    class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
+                    onClick="play()">
                 Play
             </button>
             <button type="button"
-                class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
-                onClick="pause()">
+                    class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
+                    onClick="pause()">
                 Pause
             </button>
             <button type="button"
-                class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
-                onClick="next()">
+                    class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
+                    onClick="next()">
                 Next
             </button>
             <button type="button"
-                class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
-                onClick="prev()">
+                    class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
+                    onClick="prev()">
                 Prev
             </button>
             <button type="button"
-                class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
-                onClick="sync()">
+                    class="w-24 text-white bg-gradient-to-r from-purple-700 to-purple-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-md text-sm px-3 py-1.5 text-center mr-2 mb-2"
+                    onClick="sync()">
                 Sync
             </button>
         </div>
 
         <script type="module">
 
-            import VideoPlayer from './dist/nomercyplayer.js?v=kw4n5l2n45';
+            // import VideoPlayer from '/static/nomercyplayer.js';
 
             const config = {
                 muted: false,
                 controls: false,
                 chapters: true,
                 preload: 'auto',
-                playlist: 'https://api.nomercy.tv/playlist-jw?v=9',
+                playlist: 'https://api-dev.nomercy.tv/playlist-jw?v=1',
                 controlsTimeout: 3000,
                 doubleClickDelay: 500,
                 playbackRates: [
@@ -80,12 +93,6 @@
             const js = new VideoPlayer('videojs', config, 'player1');
             window.js = js;
 
-            js.on('displayMessage', (data) => {
-                console.log('displayMessage', data);
-            });
-            js.on('removeMessage', (data) => {
-                console.log('removeMessage', data);
-            });
             js.on('theaterMode', (data) => {
                 // handle resize container
                 console.log('theaterMode', data);
@@ -118,63 +125,43 @@
                 }
             });
 
-            js.on('volume', (data) => {
-                js.displayMessage(`Volume: ${data.volume}%`);
-            });
-            js.on('ready', (data) => {
-                console.log('ready', data);
 
-            });
+            // config.key = 'W7zSm81+mmIsg7F+fyHRKhF3ggLkTqtGMhvI92kbqf/ysE99';
+            // const jw = new VideoPlayer('jwplayer', config, 'player2');
 
-            config.key = 'W7zSm81+mmIsg7F+fyHRKhF3ggLkTqtGMhvI92kbqf/ysE99';
-            const jw = new VideoPlayer('jwplayer', config, 'player2');
+            // window.jw = jw;
 
-            window.jw = jw;
-
-            jw.on('displayMessage', (data) => {
-                console.log('displayMessage', data);
-            });
-            jw.on('removeMessage', (data) => {
-                console.log('removeMessage', data);
-            });
-
-            jw.on('theaterMode', (data) => {
-                // handle resize container
-                console.log('theaterMode', data);
-                if (data) {
-                    document.querySelector('body').classList.remove('justify-center');
-                    document.querySelector('#container').classList.remove('sm:flex-row');
-                    document.querySelector('#wrapper2').classList.remove('max-w-4xl');
-                    document.querySelector('#wrapper2').classList.remove('w-full');
-                    document.querySelector('#wrapper2').classList.add('w-2/3');
-                } else {
-                    document.querySelector('body').classList.add('justify-center');
-                    document.querySelector('#container').classList.add('sm:flex-row');
-                    document.querySelector('#wrapper2').classList.add('max-w-4xl');
-                    document.querySelector('#wrapper2').classList.add('w-full');
-                    document.querySelector('#wrapper2').classList.remove('w-2/3');
-                }
-            });
-            jw.on('pip', (data) => {
-                console.log('pip', data);
-                if (data) {
-                    document.querySelector('#wrapper2').classList.add('absolute');
-                    document.querySelector('#wrapper2').classList.add('bottom-4');
-                    document.querySelector('#wrapper2').classList.add('right-4');
-                    document.querySelector('#wrapper2').classList.add('max-w-sm');
-                } else {
-                    document.querySelector('#wrapper2').classList.remove('absolute');
-                    document.querySelector('#wrapper2').classList.remove('bottom-4');
-                    document.querySelector('#wrapper2').classList.remove('right-4');
-                    document.querySelector('#wrapper2').classList.remove('max-w-sm');
-                }
-            });
-            jw.on('volume', (data) => {
-                jw.displayMessage(`Volume: ${data.volume}%`);
-            });
-            jw.on('ready', (data) => {
-                console.log('ready', data);
-            });
+            // jw.on('theaterMode', (data) => {
+            //     // handle resize container
+            //     console.log('theaterMode', data);
+            //     if (data) {
+            //         document.querySelector('body').classList.remove('justify-center');
+            //         document.querySelector('#container').classList.remove('sm:flex-row');
+            //         document.querySelector('#wrapper2').classList.remove('max-w-4xl');
+            //         document.querySelector('#wrapper2').classList.remove('w-full');
+            //         document.querySelector('#wrapper2').classList.add('w-2/3');
+            //     } else {
+            //         document.querySelector('body').classList.add('justify-center');
+            //         document.querySelector('#container').classList.add('sm:flex-row');
+            //         document.querySelector('#wrapper2').classList.add('max-w-4xl');
+            //         document.querySelector('#wrapper2').classList.add('w-full');
+            //         document.querySelector('#wrapper2').classList.remove('w-2/3');
+            //     }
+            // });
+            // jw.on('pip', (data) => {
+            //     console.log('pip', data);
+            //     if (data) {
+            //         document.querySelector('#wrapper2').classList.add('absolute');
+            //         document.querySelector('#wrapper2').classList.add('bottom-4');
+            //         document.querySelector('#wrapper2').classList.add('right-4');
+            //         document.querySelector('#wrapper2').classList.add('max-w-sm');
+            //     } else {
+            //         document.querySelector('#wrapper2').classList.remove('absolute');
+            //         document.querySelector('#wrapper2').classList.remove('bottom-4');
+            //         document.querySelector('#wrapper2').classList.remove('right-4');
+            //         document.querySelector('#wrapper2').classList.remove('max-w-sm');
+            //     }
+            // });
         </script>
     </body>
 

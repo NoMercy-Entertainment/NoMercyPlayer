@@ -1,5 +1,5 @@
-import Base from './base.js';
-import { keyBindings } from './keyEvents.js';
+import Base from './base';
+import { keyBindings } from './keyEvents';
 import SubtitlesOctopus from './octopus/subtitles-octopus.js';
 
 import type { VideoPlayerOptions, VideoPlayer as Types, TextTrack, PlaylistItem } from './nomercyplayer.d';
@@ -17,6 +17,8 @@ export default class Functions extends Base {
 	pipEnabled = false;
 	octopusInstance: any | null = null;
 	currentChapterFile = '';
+	currentFontFile = '';
+	fonts: any;
 
 	constructor(playerType: Types['playerType'], options: VideoPlayerOptions, playerId: Types['playerId'] = '') {
 		super(playerType, options, playerId);
@@ -81,7 +83,6 @@ export default class Functions extends Base {
 
 			if (keys.some(k => k.key === event.key && k.control === event.ctrlKey)) {
 				event.preventDefault();
-				console.log(keys.find(k => k.key === event.key && k.control === event.ctrlKey));
 				keys.find(k => k.key === event.key && k.control === event.ctrlKey)?.function();
 			}
 		}
@@ -243,28 +244,28 @@ export default class Functions extends Base {
 	}
 
 	rewindVideo() {
-		this.dispatchEvent('removeForward');
+		this.dispatchEvent('remove-forward');
 		clearTimeout(this.leftTap);
 
 		this.tapCount += this.options.seekInterval ?? 10;
 		this.dispatchEvent('rewind', this.tapCount);
 
 		this.leftTap = setTimeout(() => {
-			this.dispatchEvent('removeRewind');
+			this.dispatchEvent('remove-rewind');
 			this.seek(this.currentTime() - this.tapCount);
 			this.tapCount = 0;
 		}, this.leeway);
 	};
 
 	forwardVideo() {
-		this.dispatchEvent('removeRewind');
+		this.dispatchEvent('remove-rewind');
 		clearTimeout(this.rightTap);
 
 		this.tapCount += this.options.seekInterval ?? 10;
 		this.dispatchEvent('forward', this.tapCount);
 
 		this.rightTap = setTimeout(() => {
-			this.dispatchEvent('removeForward');
+			this.dispatchEvent('remove-forward');
 			this.seek(this.currentTime() + this.tapCount);
 			this.tapCount = 0;
 		}, this.leeway);
@@ -406,7 +407,7 @@ export default class Functions extends Base {
 		if (this.isJwplayer) {
 			this.player.setCurrentAudioTrack(index);
 			localStorage.setItem('audio-language', this.player.getAudioTracks()[index].language);
-		} else {
+		} else if (this.player.audioTracks().tracks_[index]) {
 			this.player.audioTracks().tracks_[index].enabled = true;
 			localStorage.setItem('audio-language', this.player.audioTracks().tracks_[index].language);
 		}
@@ -480,6 +481,7 @@ export default class Functions extends Base {
 	}
 
 	setTextTrack(index: number) {
+
 		if (this.isJwplayer) {
 			const number = this.player.getCaptionsList().findIndex((t: any) => t.id == this.getTextTracks()[index]?.id);
 			this.player.setCurrentCaptions(number);
@@ -535,7 +537,7 @@ export default class Functions extends Base {
 		}
 	}
 
-	opus() {
+	async opus() {
 		try {
 			this.octopusInstance.dispose();
 		} catch (error) {
@@ -545,6 +547,7 @@ export default class Functions extends Base {
 		const subtitleURL = this.getTextTrackSrc() ?? null;
 
 		if (subtitleURL) {
+			await this.fetchFontFile();
 			const options = {
 				video: this.getElement().querySelector('video'),
 				lossyRender: true,
@@ -553,7 +556,7 @@ export default class Functions extends Base {
 				blendRender: true,
 				lazyFileLoading: true,
 				targetFps: 120,
-				fonts: this.getPlaylistItem().fonts.map((f: any) => f.file),
+				fonts: this.fonts?.map((f: any) => f.file) ?? [],
 				workerUrl: `${this.currentScriptPath()}octopus/subtitles-octopus-worker.js`,
 				legacyWorkerUrl: `${this.currentScriptPath()}octopus/subtitles-octopus-worker-legacy.js`,
 				onReady: async () => {
@@ -627,10 +630,7 @@ export default class Functions extends Base {
 	}
 
 	getTimeFile() {
-		let file = this.getPlaylistItem().metadata.find((t: { kind: string }) => t.kind === 'spritesheet')?.file;
-		if (this.isJwplayer && !file) {
-			file = this.getPlaylistItem().tracks?.find((t: { kind: string }) => t.kind === 'spritesheet')?.file;
-		}
+		const file = this.getPlaylistItem().metadata.find((t: { kind: string }) => t.kind === 'thumbnails')?.file;
 		return file;
 	}
 
@@ -640,6 +640,32 @@ export default class Functions extends Base {
 
 	getChapterFile() {
 		return this.getPlaylistItem().metadata.find((t: { kind: string }) => t.kind === 'chapters')?.file;
+	}
+
+	getFontsFile() {
+		return this.getPlaylistItem().metadata.find((t: { kind: string }) => t.kind === 'fonts')?.file;
+	}
+
+	async fetchFontFile() {
+		const file = this.getFontsFile();
+		if (file && this.currentFontFile !== file) {
+			this.currentFontFile = file;
+			await this.getFileContents({
+				url: file,
+				options: {},
+				callback: (data: string) => {
+					this.fonts = JSON.parse(data).map((f: { file: string; mimeType: string }) => {
+						const baseFolder = file.replace(/\/[^/]*$/u, '');
+						return {
+							...f,
+							file: `${baseFolder}/fonts/${f.file}`,
+						};
+					});
+
+					this.dispatchEvent('chapters', this.getChapters());
+				},
+			});
+		}
 	}
 
 	fetchChapterFile() {
@@ -673,7 +699,7 @@ export default class Functions extends Base {
 				startTime: chapter.startTime,
 				endTime: endTime,
 			};
-		});
+		}) ?? [];
 	}
 
 	getChapter() {

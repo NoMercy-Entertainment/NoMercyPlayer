@@ -25,6 +25,7 @@
         "playlistsorted",
         "previoustrack",
         "seekbackward",
+        "seeked",
         "seekforward",
         "seekto",
         "spritesheet",
@@ -35,5 +36,6 @@
         "unmuted",
         "videojs",
         "xywh"
-    ]
+    ],
+    "liveServer.settings.port": 5501
 }
