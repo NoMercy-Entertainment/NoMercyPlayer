@@ -881,8 +881,8 @@ export default class UI extends Functions {
 		this.on('pip', (data) => {
 			if (data) {
 				time.style.display = 'none';
-			} else if (this.duration() == 0) {
-				time.style.display = 'flex';
+			} else {
+				time.style.display = '';
 			}
 		});
 
@@ -2031,10 +2031,10 @@ export default class UI extends Functions {
 				</svg>
 			`;
 		} else {
-			(spanChild as HTMLImageElement).src = `./dist/flags/${data.language || data.label.slice(0, 3).toLocaleLowerCase()}.svg`;
+			(spanChild as HTMLImageElement).src = `/img/flags/${data.language || data.label.slice(0, 3).toLocaleLowerCase()}.svg`;
 		}
 
-		// languageButton.append(spanChild);
+		languageButton.append(spanChild);
 
 		const languageButtonText = document.createElement('span');
 		languageButtonText.classList.add('menu-button-text');

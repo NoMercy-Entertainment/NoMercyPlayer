@@ -4,14 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "yarn copy-octopus && yarn copy-flags && tsc --watch",
-    "build": "tsc && yarn copy-octopus && yarn copy-flags && npx webpack",
-    "tailwind": "tailwindcss -i ./src/index.scss -o ./dist/nomercyplayer.css --watch",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "serve": "vite preview",
+    "static": "npx webpack",
     "test": "jest",
     "lint": "eslint 'src/**/*.{js,ts,d.ts}'",
-    "format": "eslint 'src/**/*.{js,ts,d.ts}' --fix",
-    "copy-octopus": "copyfiles -u 2 src/octopus/* dist/octopus",
-    "copy-flags": "copyfiles -u 2 src/flags/* dist/flags"
+    "format": "eslint 'src/**/*.{js,ts,d.ts}' --fix"
   },
   "keywords": [],
   "author": "",
@@ -44,6 +43,7 @@
     "typescript": "^5.1.6",
     "video.js": "^8.0.4",
     "videojs-playlist": "^5.0.0",
+    "vite": "^4.4.9",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.1"

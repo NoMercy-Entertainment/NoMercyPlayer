@@ -549,17 +549,35 @@ export const styles = `
 	.nomercyplayer * {
 		user-select: none;
 	}
+
+    .video-js .vjs-tech {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+
 	.slider-pop-image {
 		min-height: 80px;
 		min-width: 144px;
 	}
-	.vjs-poster, 
+	.vjs-poster,
 	.vjs-loading-spinner,
 	.vjs-big-play-button,
 	.vjs-control-bar,
 	.vjs-hidden {
 		display: none !important;
 	}
+
+    canvas {
+        transition: all 420ms ease-in-out;
+    }
+    .nomercyplayer.controls-visible canvas {
+        padding-bottom: 4rem
+    }
+
 
 	.seek-ripple {
 		--deg: 90deg;

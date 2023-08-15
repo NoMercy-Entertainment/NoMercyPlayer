@@ -1,6 +1,6 @@
 import Base from './base';
 import { keyBindings } from './keyEvents';
-import SubtitlesOctopus from './octopus/subtitles-octopus.js';
+import SubtitlesOctopus from './subtitles-octopus.js';
 
 import type { VideoPlayerOptions, VideoPlayer as Types, TextTrack, PlaylistItem } from './nomercyplayer.d';
 export default class Functions extends Base {
@@ -557,8 +557,8 @@ export default class Functions extends Base {
 				lazyFileLoading: true,
 				targetFps: 120,
 				fonts: this.fonts?.map((f: any) => f.file) ?? [],
-				workerUrl: `${this.currentScriptPath()}octopus/subtitles-octopus-worker.js`,
-				legacyWorkerUrl: `${this.currentScriptPath()}octopus/subtitles-octopus-worker-legacy.js`,
+				workerUrl: `/js/octopus/subtitles-octopus-worker.js`,
+				legacyWorkerUrl: `/js/octopus/subtitles-octopus-worker-legacy.js`,
 				onReady: async () => {
 					// player.nomercy.play();
 				},
