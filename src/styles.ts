@@ -1,3 +1,4 @@
+import './index.css';
 /* eslint-disable no-irregular-whitespace */
 
 export const bottomBarStyles = [

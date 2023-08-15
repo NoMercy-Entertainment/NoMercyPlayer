@@ -1,4 +1,4 @@
-import './index.css';
+
 /* eslint-disable indent */
 import { buttons, fluentIcons, Icon } from './buttons';
 import Functions from './functions';
