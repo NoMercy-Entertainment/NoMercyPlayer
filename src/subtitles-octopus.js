@@ -231,7 +231,7 @@ const SubtitlesOctopus = function (options) {
     };
     self.renderFrameData = null;
     function renderFrames() {
-        var _a, _b;
+        let _a, _b;
         const data = self.renderFramesData;
         const beforeDrawTime = performance.now();
         self.ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);
@@ -263,7 +263,7 @@ const SubtitlesOctopus = function (options) {
                  *
                  */
     function renderFastFrames() {
-        var _a, _b;
+        let _a, _b;
         const data = self.renderFramesData;
         const beforeDrawTime = performance.now();
         self.ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);

@@ -28,7 +28,9 @@ export default class Functions extends Base {
 	#eventHandlers() {
 		this.on('item', () => {
 			this.dispatchEvent('speed', 1);
-			this.fetchChapterFile();
+			if (this.options.chapters != false) {
+				this.fetchChapterFile();
+			}
 			this.setMediaAPI();
 			this.once('play', () => {
 				this.setMediaAPI();
@@ -414,8 +416,7 @@ export default class Functions extends Base {
 	}
 
 	getAudioTrackIndexByLanguage(language: string) {
-		const index = this.getAudioTracks().findIndex((t: any) => t.language == language);
-		return index;
+		return this.getAudioTracks().findIndex((t: any) => t.language == language);
 	}
 
 
@@ -439,8 +440,7 @@ export default class Functions extends Base {
 	}
 
 	getTextTrackIndexBy(language: string, type: string, ext: string) {
-		const index = this.getTextTracks().findIndex((t: any) => (t.src ?? t.id).endsWith(`${language}.${type}.${ext}`));
-		return index;
+		return this.getTextTracks().findIndex((t: any) => (t.src ?? t.id).endsWith(`${language}.${type}.${ext}`));
 	}
 
 	getTextTrackIndex() {
@@ -557,8 +557,8 @@ export default class Functions extends Base {
 				lazyFileLoading: true,
 				targetFps: 120,
 				fonts: this.fonts?.map((f: any) => f.file) ?? [],
-				workerUrl: `/js/octopus/subtitles-octopus-worker.js`,
-				legacyWorkerUrl: `/js/octopus/subtitles-octopus-worker-legacy.js`,
+				workerUrl: '/js/octopus/subtitles-octopus-worker.js',
+				legacyWorkerUrl: '/js/octopus/subtitles-octopus-worker-legacy.js',
 				onReady: async () => {
 					// player.nomercy.play();
 				},
@@ -630,8 +630,7 @@ export default class Functions extends Base {
 	}
 
 	getTimeFile() {
-		const file = this.getPlaylistItem().metadata.find((t: { kind: string }) => t.kind === 'thumbnails')?.file;
-		return file;
+		return this.getPlaylistItem().metadata.find((t: { kind: string }) => t.kind === 'thumbnails')?.file;
 	}
 
 	getSpriteFile() {
@@ -678,13 +677,11 @@ export default class Functions extends Base {
 				callback: (data: string) => {
 					// @ts-ignore
 					const parser = new window.WebVTTParser();
-					const tree = parser.parse(data, 'metadata');
-
-					this.chapters = tree;
+					this.chapters = parser.parse(data, 'metadata');
 
 					this.dispatchEvent('chapters', this.getChapters());
 				},
-			});
+			}).then();
 		}
 	}
 

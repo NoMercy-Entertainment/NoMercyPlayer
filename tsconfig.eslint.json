@@ -1,7 +1,8 @@
 {
     "include": [
-        ".eslintrc.js", 
+        ".eslintrc.js",
         "tailwind.config.cjs",
         "src/nomercyplayer.d.ts",
+        "postcss.config.js",
     ]
 }

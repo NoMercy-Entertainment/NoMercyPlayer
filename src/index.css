@@ -1,4 +1,6 @@
-
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @font-face {
     font-family: 'BBC';
@@ -6,10 +8,6 @@
     font-weight: 100;
     font-display: swap;
     src: url("./fonts/BBCReithSans_W_Bd.woff2") format("woff2");
-}
-
-* {
-    font-family: "BBC" !important;
 }
 
 :root {
@@ -32,12 +30,12 @@
 .spinner {
     background-clip: padding-box;
     border: none;
-    border-radius: 0px;
+    border-radius: 0;
     box-sizing: border-box;
     display: none;
     height: 70px;
     left: 50%;
-    margin: 0px;
+    margin: 0;
     opacity: 0.85;
     position: absolute;
     text-align: left;
@@ -83,7 +81,6 @@
     outline: transparent;
     padding: 0.5rem 1rem;
     text-align: center;
-    word-wrap: nowrap;
 }
 
 .spinner .loading span {
@@ -135,6 +132,6 @@
 .jw-text-track-cue,
 ::cue {
     background: transparent !important;
-    text-shadow: black 0px 0px 4px, black 0px 0px 4px, black 0px 0px 4px, black 0px 0px 4px, black 0px 0px 4px, black 0px 0px 4px,
-    black 0px 0px 4px !important;
+    text-shadow: black 0 0 4px, black 0 0 4px, black 0 0 4px, black 0 0 4px, black 0 0 4px, black 0 0 4px,
+    black 0 0 4px !important;
 }

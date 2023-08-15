@@ -4,14 +4,15 @@ import { buttons, fluentIcons, Icon } from './buttons';
 import Functions from './functions';
 import {
 	bottomBarStyles, bottomRowStyles, buttonBaseStyle, buttonStyles, centerStyles, chapterBarStyles,
-	chapterMarkerBGStyles, chapterMarkerBufferStyles, chapterMarkerProgressStyles,
-	chapterMarkersStyles, chapterTextStyles, dividerStyles, iconStyles, languageButtonSpanStyles,
+	chapterMarkerBGStyles, chapterMarkerBufferStyles, chapterMarkerHoverStyles, chapterMarkerProgressStyles,
+	chapterMarkersStyles, chapterTextStyles, dividerStyles, episodeMenuButtonImageStyles, episodeMenuButtonLeftStyles,
+	episodeMenuButtonShadowStyles, iconStyles, languageButtonSpanStyles,
 	mainMenuStyles, menuButtonStyles, menuButtonTextStyles, menuContentStyles, menuFrameStyles,
 	menuHeaderButtonTextStyles, menuHeaderStyles, overlayStyles, playerMessageStyles,
 	playlistMenuButtonStyles, playlistMenuStyles, scrollContainerStyles, sliderBarStyles,
-	sliderBufferStyles, sliderNippleStyles, sliderPopImageStyles, sliderPopStyles,
+	sliderBufferStyles, sliderHoverStyles, sliderNippleStyles, sliderPopImageStyles, sliderPopStyles,
 	sliderProgressStyles, sliderTextStyles, speedButtonTextStyles, subMenuContentStyles,
-	subMenuStyles, svgSizeStyles, timeStyles, topBarStyles, topRowStyles, touchPlaybackButtonStyles,
+	subMenuStyles, svgSizeStyles, timeStyles, tooltipStyles, topBarStyles, topRowStyles, touchPlaybackButtonStyles,
 	touchPlaybackStyles, volumeContainerStyles, volumeSliderStyles
 } from './styles';
 
@@ -68,6 +69,7 @@ export default class UI extends Functions {
 	chapterBarStyles: string[] = [];
 	chapterMarkerBGStyles: string[] = [];
 	chapterMarkerBufferStyles: string[] = [];
+	chapterMarkerHoverStyles: string[] = [];
 	chapterMarkerProgressStyles: string[] = [];
 	chapterMarkersStyles: string[] = [];
 	chapterTextStyles: string[] = [];
@@ -101,6 +103,7 @@ export default class UI extends Functions {
 	volumeSliderStyles: string[] = [];
 	volumeContainerStyles: string[] = [];
 	sliderBufferStyles: string[] = [];
+	sliderHoverStyles: string[] = [];
 	sliderProgressStyles: string[] = [];
 	playerMessageStyles: string[] = [];
 	playlistMenuStyles: string[] = [];
@@ -108,6 +111,11 @@ export default class UI extends Functions {
 	tooltip: any;
 	hasNextTip = false;
 	sliderBar: any;
+
+	tooltipStyles: string[] = [];
+	episodeMenuButtonLeftStyles: string[] = [];
+	episodeMenuButtonShadowStyles: string[] = [];
+	episodeMenuButtonImageStyles: string[] = [];
 
 	constructor(playerType: Types['playerType'], options: VideoPlayerOptions, playerId: Types['playerId'] = '') {
 		super(playerType, options, playerId);
@@ -122,6 +130,7 @@ export default class UI extends Functions {
 			this.chapterBarStyles = this.mergeStyles('chapterBarStyles', chapterBarStyles);
 			this.chapterMarkerBGStyles = this.mergeStyles('chapterMarkerBGStyles', chapterMarkerBGStyles);
 			this.chapterMarkerBufferStyles = this.mergeStyles('chapterMarkerBufferStyles', chapterMarkerBufferStyles);
+			this.chapterMarkerHoverStyles = this.mergeStyles('chapterMarkerHoverStyles', chapterMarkerHoverStyles);
 			this.chapterMarkerProgressStyles = this.mergeStyles('chapterMarkerProgressStyles', chapterMarkerProgressStyles);
 			this.chapterMarkersStyles = this.mergeStyles('chapterMarkersStyles', chapterMarkersStyles);
 			this.chapterTextStyles = this.mergeStyles('chapterTextStyles', chapterTextStyles);
@@ -155,10 +164,17 @@ export default class UI extends Functions {
 			this.volumeContainerStyles = this.mergeStyles('volumeContainerStyles', volumeContainerStyles);
 			this.volumeSliderStyles = this.mergeStyles('volumeSliderStyles', volumeSliderStyles);
 			this.sliderBufferStyles = this.mergeStyles('sliderBufferStyles', sliderBufferStyles);
+			this.sliderHoverStyles = this.mergeStyles('sliderHoverStyles', sliderHoverStyles);
 			this.sliderProgressStyles = this.mergeStyles('sliderProgressStyles', sliderProgressStyles);
 			this.playerMessageStyles = this.mergeStyles('playerMessageStyles', playerMessageStyles);
 			this.playlistMenuStyles = this.mergeStyles('playlistMenuStyles', playlistMenuStyles);
 			this.playlistMenuButtonStyles = this.mergeStyles('playlistMenuButtonStyles', playlistMenuButtonStyles);
+			this.episodeMenuButtonLeftStyles = this.mergeStyles('episodeMenuButtonLeftStyles', episodeMenuButtonLeftStyles);
+			this.episodeMenuButtonShadowStyles = this.mergeStyles('episodeMenuButtonShadowStyles', episodeMenuButtonShadowStyles);
+			this.episodeMenuButtonImageStyles = this.mergeStyles('episodeMenuButtonImageStyles', episodeMenuButtonImageStyles);
+
+			this.tooltipStyles = this.mergeStyles('tooltipStyles', tooltipStyles);
+
 
 			this.fluentIcons = fluentIcons;
 			this.buttons = buttons(this.options);
@@ -309,7 +325,7 @@ export default class UI extends Functions {
 
 		this.createNextButton(bottomRow);
 
-		this.createTime(bottomRow, 'current', ['ml-2']);
+		this.createTime(bottomRow, 'current', ['nm-ml-2']);
 		this.createDivider(bottomRow);
 		this.createTime(bottomRow, 'remaining', ['mr-2']);
 
@@ -336,18 +352,6 @@ export default class UI extends Functions {
 		this.createNextUp(overlay);
 
 		this.modifySpinner(overlay);
-	}
-
-	createContainer(parent: HTMLElement, classes: string[], id?: string) {
-		const container = document.createElement('div');
-		container.id = id ?? 'container';
-
-		classes.push(id ?? 'container');
-		this.addClasses(container, classes);
-
-		parent.appendChild(container);
-
-		return container;
 	}
 
 	createTopBar(parent: HTMLElement) {
@@ -571,23 +575,23 @@ export default class UI extends Functions {
 			...icon.classes,
 			id,
 			...this.svgSizeStyles,
-			hidden ? 'hidden' : 'flex',
+			hidden ? 'nm-hidden' : 'nm-flex',
 		]);
 
 		const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 		path.setAttribute('d', icon.normal);
 		this.addClasses(path, [
-			'group-hover/button:hidden',
-			'group-hover/volume:hidden',
+			'group-hover/button:nm-hidden',
+			'group-hover/volume:nm-hidden',
 		]);
 		svg.appendChild(path);
 
 		const path2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 		path2.setAttribute('d', icon.hover);
 		this.addClasses(path2, [
-			'hidden',
-			'group-hover/button:flex',
-			'group-hover/volume:flex',
+			'nm-hidden',
+			'group-hover/button:nm-flex',
+			'group-hover/volume:nm-flex',
 		]);
 		svg.appendChild(path2);
 
@@ -596,18 +600,19 @@ export default class UI extends Functions {
 				if (icon.title.length == 0 || (['Next', 'Previous'].includes(icon.title) && this.hasNextTip)) return;
 
 				const text = `${icon.title} ${this.getButtonKeyCode(id)}`;
+
 				const playerRect = this.getElement().getBoundingClientRect();
 				const tipRect = parent.getBoundingClientRect();
 
 				let x = Math.abs(playerRect.left - (tipRect.left + (tipRect.width * 0.5)) - (text.length * 0.5));
 				const y = Math.abs(playerRect.bottom - (tipRect.bottom + (tipRect.height * 1.2)));
 
-				if (x < 30) {
-					x = 30;
+				if (x < 35) {
+					x = 35;
 				}
 
-				if (x > playerRect.right - 110) {
-					x = playerRect.right - 110;
+				if (x > playerRect.right - 160) {
+					x = playerRect.right - 160;
 				}
 
 				this.dispatchEvent('show-tooltip', {
@@ -1025,19 +1030,7 @@ export default class UI extends Functions {
 		});
 
 		previousButton.addEventListener('mouseenter', () => {
-			const playerRect = previousButton.getBoundingClientRect();
-			const tipRect = parent.getBoundingClientRect();
-
-			let x = Math.abs((tipRect.left - playerRect.left) + 100);
-			const y = Math.abs((tipRect.bottom - playerRect.bottom) - 60);
-
-			if (x < 30) {
-				x = 30;
-			}
-
-			if (x > playerRect.right - 60) {
-				x = playerRect.right - 60;
-			}
+			const { x, y } = this.mousePosition(previousButton, parent);
 
 			this.dispatchEvent('show-episode-tip', {
 				direction: 'previous',
@@ -1054,6 +1047,27 @@ export default class UI extends Functions {
 
 		parent.appendChild(previousButton);
 		return previousButton;
+	}
+
+	mousePosition(element: HTMLElement, parent: HTMLElement, offset = 60) {
+		const playerRect = element.getBoundingClientRect();
+		const tipRect = parent.getBoundingClientRect();
+
+		let x = Math.abs((tipRect.left - playerRect.left) + 100);
+		const y = Math.abs((tipRect.bottom - playerRect.bottom) - 60);
+
+		if (x < 30) {
+			x = 30;
+		}
+
+		if (x > playerRect.right - offset) {
+			x = playerRect.right - offset;
+		}
+
+		return {
+			x,
+			y,
+		};
 	}
 
 	createNextButton(parent: HTMLDivElement) {
@@ -1089,19 +1103,7 @@ export default class UI extends Functions {
 
 		nextButton.addEventListener('mouseenter', () => {
 
-			const playerRect = nextButton.getBoundingClientRect();
-			const tipRect = parent.getBoundingClientRect();
-
-			let x = Math.abs((tipRect.left - playerRect.left) + 100);
-			const y = Math.abs((tipRect.bottom - playerRect.bottom) - 60);
-
-			if (x < 30) {
-				x = 30;
-			}
-
-			if (x > playerRect.right - 60) {
-				x = playerRect.right - 60;
-			}
+			const { x, y } = this.mousePosition(nextButton, parent);
 
 			this.dispatchEvent('show-episode-tip', {
 				direction: 'next',
@@ -1406,43 +1408,43 @@ export default class UI extends Functions {
 		return playlistButton;
 	}
 
-	createSpeedButton(parent: HTMLDivElement) {
-		if (this.isMobile()) return;
-		const speedButton = this.createButton(
-			parent,
-			'speed'
-		);
-
-		if (this.hasSpeeds()) {
-			speedButton.style.display = 'flex';
-		} else {
-			speedButton.style.display = 'none';
-		}
-
-		this.createSVGElement(speedButton, 'speed', this.buttons.speed);
-
-		speedButton.addEventListener('click', (event) => {
-			event.stopPropagation();
-			this.dispatchEvent('hide-tooltip');
-
-			if (this.speedMenuOpen) {
-				this.dispatchEvent('show-menu', false);
-			} else {
-				this.dispatchEvent('show-speed-menu', true);
-			}
-		});
-
-		this.on('pip', (data) => {
-			if (data) {
-				speedButton.style.display = 'none';
-			} else if (this.hasSpeeds()) {
-				speedButton.style.display = 'flex';
-			}
-		});
-
-		parent.appendChild(speedButton);
-		return speedButton;
-	}
+	// createSpeedButton(parent: HTMLDivElement) {
+	// 	if (this.isMobile()) return;
+	// 	const speedButton = this.createButton(
+	// 		parent,
+	// 		'speed'
+	// 	);
+	//
+	// 	if (this.hasSpeeds()) {
+	// 		speedButton.style.display = 'flex';
+	// 	} else {
+	// 		speedButton.style.display = 'none';
+	// 	}
+	//
+	// 	this.createSVGElement(speedButton, 'speed', this.buttons.speed);
+	//
+	// 	speedButton.addEventListener('click', (event) => {
+	// 		event.stopPropagation();
+	// 		this.dispatchEvent('hide-tooltip');
+	//
+	// 		if (this.speedMenuOpen) {
+	// 			this.dispatchEvent('show-menu', false);
+	// 		} else {
+	// 			this.dispatchEvent('show-speed-menu', true);
+	// 		}
+	// 	});
+	//
+	// 	this.on('pip', (data) => {
+	// 		if (data) {
+	// 			speedButton.style.display = 'none';
+	// 		} else if (this.hasSpeeds()) {
+	// 			speedButton.style.display = 'flex';
+	// 		}
+	// 	});
+	//
+	// 	parent.appendChild(speedButton);
+	// 	return speedButton;
+	// }
 
 	createPIPButton(parent: HTMLDivElement) {
 		if (this.isMobile()) return;
@@ -1522,8 +1524,8 @@ export default class UI extends Functions {
 			} else {
 				menuFrame.style.display = 'none';
 			}
-			menuContent.classList.add('translate-x-0');
-			menuContent.classList.remove('-translate-x-[50%]');
+			menuContent.classList.add('nm-translate-x-0');
+			menuContent.classList.remove('-nm-translate-x-[50%]');
 
 			this.dispatchEvent('show-language-menu', false);
 			this.dispatchEvent('show-subtitles-menu', false);
@@ -1540,8 +1542,8 @@ export default class UI extends Functions {
 				this.dispatchEvent('show-quality-menu', false);
 				this.dispatchEvent('show-speed-menu', false);
 				this.dispatchEvent('show-playlist-menu', false);
-				menuContent.classList.add('translate-x-0');
-				menuContent.classList.remove('-translate-x-[50%]');
+				menuContent.classList.add('nm-translate-x-0');
+				menuContent.classList.remove('-nm-translate-x-[50%]');
 				menuFrame.style.display = 'flex';
 			}
 		});
@@ -1554,8 +1556,8 @@ export default class UI extends Functions {
 				this.dispatchEvent('show-quality-menu', false);
 				this.dispatchEvent('show-speed-menu', false);
 				this.dispatchEvent('show-playlist-menu', false);
-				menuContent.classList.remove('translate-x-0');
-				menuContent.classList.add('-translate-x-[50%]');
+				menuContent.classList.remove('nm-translate-x-0');
+				menuContent.classList.add('-nm-translate-x-[50%]');
 				menuFrame.style.display = 'flex';
 			}
 		});
@@ -1568,8 +1570,8 @@ export default class UI extends Functions {
 				this.dispatchEvent('show-quality-menu', false);
 				this.dispatchEvent('show-speed-menu', false);
 				this.dispatchEvent('show-playlist-menu', false);
-				menuContent.classList.remove('translate-x-0');
-				menuContent.classList.add('-translate-x-[50%]');
+				menuContent.classList.remove('nm-translate-x-0');
+				menuContent.classList.add('-nm-translate-x-[50%]');
 				menuFrame.style.display = 'flex';
 			}
 		});
@@ -1582,8 +1584,8 @@ export default class UI extends Functions {
 				this.dispatchEvent('show-subtitles-menu', false);
 				this.dispatchEvent('show-speed-menu', false);
 				this.dispatchEvent('show-playlist-menu', false);
-				menuContent.classList.remove('translate-x-0');
-				menuContent.classList.add('-translate-x-[50%]');
+				menuContent.classList.remove('nm-translate-x-0');
+				menuContent.classList.add('-nm-translate-x-[50%]');
 				menuFrame.style.display = 'flex';
 			}
 		});
@@ -1596,8 +1598,8 @@ export default class UI extends Functions {
 				this.dispatchEvent('show-subtitles-menu', false);
 				this.dispatchEvent('show-quality-menu', false);
 				this.dispatchEvent('show-playlist-menu', false);
-				menuContent.classList.remove('translate-x-0');
-				menuContent.classList.add('-translate-x-[50%]');
+				menuContent.classList.remove('nm-translate-x-0');
+				menuContent.classList.add('-nm-translate-x-[50%]');
 				menuFrame.style.display = 'flex';
 			}
 		});
@@ -1610,8 +1612,8 @@ export default class UI extends Functions {
 				this.dispatchEvent('show-subtitles-menu', false);
 				this.dispatchEvent('show-quality-menu', false);
 				this.dispatchEvent('show-speed-menu', false);
-				menuContent.classList.remove('translate-x-0');
-				menuContent.classList.add('-translate-x-[50%]');
+				menuContent.classList.remove('nm-translate-x-0');
+				menuContent.classList.add('-nm-translate-x-[50%]');
 				menuFrame.style.display = 'flex';
 				menuFrame.style.width = '96%';
 			} else {
@@ -1640,41 +1642,6 @@ export default class UI extends Functions {
 			// menuContent.style.height = `${this.getElement().getBoundingClientRect().height - 80}px`;
 			this.dispatchEvent('hide-tooltip');
 		}, 0);
-	}
-
-	growMenu(childCount: number) {
-		const size = 2.35;
-		let height = 0;
-
-		if (childCount == 0) {
-			if (this.hasSpeeds()) {
-				height += size;
-			}
-			if (this.getAudioTracks().length > 1) {
-				height += size;
-			}
-			if (this.getTextTracks().length > 0) {
-				height += size;
-			}
-			if (this.getQualities().length > 1) {
-				height += size;
-			}
-			if (this.getPlaylist().length > 1) {
-				height += size;
-			}
-
-            this.once('item', () => {
-				if (this.getPlaylist().length > 1) {
-					height += size;
-				}
-			});
-		} else {
-			height += (childCount + 1) * size;
-		}
-
-		height += 0.5; // padding bottom
-
-		return `${height}rem`;
 	}
 
 	createMainMenu(parent: HTMLDivElement) {
@@ -1732,8 +1699,8 @@ export default class UI extends Functions {
 				'back'
 			);
 			this.createSVGElement(back, 'menu', this.buttons.chevronL);
-			this.addClasses(back, ['w-8']);
-			back.classList.remove('w-5');
+			this.addClasses(back, ['nm-w-8']);
+			back.classList.remove('nm-w-5');
 
 			back.addEventListener('click', (event) => {
 				event.stopPropagation();
@@ -1764,8 +1731,8 @@ export default class UI extends Functions {
 			);
 
 			this.createSVGElement(close, 'menu', this.buttons.close);
-			this.addClasses(close, ['ml-auto', 'w-8']);
-			close.classList.remove('w-5');
+			this.addClasses(close, ['nm-ml-auto', 'nm-w-8']);
+			close.classList.remove('nm-w-5');
 
 			close.addEventListener('click', (event) => {
 				event.stopPropagation();
@@ -1800,7 +1767,7 @@ export default class UI extends Functions {
 		menuButtonText.textContent = this.localize(item).toTitleCase();
 
 		const chevron = this.createSVGElement(menuButton, 'menu', this.buttons.chevronR);
-		this.addClasses(chevron, ['ml-auto']);
+		this.addClasses(chevron, ['nm-ml-auto']);
 
 		menuButton.addEventListener('click', (event) => {
 			event.stopPropagation();
@@ -1954,15 +1921,15 @@ export default class UI extends Functions {
 
 			const chevron = this.createSVGElement(speedButton, 'menu', this.buttons.checkmark);
 			this.addClasses(chevron, [
-				'ml-auto',
-				'hidden',
+				'nm-ml-auto',
+				'nm-hidden',
 			]);
 
 			this.on('speed', (event) => {
 				if (event === speed) {
-					chevron.classList.remove('hidden');
+					chevron.classList.remove('nm-hidden');
 				} else {
-					chevron.classList.add('hidden');
+					chevron.classList.add('nm-hidden');
 				}
 			});
 
@@ -2031,7 +1998,7 @@ export default class UI extends Functions {
 				</svg>
 			`;
 		} else {
-			(spanChild as HTMLImageElement).src = `/img/flags/${data.language || data.label.slice(0, 3).toLocaleLowerCase()}.svg`;
+			(spanChild as HTMLImageElement).src = `https://vscode.nomercy.tv/img/flags/${data.language || data.label.slice(0, 3).toLocaleLowerCase()}.svg`;
 		}
 
 		languageButton.append(spanChild);
@@ -2050,26 +2017,26 @@ export default class UI extends Functions {
 		}
 
 		const chevron = this.createSVGElement(languageButton, 'checkmark', this.buttons.checkmark);
-		this.addClasses(chevron, ['ml-auto']);
+		this.addClasses(chevron, ['nm-ml-auto']);
 
 		if (data.index > 0) {
-			chevron.classList.add('hidden');
+			chevron.classList.add('nm-hidden');
 		}
 
 		if (data.type == 'audio') {
 			this.on('audio-change', (audio) => {
 				if (audio.currentTrack == data.index) {
-					chevron.classList.remove('hidden');
+					chevron.classList.remove('nm-hidden');
 				} else {
-					chevron.classList.add('hidden');
+					chevron.classList.add('nm-hidden');
 				}
 			});
 		} else if (data.type == 'subtitle') {
 			this.on('caption-change', (track) => {
 				if (track.track == data.index || (track.track === -1 && data.index === 0)) {
-					chevron.classList.remove('hidden');
+					chevron.classList.remove('nm-hidden');
 				} else {
-					chevron.classList.add('hidden');
+					chevron.classList.add('nm-hidden');
 				}
 			});
 		}
@@ -2145,8 +2112,12 @@ export default class UI extends Functions {
 		const sliderBuffer = document.createElement('div');
 		sliderBuffer.id = 'slider-buffer';
 		this.addClasses(sliderBuffer, this.sliderBufferStyles);
-
 		this.sliderBar.append(sliderBuffer);
+
+		const sliderHover = document.createElement('div');
+		sliderHover.id = 'slider-hover';
+		this.addClasses(sliderHover, this.sliderHoverStyles);
+		this.sliderBar.append(sliderHover);
 
 		const sliderProgress = document.createElement('div');
 		sliderProgress.id = 'slider-progress';
@@ -2155,14 +2126,13 @@ export default class UI extends Functions {
 
 		this.on('chapters', () => {
 			if (this.getChapters()?.length > 0) {
-				sliderProgress.classList.remove('bg-purple-600');
-				sliderBuffer.classList.remove('bg-purple-900/50');
+				sliderProgress.classList.remove('nm-bg-purple-600');
+				sliderBuffer.classList.remove('nm-bg-purple-900/50');
 			} else {
-				sliderProgress.classList.add('bg-purple-600');
-				sliderBuffer.classList.add('bg-purple-900/50');
+				sliderProgress.classList.add('nm-bg-purple-600');
+				sliderBuffer.classList.add('nm-bg-purple-900/50');
 			}
 		});
-
 
 		this.chapterBar = document.createElement('div');
 		this.chapterBar.id = 'chapter-progress';
@@ -2172,7 +2142,10 @@ export default class UI extends Functions {
 		const sliderNipple = document.createElement('div');
 		this.addClasses(sliderNipple, this.sliderNippleStyles);
 		sliderNipple.id = 'slider-nipple';
-		this.sliderBar.append(sliderNipple);
+
+		if (this.options.nipple) {
+			this.sliderBar.append(sliderNipple);
+		}
 
 		const sliderPop = document.createElement('div');
 		sliderPop.id = 'slider-pop';
@@ -2199,14 +2172,23 @@ export default class UI extends Functions {
 
 		this.sliderBar.append(sliderPop);
 
+		if (this.options.chapters != false) {
+			this.sliderBar.style.background = 'transparent';
+		}
 
 		['mousemove', 'touchmove'].forEach((event) => {
-			this.bottomBar.addEventListener(event, (e: any) => {
+			this.sliderBar.addEventListener(event, (e: any) => {
 				const scrubTime = this.#getScrubTime(e);
 				this.#getSliderPopImage(scrubTime);
-				const sliderPopOffsetX = this.#getSliderPopOffsetX(e, this.sliderBar, sliderPop, scrubTime);
-				sliderPop.style.left = `${sliderPopOffsetX}%`;
 				sliderText.textContent = this.humanTime(scrubTime.scrubTimePlayer);
+
+				const sliderPopOffsetX = this.#getSliderPopOffsetX(sliderPop, scrubTime);
+				sliderPop.style.left = `${sliderPopOffsetX}%`;
+
+				if (this.options.chapters == false) {
+					sliderHover.style.width = `${scrubTime.scrubTime}%`;
+				}
+
 				if (!this.isMouseDown) return;
 
 				chapterText.textContent = this.#getChapterText(scrubTime.scrubTimePlayer);
@@ -2232,13 +2214,14 @@ export default class UI extends Functions {
 			chapterText.textContent = this.#getChapterText(scrubTime.scrubTimePlayer);
 			if (this.previewTime.length > 0) {
 				sliderPop.style.setProperty('--visibility', '1');
-				const sliderPopOffsetX = this.#getSliderPopOffsetX(e, this.sliderBar, sliderPop, scrubTime);
+				const sliderPopOffsetX = this.#getSliderPopOffsetX(sliderPop, scrubTime);
 				sliderPop.style.left = `${sliderPopOffsetX}%`;
 			}
 		});
 
 		this.sliderBar.addEventListener('mouseleave', () => {
 			sliderPop.style.setProperty('--visibility', '0');
+			sliderHover.style.width = '0';
 		});
 
 		this.bottomBar.addEventListener('click', (e: any) => {
@@ -2258,17 +2241,19 @@ export default class UI extends Functions {
 		});
 
 		this.on('item', () => {
-			this.sliderBar.classList.add('bg-white/60');
+			this.sliderBar.classList.add('nm-bg-white/40');
 			this.previewTime = [];
 			this.chapters = [];
 		});
 
 		this.on('chapters', () => {
-			if (this.getChapters()?.length > 0) {
-				this.sliderBar.classList.remove('bg-white/60');
-			} else {
-				this.sliderBar.classList.add('bg-white/60');
-			}
+			setTimeout(() => {
+				if (this.getChapters()?.length > 0) {
+					this.sliderBar.classList.remove('nm-bg-white/40');
+				} else {
+					this.sliderBar.classList.add('nm-bg-white/40');
+				}
+			}, 0);
 		});
 
 		this.on('time', (data) => {
@@ -2325,9 +2310,14 @@ export default class UI extends Functions {
 		chapterMarker.append(chapterMarkerBG);
 
 		const chapterMarkerBuffer = document.createElement('div');
-		chapterMarkerBuffer.id = `chapter-marker-buffer-${chapter.id.replace(/\s/gu, '-')}`;
+		chapterMarkerBuffer.id = `chapter-marker-hover-${chapter.id.replace(/\s/gu, '-')}`;
 		this.addClasses(chapterMarkerBuffer, this.chapterMarkerBufferStyles);
 		chapterMarker.append(chapterMarkerBuffer);
+
+		const chapterMarkerHover = document.createElement('div');
+		chapterMarkerHover.id = 'chapterMarker-hover';
+		this.addClasses(chapterMarkerHover, this.chapterMarkerHoverStyles);
+		chapterMarker.append(chapterMarkerHover);
 
 		const chapterMarkerProgress = document.createElement('div');
 		chapterMarkerProgress.id = `chapter-marker-progress-${chapter.id.replace(/\s/gu, '-')}`;
@@ -2355,13 +2345,32 @@ export default class UI extends Functions {
 			}
 		});
 
+		['mousemove', 'touchmove'].forEach((event) => {
+			this.chapterBar.addEventListener(event, (e: any) => {
+				const { scrubTime } = this.#getScrubTime(e);
+
+				if (scrubTime < left) {
+					chapterMarkerHover.style.transform = 'scaleX(0)';
+				} else if (scrubTime > right) {
+					chapterMarkerHover.style.transform = 'scaleX(1)';
+				} else {
+					chapterMarkerHover.style.transform = `scaleX(${(scrubTime - left) / (right - left)})`;
+				}
+
+			});
+		});
+
+		this.chapterBar.addEventListener('mouseleave', () => {
+			chapterMarkerHover.style.transform = 'scaleX(0)';
+		});
+
 		this.chapterBar.append(chapterMarker);
 		return chapterMarker;
 	}
 
 	createChapterMarkers() {
 		this.chapterBar.querySelectorAll('.chapter-marker').forEach((element) => {
-			this.sliderBar.classList.add('bg-white/60');
+			this.sliderBar.classList.add('nm-bg-white/40');
 			element.remove();
 		});
 		this.getChapters()?.forEach((chapter: Chapter) => {
@@ -2369,7 +2378,7 @@ export default class UI extends Functions {
 		});
 	}
 
-	#getSliderPopOffsetX(e: any, sliderBar: HTMLDivElement, sliderPop: HTMLDivElement, scrubTime: any) {
+	#getSliderPopOffsetX(sliderPop: HTMLDivElement, scrubTime: any) {
 		const sliderBarRect = this.sliderBar.getBoundingClientRect();
 		const sliderPopRect = sliderPop.getBoundingClientRect();
 		const sliderPopPercentageWidth = ((sliderPopRect.width * 0.5) / sliderBarRect.width) * 100;
@@ -2399,7 +2408,7 @@ export default class UI extends Functions {
 					callback: (data: string) => {
 						// eslint-disable-next-line max-len
 						const regex
-							= /(\d{2}:\d{2}:\d{2})\.\d{3}\s-->\s(\d{2}:\d{2}:\d{2})\.\d{3}\nsprite\.webp#(xywh=\d{1,},\d{1,},\d{1,},\d{1,})/gmu;
+							= /(\d{2}:\d{2}:\d{2})\.\d{3}\s-->\s(\d{2}:\d{2}:\d{2})\.\d{3}\nsprite\.webp#(xywh=\d+,\d+,\d+,\d+)/gmu;
 
 						let m: any;
 						while ((m = regex.exec(data)) !== null) {
@@ -2419,6 +2428,8 @@ export default class UI extends Functions {
 							});
 						}
 					},
+				}).then(() => {
+					// this.#fetchSliderPopImage(scrubTime);
 				});
 			}
 		}
@@ -2443,8 +2454,8 @@ export default class UI extends Functions {
 		}
 	}
 
-	#getScrubTime(e: any) {
-		const elementRect = this.sliderBar.getBoundingClientRect();
+	#getScrubTime(e: any, parent = this.sliderBar) {
+		const elementRect = parent.getBoundingClientRect();
 
 		const x = e.clientX ?? e.touches?.[0]?.clientX ?? e.changedTouches?.[0]?.clientX ?? 0;
 
@@ -2452,8 +2463,8 @@ export default class UI extends Functions {
 		if (offsetX <= 0) offsetX = 0;
 		if (offsetX >= elementRect.width) offsetX = elementRect.width;
 		return {
-			scrubTime: (offsetX / this.sliderBar.offsetWidth) * 100,
-			scrubTimePlayer: (offsetX / this.sliderBar.offsetWidth) * this.duration(),
+			scrubTime: (offsetX / parent.offsetWidth) * 100,
+			scrubTimePlayer: (offsetX / parent.offsetWidth) * this.duration(),
 		};
 	}
 
@@ -2485,10 +2496,8 @@ export default class UI extends Functions {
 		playlistMenu.id = 'playlist-menu';
 		this.addClasses(playlistMenu, [
 			...this.subMenuContentStyles,
-			'!flex-row',
-			'!gap-0',
-			'',
-			'',
+			'!nm-flex-row',
+			'!nm-gap-0',
 		]);
 		parent.appendChild(playlistMenu);
 
@@ -2496,11 +2505,10 @@ export default class UI extends Functions {
 		seasonsMenu.id = 'season-menu';
 		this.addClasses(seasonsMenu, [
 			...this.subMenuContentStyles,
-			'!flex',
-			'!w-1/3',
-			'border-r-2',
-			'border-gray-500/20',
-			'',
+			'!nm-flex',
+			'!nm-w-1/3',
+			'nm-border-r-2',
+			'nm-border-gray-500/20',
 		]);
 		playlistMenu.appendChild(seasonsMenu);
 
@@ -2522,9 +2530,8 @@ export default class UI extends Functions {
 		episodeMenu.id = 'episode-menu';
 		this.addClasses(episodeMenu, [
 			...this.subMenuContentStyles,
-			'!flex',
-			'!w/2/3',
-			'',
+			'!nm-flex',
+			'!nm-w/2/3',
 		]);
 		playlistMenu.appendChild(episodeMenu);
 
@@ -2593,7 +2600,7 @@ export default class UI extends Functions {
 		buttonSpan.innerText = `Season ${item.season}`;
 
 		const chevron = this.createSVGElement(seasonButton, 'menu', this.buttons.chevronR);
-		this.addClasses(chevron, ['ml-auto']);
+		this.addClasses(chevron, ['nm-ml-auto']);
 
 		seasonButton.addEventListener('click', () => {
 			this.dispatchEvent('switch-season', item.season);
@@ -2616,44 +2623,19 @@ export default class UI extends Functions {
 
 		const leftSide = document.createElement('div');
 		leftSide.id = `playlist-${item.id}-left`;
-		this.addClasses(leftSide, [
-			'playlist-card-left',
-			'relative',
-			'rounded-md',
-			'w-[30%]',
-			'overflow-clip',
-			'self-center',
-			'',
-		]);
+		this.addClasses(leftSide, this.episodeMenuButtonLeftStyles);
 		button.append(leftSide);
 
 		const shadow = document.createElement('div');
 		shadow.id = `episode-${item.id}-shadow`;
-		this.addClasses(shadow, [
-			'episode-card-shadow',
-			'bg-[linear-gradient(0deg,rgba(0,0,0,0.87)_0%,rgba(0,0,0,0.7)_25%,rgba(0,0,0,0)_50%,rgba(0,0,0,0)_100%)]',
-			'shadow-[inset_0px_1px_0px_rgba(255,255,255,0.24),inset_0px_-1px_0px_rgba(0,0,0,0.24),inset_0px_-2px_0px_rgba(0,0,0,0.24)]',
-			'bottom-0',
-			'left-0',
-			'absolute',
-			'!h-full',
-			'',
-			'',
-		]);
+		this.addClasses(shadow, this.episodeMenuButtonShadowStyles);
 		shadow.style.margin = item.video_type == 'movie' ? '0px 30%' : '0';
 		shadow.style.width = item.video_type == 'movie' ? 'calc(120px / 3 * 2)' : '100%';
 		leftSide.append(shadow);
 
 		const image = document.createElement('img');
 		image.id = `playlist-${item.id}-image`;
-		this.addClasses(image, [
-			'playlist-card-image',
-			'w-full',
-			'h-auto',
-			'aspect-video',
-			'object-cover',
-			'',
-		]);
+		this.addClasses(image, episodeMenuButtonImageStyles);
 		image.setAttribute('loading', 'lazy');
 		image.src = item.image && item.image != '' ? `${imageBaseUrl}${item.image}` : '';
 
@@ -2663,12 +2645,11 @@ export default class UI extends Functions {
 		progressContainer.id = `episode-${item.id}-progress-container`;
 		this.addClasses(progressContainer, [
 			'progress-container',
-			'absolute',
-			'bottom-0',
-			'w-full',
-			'flex',
-			'flex-col',
-			'',
+			'nm-absolute',
+			'nm-bottom-0',
+			'nm-w-full',
+			'nm-flex',
+			'nm-flex-col',
 		]);
 		leftSide.append(progressContainer);
 
@@ -2676,20 +2657,19 @@ export default class UI extends Functions {
 		progressContainerItemBox.id = `episode-${item.id}-progress-box`;
 		this.addClasses(progressContainerItemBox, [
 			'progress-box',
-			'flex',
-			'justify-between',
-			'h-full',
-			'mx-1',
-			'sm:mx-2',
-			'mb-1',
-			'',
+			'nm-flex',
+			'nm-justify-between',
+			'nm-h-full',
+			'nm-mx-1',
+			'nm-sm:mx-2',
+			'nm-mb-1',
 		]);
 
 		const progressContainerItemText = document.createElement('div');
 		progressContainerItemText.id = `episode-${item.id}-progress-item`;
 		this.addClasses(progressContainerItemText, [
 			'progress-item',
-			'text-[0.7rem]',
+			'nm-text-[0.7rem]',
 			'',
 		]);
 
@@ -2702,8 +2682,7 @@ export default class UI extends Functions {
 		progressContainerDurationText.id = `episode-${item.id}-progress-duration`;
 		this.addClasses(progressContainerDurationText, [
 			'progress-duration',
-			'text-[0.7rem]',
-			'',
+			'nm-text-[0.7rem]',
 		]);
 		progressContainerDurationText.innerText = item.duration?.replace(/^00:/u, '');
 		progressContainerItemBox.append(progressContainerDurationText);
@@ -2712,14 +2691,13 @@ export default class UI extends Functions {
 		sliderContainer.id = `episode-${item.id}-slider-container`;
 		this.addClasses(sliderContainer, [
 			'slider-container',
-			'rounded-md',
-			'overflow-clip',
-			'bg-white',
-			'h-1',
-			'mb-2',
-			'mx-1',
-			'sm:mx-2',
-			'',
+			'nm-rounded-md',
+			'nm-overflow-clip',
+			'nm-bg-white',
+			'nm-h-1',
+			'nm-mb-2',
+			'nm-mx-1',
+			'nm-sm:mx-2',
 		]);
 		sliderContainer.style.display = item.progress ? 'flex' : 'none';
 		progressContainer.append(sliderContainer);
@@ -2728,8 +2706,8 @@ export default class UI extends Functions {
 		progressBar.id = `episode-${item.id}-progress-bar`;
 		this.addClasses(progressBar, [
 			'progress-bar',
-			'bg-purple-400',
-			'w-1/2',
+			'nm-bg-purple-400',
+			'nm-w-1/2',
 		]);
 		if (item.progress) {
 			progressBar.style.width = `${item.progress > 99 ? 100 : item.progress}%`;
@@ -2740,11 +2718,11 @@ export default class UI extends Functions {
 		rightSide.id = `playlist-${item.id}-right-side`;
 		this.addClasses(rightSide, [
 			'playlist-card-right',
-			'w-3/4',
-			'flex',
-			'flex-col',
-			'text-left',
-			'gap-1',
+			'nm-w-3/4',
+			'nm-flex',
+			'nm-flex-col',
+			'nm-text-left',
+			'nm-gap-1',
 		]);
 		button.append(rightSide);
 
@@ -2752,7 +2730,7 @@ export default class UI extends Functions {
 		title.id = `playlist-${item.id}-title`;
 		this.addClasses(title, [
 			'playlist-card-title',
-			'font-bold',
+			'nm-font-bold',
 			'',
 		]);
 		title.textContent = this.lineBreakShowTitle(item.title.replace('%S', this.localize('S')).replace('%E', this.localize('E')));
@@ -2762,9 +2740,9 @@ export default class UI extends Functions {
 		overview.id = `playlist-${item.id}-overview`;
 		this.addClasses(overview, [
 			'playlist-card-overview',
-			'text-[0.7rem]',
-			'leading-[1rem]',
-			'line-clamp-4',
+			'nm-text-[0.7rem]',
+			'nm-leading-[1rem]',
+			'nm-line-clamp-4',
 			'',
 		]);
 		overview.textContent = this.limitSentenceByCharacters(item.description, 600);
@@ -2814,21 +2792,7 @@ export default class UI extends Functions {
 	createToolTip(parent: HTMLDivElement) {
 		this.tooltip = document.createElement('div');
 		this.tooltip.id = 'tooltip';
-		this.addClasses(this.tooltip, [
-			'tooltip',
-			'hidden',
-			'absolute',
-			'left-0',
-			'bottom-0',
-			'z-50',
-			'px-3',
-			'py-2',
-			'text-xs',
-			'text-white',
-			'rounded-lg',
-			'font-medium',
-			'bg-neutral-900/95',
-		]);
+		this.addClasses(this.tooltip, this.tooltipStyles);
 
 		this.tooltip.style.transform = 'translateX(10px)';
 		this.tooltip.innerText = 'Play (space)';
@@ -2838,11 +2802,11 @@ export default class UI extends Functions {
 			this.tooltip.style.display = 'block';
 			this.tooltip.style.transform = `translate(calc(${data.x} - 50%), calc(${data.y} - 50%))`;
 			if (data.position == 'top') {
-				this.tooltip.classList.add('top-0');
-				this.tooltip.classList.remove('bottom-0');
+				this.tooltip.classList.add('nm-top-0');
+				this.tooltip.classList.remove('nm-bottom-0');
 			} else {
-				this.tooltip.classList.remove('top-0');
-				this.tooltip.classList.add('bottom-0');
+				this.tooltip.classList.remove('nm-top-0');
+				this.tooltip.classList.add('nm-bottom-0');
 			}
 		});
 
@@ -2859,21 +2823,21 @@ export default class UI extends Functions {
 		const nextTip = document.createElement('div');
 		nextTip.id = 'episode-tip';
 		this.addClasses(nextTip, [
-			'episode-tip',
-			'hidden',
-			'absolute',
-			'left-0',
-			'bottom-10',
-			'z-50',
-			'!w-96',
-			'h-24',
-			'px-2',
-			'py-2',
-			'text-xs',
-			'text-white',
-			'rounded-lg',
-			'font-medium',
-			'bg-neutral-900/95',
+			'nm-episode-tip',
+			'nm-hidden',
+			'nm-absolute',
+			'nm-left-0',
+			'nm-bottom-10',
+			'nm-z-50',
+			'!nm-w-96',
+			'nm-h-24',
+			'nm-px-2',
+			'nm-py-2',
+			'nm-text-xs',
+			'nm-text-white',
+			'nm-rounded-lg',
+			'nm-font-medium',
+			'nm-bg-neutral-900/95',
 		]);
 
 		this.addClasses(nextTip, this.playlistMenuButtonStyles);
@@ -2881,12 +2845,12 @@ export default class UI extends Functions {
 		const leftSide = document.createElement('div');
 		leftSide.id = 'next-tip-left';
 		this.addClasses(leftSide, [
-			'playlist-card-left',
-			'relative',
-			'rounded-sm',
-			'w-[40%]',
-			'overflow-clip',
-			'self-center',
+			'nm-playlist-card-left',
+			'nm-relative',
+			'nm-rounded-sm',
+			'nm-w-[40%]',
+			'nm-overflow-clip',
+			'nm-self-center',
 			'',
 		]);
 		nextTip.append(leftSide);
@@ -2894,12 +2858,12 @@ export default class UI extends Functions {
 		const image = document.createElement('img');
 		image.id = 'next-tip-image';
 		this.addClasses(image, [
-			'playlist-card-image',
-			'w-full',
-			'h-auto',
-			'aspect-video',
-			'object-cover',
-			'rounded-md',
+			'nm-playlist-card-image',
+			'nm-w-full',
+			'nm-h-auto',
+			'nm-aspect-video',
+			'nm-object-cover',
+			'nm-rounded-md',
 			'',
 		]);
 		image.setAttribute('loading', 'eager');
@@ -2909,20 +2873,20 @@ export default class UI extends Functions {
 		const rightSide = document.createElement('div');
 		rightSide.id = 'next-tip-right-side';
 		this.addClasses(rightSide, [
-			'playlist-card-right',
-			'w-[60%]',
-			'flex',
-			'flex-col',
-			'text-left',
-			'gap-1',
+			'nm-playlist-card-right',
+			'nm-w-[60%]',
+			'nm-flex',
+			'nm-flex-col',
+			'nm-text-left',
+			'nm-gap-1',
 		]);
 		nextTip.append(rightSide);
 
 		const header = document.createElement('span');
 		header.id = 'next-tip-header';
 		this.addClasses(header, [
-			'playlist-card-header',
-			'font-bold',
+			'nm-playlist-card-header',
+			'nm-font-bold',
 			'',
 		]);
 
@@ -2931,8 +2895,8 @@ export default class UI extends Functions {
 		const title = document.createElement('span');
 		title.id = 'next-tip-title';
 		this.addClasses(title, [
-			'playlist-card-title',
-			'font-bold',
+			'nm-playlist-card-title',
+			'nm-font-bold',
 			'',
 		]);
 
@@ -2952,38 +2916,31 @@ export default class UI extends Functions {
 		return nextTip;
 	}
 
-	getTipData({ direction, header, title, image }:
-		{ direction: string; header: HTMLSpanElement; title: HTMLSpanElement; image: HTMLImageElement; }) {
-
-		const imageBaseUrl = 'https://image.tmdb.org/t/p/w185';
-
-		let index = 0;
+	getTipDataIndex(direction: string) {
+		let index: number;
 		if (direction == 'previous') {
 			index = this.getPlaylistIndex() - 1;
 		} else {
 			index = this.getPlaylistIndex() + 1;
 		}
-		const item = this.getPlaylist().at(index);
+
+		return this.getPlaylist().at(index);
+	}
+
+	getTipData({ direction, header, title, image }:
+		{ direction: string; header: HTMLSpanElement; title: HTMLSpanElement; image: HTMLImageElement; }) {
+
+		const imageBaseUrl = 'https://image.tmdb.org/t/p/w185';
+
+		const item = this.getTipDataIndex(direction);
 		if (!item) return;
 
 		image.src = item.image && item.image != '' ? `${imageBaseUrl}${item.image}` : '';
 		header.textContent = `${this.localize(`${direction.toTitleCase()} Episode`)}: ${this.getButtonKeyCode(direction)}`;
 		title.textContent = `${this.localize('S')}${item.season} ${this.localize('E')}${item.episode}: ${this.lineBreakShowTitle(item.title.replace('%S', this.localize('S')).replace('%E', this.localize('E')))}`;
 
-		this.on('item', () => {
-			let index = 0;
-			if (direction == 'previous') {
-				index = this.getPlaylistIndex() - 1;
-			} else {
-				index = this.getPlaylistIndex() + 1;
-			}
-			const item = this.getPlaylist().at(index);
-			if (!item) return;
-
-			image.src = item.image && item.image != '' ? `${imageBaseUrl}${item.image}` : '';
-			header.textContent = `${this.localize(`${direction.toTitleCase()} Episode`)}: ${this.getButtonKeyCode(direction)}`;
-			title.textContent = `${this.localize('S')}${item.season} ${this.localize('E')}${item.episode}: ${this.lineBreakShowTitle(item.title.replace('%S', this.localize('S')).replace('%E', this.localize('E')))}`;
-
+		this.once('item', () => {
+			this.getTipData({ direction, header, title, image });
 		});
 	}
 
@@ -2992,16 +2949,16 @@ export default class UI extends Functions {
 		const nextUp = document.createElement('div');
 		nextUp.id = 'episode-tip';
 		this.addClasses(nextUp, [
-			'episode-tip',
-			'flex',
-			'gap-2',
-			'absolute',
-			'right-4',
-			'bottom-8',
-			'!w-80',
-			'h-24',
-			'px-2',
-			'py-2',
+			'nm-episode-tip',
+			'nm-flex',
+			'nm-gap-2',
+			'nm-absolute',
+			'nm-right-4',
+			'nm-bottom-8',
+			'!nm-w-80',
+			'nm-h-24',
+			'nm-px-2',
+			'nm-py-2',
 		]);
 		parent.appendChild(nextUp);
 		nextUp.style.display = 'none';
@@ -3009,15 +2966,15 @@ export default class UI extends Functions {
 		const creditsButton = document.createElement('button');
 		creditsButton.id = 'next-up';
 		this.addClasses(creditsButton, [
-			'next-up',
-			'next-button',
-			'bg-neutral-900/95',
-			'block',
-			'!text-[0.9rem]',
-			'font-bold',
-			'!color-neutral-100',
-			'!py-1.5',
-			'w-[45%]',
+			'nm-next-up',
+			'nm-next-button',
+			'nm-bg-neutral-900/95',
+			'nm-block',
+			'!nm-text-[0.9rem]',
+			'nm-font-bold',
+			'!nm-color-neutral-100',
+			'!nm-py-1.5',
+			'nm-w-[45%]',
 			'',
 		]);
 
@@ -3028,11 +2985,11 @@ export default class UI extends Functions {
 		const nextButton = document.createElement('button');
 		nextButton.id = 'next-up';
 		this.addClasses(nextButton, [
-			'next-up',
-			'next-button',
-			'animated',
-			'bg-neutral-100',
-			'w-[55%]',
+			'nm-next-up',
+			'nm-next-button',
+			'nm-animated',
+			'nm-bg-neutral-100',
+			'nm-w-[55%]',
 			'',
 		]);
 
@@ -3066,7 +3023,7 @@ export default class UI extends Functions {
 			enabled = false;
 		});
 		this.on('time', (data) => {
-			if (data.position > (this.duration() - 5) && enabled == false) {
+			if (data.position > (this.duration() - 5) && !enabled) {
 				this.dispatchEvent('show-next-up');
 				enabled = true;
 			}
@@ -3104,14 +3061,14 @@ export default class UI extends Functions {
 	loadingSpinner.innerHTML = '';
 	loadingSpinner.classList.add('spinner');
 	this.addClasses(loadingSpinner, [
-		'flex',
-		'justify-center',
-		'items-center',
-		'absolute',
-		'left-0',
-		'right-0',
-		'top-0',
-		'bottom-0',
+		'nm-flex',
+		'nm-justify-center',
+		'nm-items-center',
+		'nm-absolute',
+		'nm-left-0',
+		'nm-right-0',
+		'nm-top-0',
+		'nm-bottom-0',
 
 	]);
 
@@ -3130,17 +3087,17 @@ export default class UI extends Functions {
 
 	this.on('item', () => {
 		loadingSpinner.style.display = 'none';
-		loadingSpinner.style.visibility = 'hidden';
+		loadingSpinner.style.visibility = 'nm-hidden';
 	});
 
 	this.on('time', () => {
 		loadingSpinner.style.display = 'none';
-		loadingSpinner.style.visibility = 'hidden';
+		loadingSpinner.style.visibility = 'nm-hidden';
 	});
 
 	this.on('bufferedEnd', () => {
 		loadingSpinner.style.display = 'none';
-		loadingSpinner.style.visibility = 'hidden';
+		loadingSpinner.style.visibility = 'nm-hidden';
 	});
 
 	this.on('waiting', () => {
