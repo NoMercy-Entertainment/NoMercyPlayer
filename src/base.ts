@@ -1074,12 +1074,15 @@ export default class Base {
 				delete newItem.file;
 				delete newItem.tracks;
 
-				newItem.textTracks = item.tracks?.filter(t => t.kind === 'captions')
-					.map(t => ({
-						kind: 'subtitles',
-						src: t.file,
-						label: t.label,
-					})) as unknown as PlaylistItem['textTracks'];
+				newItem.textTracks = [
+					...item.textTracks ?? [],
+					...item.tracks?.filter(t => t.kind === 'captions')
+						.map(t => ({
+							kind: 'subtitles',
+							src: t.file,
+							label: t.label,
+						})) ?? [],
+				 ] as unknown as PlaylistItem['textTracks'];
 
 				newItem.metadata = [...item.tracks?.filter(t => t.kind !== 'captions') ?? []];
 			}
