@@ -2,7 +2,7 @@ import './index.css';
 /* eslint-disable no-irregular-whitespace */
 
 export const bottomBarStyles = [
-	'nm-bottom-bar',
+	'bottom-bar',
 	'nm-absolute',
 	'nm-bg-gradient-to-t',
 	'nm-bottom-0',
@@ -19,7 +19,7 @@ export const bottomBarStyles = [
 ];
 
 export const bottomRowStyles = [
-	'nm-bottom-row',
+	'bottom-row',
 	'nm-flex',
 	'nm-h-10',
 	'nm-my-2',
@@ -30,7 +30,7 @@ export const bottomRowStyles = [
 ];
 
 export const buttonBaseStyle = [
-	'nm-button-base',
+	'button-base',
 	'nm-flex',
 	'nm-h-10',
 	'nm-items-center',
@@ -39,7 +39,7 @@ export const buttonBaseStyle = [
 ];
 
 export const buttonStyles = [
-	'nm-button',
+	'button',
 	'nm-cursor-pointer',
 	'nm-fill-white',
 	'nm-flex',
@@ -56,7 +56,7 @@ export const buttonStyles = [
 ];
 
 export const centerStyles = [
-	'nm-center',
+	'center',
 	'nm-grid',
 	'nm-grid-cols-3',
 	'nm-grid-rows-6',
@@ -66,7 +66,7 @@ export const centerStyles = [
 ];
 
 export const chapterBarStyles = [
-	'nm-chapter-bar',
+	'chapter-bar',
 	'nm-bg-transparent',
 	'nm-flex',
 	'nm-h-2',
@@ -78,7 +78,7 @@ export const chapterBarStyles = [
 ];
 
 export const chapterMarkerBGStyles = [
-	'nm-chapter-marker-bg',
+	'chapter-marker-bg',
 	'nm-bg-gray-400/70',
 	'nm-absolute',
 	'nm-h-full',
@@ -89,7 +89,7 @@ export const chapterMarkerBGStyles = [
 ];
 
 export const chapterMarkerBufferStyles = [
-	'nm-chapter-marker-buffer',
+	'chapter-marker-buffer',
 	'nm-absolute',
 	'nm-bg-gray-300',
 	'nm-h-full',
@@ -102,7 +102,7 @@ export const chapterMarkerBufferStyles = [
 ];
 
 export const chapterMarkerHoverStyles = [
-	'nm-chapter-marker-hover',
+	'chapter-marker-hover',
 	'nm-absolute',
 	'nm-bg-gray-200',
 	'nm-transition-opacity',
@@ -116,7 +116,7 @@ export const chapterMarkerHoverStyles = [
 ];
 
 export const chapterMarkerProgressStyles = [
-	'nm-chapter-marker-progress',
+	'chapter-marker-progress',
 	'nm-absolute',
 	'nm-bg-purple-500',
 	'nm-h-full',
@@ -129,7 +129,7 @@ export const chapterMarkerProgressStyles = [
 ];
 
 export const chapterMarkersStyles = [
-	'nm-chapter-marker',
+	'chapter-marker',
 	'nm-min-w-[2px]',
 	'nm-absolute',
 	'nm-h-full',
@@ -141,15 +141,15 @@ export const chapterMarkersStyles = [
 export const chapterTextStyles = ['chapter-text'];
 
 export const dividerStyles = [
-	'nm-divider',
+	'divider',
 	'nm-flex',
 	'nm-flex-1',
 ];
 
-export const iconStyles = ['text-white'];
+export const iconStyles = ['nm-text-white'];
 
 export const languageButtonSpanStyles = [
-	'nm-language-button-span',
+	'language-button-span',
 	'nm-MuiSvgIcon-root',
 	'nm-cursor-pointer',
 	'nm-h-6',
@@ -159,7 +159,7 @@ export const languageButtonSpanStyles = [
 ];
 
 export const mainMenuStyles = [
-	'nm-main-menu',
+	'main-menu',
 	'nm-duration-300',
 	'nm-flex',
 	'nm-flex-col',
@@ -171,7 +171,7 @@ export const mainMenuStyles = [
 ];
 
 export const menuButtonStyles = [
-	'nm-menu-button',
+	'menu-button',
 	'nm-cursor-pointer',
 	'nm-flex',
 	'nm-h-8',
@@ -185,7 +185,7 @@ export const menuButtonStyles = [
 ];
 
 export const menuButtonTextStyles = [
-	'nm-menu-button-text',
+	'menu-button-text',
 	'nm-cursor-pointer',
 	'nm-font-semibold',
 	'nm-pl-2',
@@ -195,7 +195,7 @@ export const menuButtonTextStyles = [
 ];
 
 export const menuContentStyles = [
-	'nm-menu-content',
+	'menu-content',
 	'nm-duration-300',
 	'nm-flex',
 	'nm-flex-row',
@@ -205,7 +205,7 @@ export const menuContentStyles = [
 ];
 
 export const menuFrameStyles = [
-	'nm-menu-frame',
+	'menu-frame',
 	'nm-absolute',
 	'nm-bg-neutral-900/95',
 	'nm-bottom-10',
@@ -223,7 +223,7 @@ export const menuFrameStyles = [
 ];
 
 export const menuHeaderButtonStyles = [
-	'nm-menu-header-button',
+	'menu-header-button',
 	'nm-cursor-pointer',
 	'nm-flex',
 	'nm-h-8',
@@ -238,14 +238,14 @@ export const menuHeaderButtonStyles = [
 ];
 
 export const menuHeaderButtonTextStyles = [
-	'nm-menu-header-button-text',
+	'menu-header-button-text',
 	'nm-cursor-pointer',
 	'nm-font-semibold',
 	'nm-pl-2',
 ];
 
 export const menuHeaderStyles = [
-	'nm-menu-header',
+	'menu-header',
 	// 'border-b-2',
 	// 'border-white',
 	'nm-cursor-pointer',
@@ -261,7 +261,7 @@ export const menuHeaderStyles = [
 ];
 
 export const overlayStyles = [
-	'nm-overlay',
+	'overlay',
 	'nm-absolute',
 	'nm-fill-white',
 	'nm-font-Poppins',
@@ -277,7 +277,7 @@ export const overlayStyles = [
 ];
 
 export const scrollContainerStyles = [
-	'nm-scroll-container',
+	'scroll-container',
 	'nm-flex',
 	'nm-flex-col',
 	'nm-gap-1',
@@ -289,7 +289,7 @@ export const scrollContainerStyles = [
 ];
 
 export const sliderBarStyles = [
-	'nm-slider-bar',
+	'slider-bar',
 	'nm-flex',
 	'nm-bg-white/40',
 	'nm-rounded-full',
@@ -299,7 +299,7 @@ export const sliderBarStyles = [
 ];
 
 export const sliderBufferStyles = [
-	'nm-slider-buffer',
+	'slider-buffer',
 	'nm-absolute',
 	'nm-flex',
 	'nm-h-full',
@@ -310,7 +310,7 @@ export const sliderBufferStyles = [
 ];
 
 export const sliderHoverStyles = [
-	'nm-slider-hover',
+	'slider-hover',
 	'nm-absolute',
 	'nm-opacity-1',
 	'nm-transition-[opacity,transform]',
@@ -323,7 +323,7 @@ export const sliderHoverStyles = [
 ];
 
 export const sliderProgressStyles = [
-	'nm-slider-progress',
+	'slider-progress',
 	'nm-absolute',
 	'nm-flex',
 	'nm-h-full',
@@ -336,7 +336,7 @@ export const sliderProgressStyles = [
 
 
 export const sliderNippleStyles = [
-	'nm-slider-nipple',
+	'slider-nipple',
 	'nm--translate-x-1/2',
 	'nm--translate-y-[25%]',
 	'nm-absolute',
@@ -352,7 +352,7 @@ export const sliderNippleStyles = [
 export const sliderPopImageStyles = ['slider-pop-image'];
 
 export const sliderPopStyles = [
-	'nm-slider-pop',
+	'slider-pop',
 	'nm--translate-x-1/2',
 	'nm-absolute',
 	'nm-bg-neutral-900/95',
@@ -373,21 +373,21 @@ export const sliderPopStyles = [
 ];
 
 export const sliderTextStyles = [
-	'nm-slider-pop-text',
+	'slider-pop-text',
 	'nm-font-mono',
 ];
 
-export const sliderThumbStyles = [];
+export const sliderThumbStyles = ['slider-thumb'];
 
 export const speedButtonTextStyles = [
-	'nm-speed-button-text',
+	'speed-button-text',
 	'nm-cursor-pointer',
 	'nm-font-semibold',
 	'nm-pl-2',
 ];
 
 export const subMenuContentStyles = [
-	'nm-sub-menu-content',
+	'sub-menu-content',
 	'nm-flex',
 	'nm-flex-col',
 	'nm-gap-1',
@@ -397,7 +397,7 @@ export const subMenuContentStyles = [
 ];
 
 export const subMenuStyles = [
-	'nm-sub-menu',
+	'sub-menu',
 	'nm-duration-300',
 	'nm-flex',
 	'nm-flex-col',
@@ -407,7 +407,7 @@ export const subMenuStyles = [
 ];
 
 export const svgSizeStyles = [
-	'nm-svg-size',
+	'svg-size',
 	'nm-h-5',
 	'nm-w-5',
 	'group-hover/button:nm-scale-110',
@@ -416,7 +416,7 @@ export const svgSizeStyles = [
 ];
 
 export const timeStyles = [
-	'nm-time',
+	'time',
 	'nm-flex',
 	'nm-font-mono',
 	'nm-items-center',
@@ -426,7 +426,7 @@ export const timeStyles = [
 ];
 
 export const topBarStyles = [
-	'nm-top-bar',
+	'top-bar',
 	'nm--translate-y-full',
 	'nm-absolute',
 	'nm-bg-gradient-to-b',
@@ -443,7 +443,7 @@ export const topBarStyles = [
 ];
 
 export const topRowStyles = [
-	'nm-top-row',
+	'top-row',
 	'nm-flex',
 	'nm-gap-1',
 	'nm-h-2',
@@ -455,26 +455,26 @@ export const topRowStyles = [
 ];
 
 export const touchPlaybackButtonStyles = [
-	'nm-touch-playback-button',
+	'touch-playback-button',
 	'nm-pointer-events-none',
 ];
 
 export const touchPlaybackStyles = [
-	'nm-touch-playback',
+	'touch-playback',
 	'nm-flex',
 	'nm-items-center',
 	'nm-justify-center',
 ];
 
 export const volumeContainerStyles = [
-	'nm-volume-container',
+	'volume-container',
 	'nm-group/volume',
 	'nm-flex',
 	'nm-overflow-clip',
 ];
 
 export const volumeSliderStyles = [
-	'nm-volume-slider',
+	'volume-slider',
 	'nm-w-0',
 	'nm-rounded-full',
 	'nm-opacity-0',
@@ -508,7 +508,7 @@ export const volumeSliderStyles = [
 ];
 
 export const playerMessageStyles = [
-	'nm-player-message',
+	'player-message',
 	'nm-hidden',
 	'nm-absolute',
 	'nm-rounded-md',
@@ -524,12 +524,12 @@ export const playerMessageStyles = [
 ];
 
 export const playlistMenuStyles = [
-	'nm-playlist-menu',
+	'playlist-menu',
 	'nm-p-2',
 ];
 
 export const playlistMenuButtonStyles = [
-	'nm-playlist-menu-button',
+	'playlist-menu-button',
 	'nm-relative',
 	'nm-flex',
 	'nm-w-full',
@@ -568,7 +568,7 @@ export const episodeMenuButtonImageStyles = [
 ];
 
 export const tooltipStyles = [
-	'nm-tooltip',
+	'tooltip',
 	'nm-hidden',
 	'nm-absolute',
 	'nm-left-0',

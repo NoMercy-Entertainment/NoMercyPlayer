@@ -7,6 +7,7 @@ import type {
 } from './nomercyplayer.d';
 import { styles } from './styles';
 
+// noinspection JSUnusedGlobalSymbols
 export default class Base {
 
 	player: Types['player'] = <Types['player']>{};
@@ -103,7 +104,7 @@ export default class Base {
 		 * @param  {boolean} withLowers true|false
 		 */
 		// cSpell:disable
-		String.prototype.titleCase = function (lang: string = navigator.language.split('-')[0], withLowers: boolean = true): string {
+		String.prototype.titleCase = function (lang: string = navigator.language.split('-')[0], withLowers = true): string {
 			let string = '';
 			let lowers: string[] = [];
 
