@@ -17,6 +17,10 @@ If you require the stability and speed of JWPlayer on one site, and the free use
 This is a good solution if you have multiple sites with different requirements. </br>
 You can also use this facade to use the JWPlayer playlist with VideoJS and vice versa. </br>
 
+### Example
+
+![screenshot.png](screenshot.png)
+
 ### Setup
 
 ```html
