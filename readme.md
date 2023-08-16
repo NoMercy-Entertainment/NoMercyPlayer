@@ -36,7 +36,7 @@ You can also use this facade to use the JWPlayer playlist with VideoJS and vice 
     </div>
 
     <script type="module">
-        import VideoPlayer from './js/nomercyplayer.js';
+        import VideoPlayer from './src/nomercyplayer.js';
 
         const config = {
             muted: false,
@@ -67,23 +67,21 @@ You can also use this facade to use the JWPlayer playlist with VideoJS and vice 
 
 #### `constructor(player, config, id)`
 
-| Parameter | Type              | Description |
-| :---      | :---              | :---        |
-| player    | `string`          | `jwplayer` or videojs` |
+| Parameter | Type              | Description                                                                                                                                                                                    |
+|:----------|:------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| player    | `string`          | `jwplayer` or `videojs`                                                                                                                                                                        |
 | config    | `object <Config>` | [JWPlayer](https://developer.jwplayer.com/jwplayer/docs/jw8-player-configuration-reference) or [VideoJS](https://docs.videojs.com/tutorial-options.html) configuration with our custom options |
-| id        | `string`          | ID of the element to attach the player to |
+| id        | `string`          | ID of the element to attach the player to                                                                                                                                                      |
 
 ### `<Config>`
 
 *Only showing what is different from the original config.*
+
 | Parameter        | Type                         | Required | Description                                                                  |
-| :---             | :---                         | :---     | :---                                                                         |
+|:-----------------|:-----------------------------|:---------|:-----------------------------------------------------------------------------|
 | playlist         | `string` or `PlaylistItem[]` | true     | playlist url or playlist items                                               |
-|                  |                              |          |                                                                              |
-| buttons          | `Buttons[]`                  |          | Override the button placement                                                |
-| buttonStyles     | `ButtonStyles[]`             |          |                                                                              |
 | controls         | `boolean`                    |          | Show the default player overlay                                              |
-| controlsTimeout  | `number`                     |          | controls timeout in ms                                                       |
+| controlsTimeout  | `number`                     |          | controls hide delay in ms                                                    |
 | debug            | `boolean`                    |          | Verbose logging                                                              |
 | doubleClickDelay | `number`                     |          | Double click/tap delay in ms                                                 |
 | playbackRates    | `number[]`                   |          | Playback speeds                                                              |
@@ -95,20 +93,20 @@ You can also use this facade to use the JWPlayer playlist with VideoJS and vice 
 
 #### `<PlaylistItem>`
 
-| Parameter            | Type              | Description           |
-| :---                 | :---              | :---                  |
-| title                | `string`          | Title                 |
-| description          | `string`          | Description           |
-| image                | `string`          | Placeholder image url |
-| sources              | `Source[]`        | Video source(s)       |
-| tracks (JWPlayer)    | `Track[]`         | Text tracks           |
-| textTracks (videoJS) | `TextTrack[]`     | Text tracks           |
-| metadata (both)      | `TextTrack< sprite | fonts | chapters | spritesheet >[]` | Text tracks |
+| Parameter             | Type                                                 | Description           |
+|:----------------------|:-----------------------------------------------------|:----------------------|
+| title                 | `string`                                             | Title                 |
+| description           | `string`                                             | Description           |
+| image                 | `string`                                             | Placeholder image url |
+| sources               | `Source[]`                                           | Video source(s)       |
+| tracks (JWPlayer)     | `Track[]`                                            | Text tracks           |
+| textTracks (videoJS)  | `TextTrack[]`                                        | Text tracks           |
+| tracks (videoJS)      | `TextTrack<sprite\|fonts\|chapters\|spritesheet >[]` | Metadata for ui       |
 
 #### `<Source>`
 
 | Parameter | Type      | Description    |
-| :---      | :---      | :---           |
+|:----------|:----------|:---------------|
 | file      | `string`  | URL            |
 | label     | `string`  | Label          |
 | default   | `boolean` | Default source |
@@ -117,7 +115,7 @@ You can also use this facade to use the JWPlayer playlist with VideoJS and vice 
 #### `<Track>` | `<TextTrack>`
 
 | Parameter | Type      | Description                                                           |
-| :---      | :---      | :---                                                                  |
+|:----------|:----------|:----------------------------------------------------------------------|
 | file      | `string`  | URL                                                                   |
 | label     | `string`  | Label                                                                 |
 | default   | `boolean` | Default track                                                         |
@@ -183,7 +181,7 @@ You can also use this facade to use the JWPlayer playlist with VideoJS and vice 
 * Quality levels
   * `getQualities()`
   * `getQuality()`
-  * `getQualityIndex()
+  * `getQualityIndex()`
 * Chapters
   * `getChapters()`
   * `getChapter()`
@@ -191,55 +189,65 @@ You can also use this facade to use the JWPlayer playlist with VideoJS and vice 
 ### setters
 
 `seek(value)`
+
 | Parameter | Type     | Description        |
-| :---      | :---     | :---               |
+|:----------|:---------|:-------------------|
 | value     | `number` | seconds to seek to |
 
 `setVolume(value)`
+
 | Parameter | Type     | Description              |
-| :---      | :---     | :---                     |
+|:----------|:---------|:-------------------------|
 | value     | `number` | volume between 0 and 100 |
 
 `setMuted(value)`
+
 | Parameter | Type      | Description                       |
-| :---      | :---      | :---                              |
+|:----------|:----------|:----------------------------------|
 | value     | `boolean` | `true` to mute, `false` to unmute |
 
 `setPlaybackRate(value)`
+
 | Parameter | Type     | Description   |
-| :---      | :---     | :---          |
+|:----------|:---------|:--------------|
 | value     | `number` | playback rate |
 
 `setPlaylist(playlist)`
+
 | Parameter | Type             | Description   |
-| :---      | :---             | :---          |
+|:----------|:-----------------|:--------------|
 | playlist  | `PlaylistItem[]` | playback rate |
 
 `setAudioTrack(index)`
+
 | Parameter | Type     | Description |
-| :---      | :---     | :---        |
+|:----------|:---------|:------------|
 | index     | `number` |             |
 
 `setTextTrack(index)`
+
 | Parameter | Type     | Description |
-| :---      | :---     | :---        |
+|:----------|:---------|:------------|
 | index     | `number` |             |
 
 `setQualityLevel(index)`
+
 | Parameter | Type     | Description |
-| :---      | :---     | :---        |
+|:----------|:---------|:------------|
 | index     | `number` |             |
 
 `getAudioTrackIndexByLanguage(language)`
+
 | Parameter | Type     | Description               |
-| :---      | :---     | :---                      |
+|:----------|:---------|:--------------------------|
 | language  | `string` | ISO 639-2/B language code |
 
 `getTextTrackIndexBy(language, type, ext)`
 
 *Only works with correct file urls with this end: `.(language).(type).(ext)`* eg: `eng.full.vtt`
+
 | Parameter | Type     | Description                         |
-| :---      | :---     | :---                                |
+|:----------|:---------|:------------------------------------|
 | language  | `string` | ISO 639-2/B language code           |
 | type      | `string` | Language type `full`, `sign`, `sdh` |
 | ext       | `string` | Extension `vtt`, `ass`              |
@@ -247,18 +255,15 @@ You can also use this facade to use the JWPlayer playlist with VideoJS and vice 
 `setToken(value)`
 
 | Parameter | Type     | Description |
-| :---      | :---     | :---        |
+|:----------|:---------|:------------|
 | value     | `string` | new token   |
 
 ### Event listeners
-
-`on(event, callback)`
-
-`once(event, callback)`
-
+`on(event, callback)`<br>
+`once(event, callback)`<br>
 `off(event, callback)`
 
-| Parameter | Type       | Description       |
-| :---      | :---       | :---              |
+| Parameter | Type       | Description                                                                                                                                                                                                                         |
+|:----------|:-----------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | event     | `string`   | `audio-change`, `audio`, `caption-change`, `captions`, `chapters`, `controls`, `duration`, `fullscreen`, `item`, `mute`, `pause`, `pip`, `play`, `playing`, `quality`, `ready`, `resize`, `seeked`, `theaterMode`, `time`, `volume` |
-| callback  | `function` | callback function |
+| callback  | `function` | callback function                                                                                                                                                                                                                   |
