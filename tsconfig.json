@@ -12,10 +12,10 @@
 		"allowJs": true,
 		"jsx": "react",
 		"sourceMap": true,
-		"rootDir": "./src",
+		"rootDir": ".",
 		"downlevelIteration": true,
 		"moduleResolution": "Node",
 		"types": ["node"]
 	},
-	"include": ["./src/**/*.ts", "./src/**/*.d.ts", "./src/*.d.ts", "src/app.js"]
+	"include": ["./src/**/*.ts", "./src/**/*.d.ts", "./src/*.d.ts", "src/app.js", "./vite.config.ts"]
 }

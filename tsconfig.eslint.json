@@ -4,5 +4,6 @@
         "tailwind.config.cjs",
         "src/nomercyplayer.d.ts",
         "postcss.config.js",
+        "./vite.config.ts"
     ]
 }
