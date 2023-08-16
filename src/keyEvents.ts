@@ -1,4 +1,4 @@
-// import type { VideoPlayer } from './nomercyplayer.d';
+// import type { VideoPlayer } from './index.d';
 
 export const keyBindings = (player: any) => [
 	{

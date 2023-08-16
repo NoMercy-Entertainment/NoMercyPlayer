@@ -1,4 +1,4 @@
-import type { VideoPlayerOptions, VideoPlayer as Types } from './nomercyplayer.d';
+import type { VideoPlayerOptions, VideoPlayer as Types } from './index.d';
 import UI from './ui';
 
 export default class VideoPlayer extends UI {

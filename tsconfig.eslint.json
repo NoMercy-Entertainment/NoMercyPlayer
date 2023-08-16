@@ -2,7 +2,7 @@
     "include": [
         ".eslintrc.js",
         "tailwind.config.cjs",
-        "src/nomercyplayer.d.ts",
+      "src/index.d.ts",
         "postcss.config.js",
         "./vite.config.ts"
     ]

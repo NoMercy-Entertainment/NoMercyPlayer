@@ -4,7 +4,7 @@ import type {
 	Chapter,
 	EpisodeTooltip,
 	PlaybackState, PlaylistItem, toolTooltip, VideoPlayer as Types, VideoPlayerOptions, VolumeState
-} from './nomercyplayer.d';
+} from './index.d';
 
 // noinspection JSUnusedGlobalSymbols
 export default class Base {

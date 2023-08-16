@@ -2,7 +2,7 @@ import Base from './base';
 import { keyBindings } from './keyEvents';
 import SubtitlesOctopus from './subtitles-octopus.js';
 
-import type { VideoPlayerOptions, VideoPlayer as Types, TextTrack, PlaylistItem } from './nomercyplayer.d';
+import type { VideoPlayerOptions, VideoPlayer as Types, TextTrack, PlaylistItem } from './index.d';
 export default class Functions extends Base {
 	tapCount = 0;
 	leftTap: NodeJS.Timeout = <NodeJS.Timeout>{};

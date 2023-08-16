@@ -1,4 +1,4 @@
-import type { VideoPlayerOptions } from './nomercyplayer.d';
+import type { VideoPlayerOptions } from './index.d';
 
 export interface Icon {
 	[key: string]: {
