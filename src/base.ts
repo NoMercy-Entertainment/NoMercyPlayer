@@ -103,7 +103,7 @@ export default class Base {
 		 * @param  {boolean} withLowers true|false
 		 */
 		// cSpell:disable
-		String.prototype.titleCase = function (lang = navigator.language.split('-')[0], withLowers = true): string {
+		String.prototype.titleCase = function (lang: string = navigator.language.split('-')[0], withLowers: boolean = true): string {
 			let string = '';
 			let lowers: string[] = [];
 
@@ -358,163 +358,163 @@ export default class Base {
 				this.player.once(event, (data: any) => {
 					// console.log(this.playerType, event, data);
 					switch (event) {
-						case 'ready':
-							this.dispatchEvent('ready', this.#getReadyState(data));
-							break;
+					case 'ready':
+						this.dispatchEvent('ready', this.#getReadyState(data));
+						break;
 					}
 				});
 			} else {
 				this.player.one(event, (data: any) => {
 					// console.log(this.playerType, event, data);
 					switch (event) {
-						case 'duringplaylistchange':
-							this.dispatchEvent('ready', this.#getReadyState(data));
-							break;
+					case 'duringplaylistchange':
+						this.dispatchEvent('ready', this.#getReadyState(data));
+						break;
 					}
 				});
 			}
 			this.player.on(event, (data: any) => {
 				switch (event) {
-					case 'chapter':
-						this.dispatchEvent('chapters', data);
-						break;
-					case 'adBlock':
-						break;
-					case 'adClick':
-						break;
-					case 'adCompanions':
-						break;
-					case 'adComplete':
-						break;
-					case 'adError':
-						break;
-					case 'adSkipped':
-						break;
-					case 'adStarted':
-						break;
-					case 'adTime':
-						break;
-					case 'audioTracks':
-						this.dispatchEvent('audio', data);
-						break;
-					case 'audioTrackChanged':
-						this.dispatchEvent('audio-change', data);
-						break;
-					case 'beforePlay':
-						this.dispatchEvent('beforeplay');
-						break;
-					case 'beforeplaylistItem':
-						console.log('beforeplaylistitem');
-						this.dispatchEvent('beforeplaylistitem');
-						break;
-					case 'buffer':
-						this.dispatchEvent('waiting', data);
-						break;
-					case 'bufferedEnd':
-						console.log('bufferedEnd');
-						this.dispatchEvent('bufferedEnd', data);
-						break;
-					case 'canplay':
-						break;
-					case 'canplaythrough':
-						// this.dispatchEvent('item', data);
-						break;
-					case 'complete': // jwplayer
-						break;
-					case 'controls':
-						break;
-					case 'displayClick':
-						break;
-					case 'duringplaylistchange':
-						console.log('duringplaylistchange');
-						this.dispatchEvent('duringplaylistchange');
-						break;
-					case 'ended': // videojs
-						this.dispatchEvent('ended');
-						break;
-					case 'error':
-						console.log('error');
-						this.dispatchEvent('error', data);
-						break;
-					case 'fullscreen': // jwplayer
-					case 'fullscreenchange': // videojs
-						this.dispatchEvent('fullscreen', data);
-						break;
-					case 'idle': // jwplayer
-						break;
-					case 'loadeddata': // videojs
-						break;
-					case 'loadedmetadata': // videojs
-						this.dispatchEvent('duration', this.#getTimeState(data));
-						this.dispatchEvent('audio', this.#getAudioState());
-						this.dispatchEvent('captions', this.getCaptionState());
-						break;
-					case 'loadstart': // videojs
-						break;
-					case 'mute':
-						this.dispatchEvent('mute', this.#getPlaybackState(data));
-						break;
-					case 'pause':
-						this.dispatchEvent('pause', data);
-						break;
-					case 'play':
-						this.dispatchEvent('play', data);
-						break;
-					case 'firstFrame': // jwplayer aka playing
-					case 'playing': // videojs
-						this.dispatchEvent('playing');
-						break;
-					case 'playlist':
-						this.dispatchEvent('playlist', data);
-						break;
-					case 'durationchanged':
-					case 'playlistItem':
-					case 'playlistitem':
-						this.dispatchEvent('duration', this.#getTimeState(data));
-						this.dispatchEvent('item', data);
-						break;
-					case 'playlistchange':
-						this.dispatchEvent('playlistchange');
-						break;
-					case 'playlistsorted':
-						break;
-					case 'ratechange':
-						this.dispatchEvent('speed', data);
-						break;
-					case 'resize':
-						break;
-					case 'seek':
-						break;
-					case 'seeked': // both
-						this.dispatchEvent('seeked', data);
-						break;
-					case 'seeking':
-						break;
-					case 'setupError':
-						break;
-					case 'stalled':
-						this.dispatchEvent('stalled', data);
-						break;
-					case 'suspend':
-						break;
-					case 'captionsList':
-						this.dispatchEvent('captions', data);
-						break;
-					case 'captionsChanged':
-						this.dispatchEvent('caption-change', data);
-						break;
-					case 'time': // JWPlayer
-					case 'timeupdate': // VideoJS
-						this.dispatchEvent('time', this.#getTimeState(data));
-						break;
-					case 'volume':
-					case 'volumechange':
-						this.dispatchEvent('volume', this.#getPlaybackState(data));
-						break;
-					case 'waiting':
-						console.log('waiting');
-						this.dispatchEvent('waiting', data);
-						break;
+				case 'chapter':
+					this.dispatchEvent('chapters', data);
+					break;
+				case 'adBlock':
+					break;
+				case 'adClick':
+					break;
+				case 'adCompanions':
+					break;
+				case 'adComplete':
+					break;
+				case 'adError':
+					break;
+				case 'adSkipped':
+					break;
+				case 'adStarted':
+					break;
+				case 'adTime':
+					break;
+				case 'audioTracks':
+					this.dispatchEvent('audio', data);
+					break;
+				case 'audioTrackChanged':
+					this.dispatchEvent('audio-change', data);
+					break;
+				case 'beforePlay':
+					this.dispatchEvent('beforeplay');
+					break;
+				case 'beforeplaylistItem':
+					console.log('beforeplaylistitem');
+					this.dispatchEvent('beforeplaylistitem');
+					break;
+				case 'buffer':
+					this.dispatchEvent('waiting', data);
+					break;
+				case 'bufferedEnd':
+					console.log('bufferedEnd');
+					this.dispatchEvent('bufferedEnd', data);
+					break;
+				case 'canplay':
+					break;
+				case 'canplaythrough':
+					// this.dispatchEvent('item', data);
+					break;
+				case 'complete': // jwplayer
+					break;
+				case 'controls':
+					break;
+				case 'displayClick':
+					break;
+				case 'duringplaylistchange':
+					console.log('duringplaylistchange');
+					this.dispatchEvent('duringplaylistchange');
+					break;
+				case 'ended': // videojs
+					this.dispatchEvent('ended');
+					break;
+				case 'error':
+					console.log('error');
+					this.dispatchEvent('error', data);
+					break;
+				case 'fullscreen': // jwplayer
+				case 'fullscreenchange': // videojs
+					this.dispatchEvent('fullscreen', data);
+					break;
+				case 'idle': // jwplayer
+					break;
+				case 'loadeddata': // videojs
+					break;
+				case 'loadedmetadata': // videojs
+					this.dispatchEvent('duration', this.#getTimeState(data));
+					this.dispatchEvent('audio', this.#getAudioState());
+					this.dispatchEvent('captions', this.getCaptionState());
+					break;
+				case 'loadstart': // videojs
+					break;
+				case 'mute':
+					this.dispatchEvent('mute', this.#getPlaybackState(data));
+					break;
+				case 'pause':
+					this.dispatchEvent('pause', data);
+					break;
+				case 'play':
+					this.dispatchEvent('play', data);
+					break;
+				case 'firstFrame': // jwplayer aka playing
+				case 'playing': // videojs
+					this.dispatchEvent('playing');
+					break;
+				case 'playlist':
+					this.dispatchEvent('playlist', data);
+					break;
+				case 'durationchanged':
+				case 'playlistItem':
+				case 'playlistitem':
+					this.dispatchEvent('duration', this.#getTimeState(data));
+					this.dispatchEvent('item', data);
+					break;
+				case 'playlistchange':
+					this.dispatchEvent('playlistchange');
+					break;
+				case 'playlistsorted':
+					break;
+				case 'ratechange':
+					this.dispatchEvent('speed', data);
+					break;
+				case 'resize':
+					break;
+				case 'seek':
+					break;
+				case 'seeked': // both
+					this.dispatchEvent('seeked', data);
+					break;
+				case 'seeking':
+					break;
+				case 'setupError':
+					break;
+				case 'stalled':
+					this.dispatchEvent('stalled', data);
+					break;
+				case 'suspend':
+					break;
+				case 'captionsList':
+					this.dispatchEvent('captions', data);
+					break;
+				case 'captionsChanged':
+					this.dispatchEvent('caption-change', data);
+					break;
+				case 'time': // JWPlayer
+				case 'timeupdate': // VideoJS
+					this.dispatchEvent('time', this.#getTimeState(data));
+					break;
+				case 'volume':
+				case 'volumechange':
+					this.dispatchEvent('volume', this.#getPlaybackState(data));
+					break;
+				case 'waiting':
+					console.log('waiting');
+					this.dispatchEvent('waiting', data);
+					break;
 				}
 			});
 		});
@@ -608,14 +608,10 @@ export default class Base {
 
 	}
 
-	#fetchPlaylist(url: string) {
-		return fetch(url)
-			.then((response) => {
-				return response.json();
-			})
-			.then((json) => {
-				return this.convertPlaylistToCurrentPlayer(json);
-			});
+	async #fetchPlaylist(url: string) {
+		const response = await fetch(url);
+		const json = await response.json();
+		return this.convertPlaylistToCurrentPlayer(json);
 	}
 
 	#loadPlaylist() {
@@ -685,7 +681,7 @@ export default class Base {
 	dispatchEvent(eventType: 'chapters', data: Chapter[]): void;
 	dispatchEvent(eventType: 'controls', showing: boolean): void;
 	dispatchEvent(eventType: 'display-message', value: string): void;
-	dispatchEvent(eventType: 'duration', data: PlaybackState): void;	
+	dispatchEvent(eventType: 'duration', data: PlaybackState): void;
 	dispatchEvent(eventType: 'error', data: any): void;
 	dispatchEvent(eventType: 'error', data: any): void;
 	dispatchEvent(eventType: 'forward', amount: number): void;
@@ -1088,7 +1084,7 @@ export default class Base {
 			}
 
 			newPlaylist.push(newItem);
-		};
+		}
 
 		return newPlaylist;
 	}

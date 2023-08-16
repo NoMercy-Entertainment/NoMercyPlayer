@@ -274,6 +274,9 @@ export interface VideoPlayerOptions {
     seekInterval?: number;
     styles?: Style;
     token?: string;
+    chapters?: boolean;
+    nipple?: boolean;
+    icons?: any;
 }
 
 export interface VolumeState {

@@ -7,7 +7,8 @@ export interface Icon {
 		normal: string;
 		title: string;
 	};
-};
+}
+
 export const fluentIcons: Icon = {
 	back: {
 		classes: [],
