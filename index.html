@@ -9,16 +9,12 @@
         <meta name="viewport"
               content="width=device-width, initial-scale=1.0" />
         <title>NoMercyPlayer API</title>
-
-        <!-- <script type="module"
-                src="/src/tailwind.ts"></script> -->
-
     </head>
 
     <body class="nm-flex nm-flex-col nm-items-center nm-justify-center nm-w-screen nm-h-screen nm-gap-4 nm-text-white nm-bg-zinc-900">
 
         <div id="container"
-             class="nm-flex nm-flex-col nm-justify-center nm-w-full nm-gap-8 p-8 sm:nm-flex-row">
+             class="nm-flex nm-flex-col nm-justify-center nm-w-full nm-gap-8 nm-p-8 sm:nm-flex-row">
             <div id="wrapper2"
                  class="nm-flex nm-flex-col nm-items-center nm-w-full max-nm-w-4xl nm-gap-2 nm-text-center">
                 <span>JWPlayer</span>
@@ -68,6 +64,8 @@
 
         <script type="module">
 
+            import VideoPlayer from './src/nomercyplayer';
+
             const config = {
                 muted: false,
                 controls: false,
@@ -87,11 +85,171 @@
                     2,
                 ],
                 styles: {
-                    sliderProgressStyles: ['nm-bg-red-500'],
-                    chapterMarkerProgressStyles: ['nm-bg-red-500'],
-                    sliderNippleStyles: ['nm-bg-red-500'],
+                    // sliderProgressStyles: ['nm-bg-theme-500'],
+                    // chapterMarkerProgressStyles: ['nm-bg-theme-500'],
+                    // sliderNippleStyles: ['nm-bg-theme-500'],
                     // sliderBarStyles: ['!nm-bg-transparent'],
-                }
+                },
+                layout: {
+                    top: [
+                        {
+                            backButton: {
+                                // action: () => {},
+                                // classNames: 'flex',
+                                // icons: {
+                                //     normal: '',
+                                //     hover: ''
+                                // }
+                            },
+                        },
+                    ],
+                    middle: [],
+                    bottom: [
+                        {
+                            currentTime: {},
+                            divider: {
+                                // classNames: 'mx-1',
+                                text: '/'
+                            },
+                            duration: {},
+                            progress: {},
+                        },
+                        {
+                            play: {
+                                // action: () => {},
+                                // classNames: 'flex',
+                                // icons: {
+                                //     normal: '',
+                                //     hover: ''
+                                // }
+                            },
+                            volume: {
+                                // action: () => {},
+                                // classNames: 'flex',
+                                // icons: {
+                                //     lowVolume: {
+                                //         normal: '',
+                                //         hover: ''
+                                //     },
+                                //     midVolume: {
+                                //         normal: '',
+                                //         hover: ''
+                                //     },
+                                //     highVolume: {
+                                //         normal: '',
+                                //         hover: ''
+                                //     },
+                                //     muted: {
+                                //         normal: '',
+                                //         hover: ''
+                                //     },
+                                // }
+                            },
+                            previous: {
+                                // action: () => {},
+                                // classNames: 'flex',
+                                // icons: {
+                                //     normal: '',
+                                //     hover: ''
+                                // }
+                            },
+                            skipMinus: {
+                                seconds: 10,
+                                // action: () => {},
+                                // classNames: 'flex',
+                                // icons: {
+                                //     normal: '',
+                                //     hover: ''
+                                // }
+                            },
+                            skipPlus: {
+                                seconds: 10,
+                                // action: () => {},
+                                // classNames: 'flex',
+                                // icons: {
+                                //     normal: '',
+                                //     hover: ''
+                                // }
+                            },
+                            next: {
+                                // action: () => {},
+                                // classNames: 'flex',
+                                // icons: {
+                                //     normal: '',
+                                //     hover: ''
+                                // }
+                            },
+                            autoPlay: {
+                                // action: () => {},
+                                // classNames: 'flex',
+                                // icons: {
+                                //     normal: '',
+                                //     hover: ''
+                                // }
+                            },
+                            divider: {
+                                // classNames: 'mx-auto',
+                                // text: ''
+                            },
+                            settings: {
+                                // action: () => {},
+                                // classNames: 'flex',
+                                // icons: {
+                                //     normal: '',
+                                //     hover: ''
+                                // }
+                            },
+                            pip: {
+                                // action: () => {},
+                                // classNames: 'flex',
+                                // icons: {
+                                //     normal: '',
+                                //     hover: ''
+                                // }
+                            },
+                            theaterMode: {
+                                // action: () => {},
+                                // classNames: 'flex',
+                                // icons: {
+                                //     normal: '',
+                                //     hover: ''
+                                // }
+                            },
+                            playlist: {
+                                // action: () => {},
+                                // classNames: 'flex',
+                                // icons: {
+                                //     normal: '',
+                                //     hover: ''
+                                // }
+                            },
+                            subtitles: {
+                                // action: () => {},
+                                // classNames: 'flex',
+                                // icons: {
+                                //     normal: '',
+                                //     hover: ''
+                                // }
+                            },
+                            settings: {
+                                // action: () => {},
+                                // classNames: 'flex',
+                                // icons: {
+                                //     normal: '',
+                                //     hover: ''
+                                // }
+                            },
+                            fullscreen: {
+                                // action: () => {},
+                                // classNames: 'flex',
+                                // icons: {
+                                //     normal: '',
+                                //     hover: ''
+                                // }
+                            },
+                        }
+                    ],
+                },
             };
 
             const js = new VideoPlayer('videojs', config, 'player1');

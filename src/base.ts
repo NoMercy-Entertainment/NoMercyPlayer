@@ -5,7 +5,6 @@ import type {
 	EpisodeTooltip,
 	PlaybackState, PlaylistItem, toolTooltip, VideoPlayer as Types, VideoPlayerOptions, VolumeState
 } from './nomercyplayer.d';
-import { styles } from './styles';
 
 // noinspection JSUnusedGlobalSymbols
 export default class Base {
@@ -340,17 +339,6 @@ export default class Base {
 		// reset jwplayer styles
 		this.getElement().style.width = '';
 		this.getElement().style.height = '';
-
-		if (document.getElementById('nomercyplayer-styles')) return;
-
-		const styleSheet = document.createElement('style');
-		styleSheet.id = 'nomercyplayer-styles';
-
-		styleSheet.innerHTML = styles
-			.replace(/[\t]{2,}/gu, '\t')
-			.replace(/[\s]{2,}/gu, ' ');
-
-		document.head.appendChild(styleSheet);
 	}
 
 	#init() {

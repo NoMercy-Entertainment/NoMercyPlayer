@@ -1,20 +1,10 @@
+import './index.css';
 
 /* eslint-disable indent */
 import { buttons, fluentIcons, Icon } from './buttons';
 import Functions from './functions';
-import {
-	bottomBarStyles, bottomRowStyles, buttonBaseStyle, buttonStyles, centerStyles, chapterBarStyles,
-	chapterMarkerBGStyles, chapterMarkerBufferStyles, chapterMarkerHoverStyles, chapterMarkerProgressStyles,
-	chapterMarkersStyles, chapterTextStyles, dividerStyles, episodeMenuButtonImageStyles, episodeMenuButtonLeftStyles,
-	episodeMenuButtonShadowStyles, iconStyles, languageButtonSpanStyles,
-	mainMenuStyles, menuButtonStyles, menuButtonTextStyles, menuContentStyles, menuFrameStyles,
-	menuHeaderButtonTextStyles, menuHeaderStyles, overlayStyles, playerMessageStyles,
-	playlistMenuButtonStyles, playlistMenuStyles, scrollContainerStyles, sliderBarStyles,
-	sliderBufferStyles, sliderHoverStyles, sliderNippleStyles, sliderPopImageStyles, sliderPopStyles,
-	sliderProgressStyles, sliderTextStyles, speedButtonTextStyles, subMenuContentStyles,
-	subMenuStyles, svgSizeStyles, timeStyles, tooltipStyles, topBarStyles, topRowStyles, touchPlaybackButtonStyles,
-	touchPlaybackStyles, volumeContainerStyles, volumeSliderStyles
-} from './styles';
+
+import * as styles from './styles';
 
 import type { VideoPlayerOptions, VideoPlayer as Types, Chapter, VolumeState, PlaylistItem } from './nomercyplayer.d';
 
@@ -60,122 +50,14 @@ export default class UI extends Functions {
 	currentTimeFile = '';
 	fluentIcons: Icon = <Icon>{};
 	buttons: Icon = <Icon>{};
-
-	bottomBarStyles: string[] = [];
-	bottomRowStyles: string[] = [];
-	buttonBaseStyles: string[] = [];
-	buttonStyles: string[] = [];
-	centerStyles: string[] = [];
-	chapterBarStyles: string[] = [];
-	chapterMarkerBGStyles: string[] = [];
-	chapterMarkerBufferStyles: string[] = [];
-	chapterMarkerHoverStyles: string[] = [];
-	chapterMarkerProgressStyles: string[] = [];
-	chapterMarkersStyles: string[] = [];
-	chapterTextStyles: string[] = [];
-	dividerStyles: string[] = [];
-	iconStyles: string[] = [];
-	languageButtonSpanStyles: string[] = [];
-	languageButtonStyles: string[] = [];
-	mainMenuStyles: string[] = [];
-	menuButtonStyles: string[] = [];
-	menuButtonTextStyles: string[] = [];
-	menuContentStyles: string[] = [];
-	menuFrameStyles: string[] = [];
-	menuHeaderButtonTextStyles: string[] = [];
-	menuHeaderStyles: string[] = [];
-	overlayStyles: string[] = [];
-	scrollContainerStyles: string[] = [];
-	sliderBarStyles: string[] = [];
-	sliderNippleStyles: string[] = [];
-	sliderPopImageStyles: string[] = [];
-	sliderPopStyles: string[] = [];
-	sliderTextStyles: string[] = [];
-	speedButtonTextStyles: string[] = [];
-	subMenuStyles: string[] = [];
-	svgSizeStyles: string[] = [];
-	timeStyles: string[] = [];
-	topBarStyles: string[] = [];
-	topRowStyles: string[] = [];
-	touchPlaybackStyles: string[] = [];
-	touchPlaybackButtonStyles: string[] = [];
-	subMenuContentStyles: string[] = [];
-	volumeSliderStyles: string[] = [];
-	volumeContainerStyles: string[] = [];
-	sliderBufferStyles: string[] = [];
-	sliderHoverStyles: string[] = [];
-	sliderProgressStyles: string[] = [];
-	playerMessageStyles: string[] = [];
-	playlistMenuStyles: string[] = [];
-	playlistMenuButtonStyles: string[] = [];
 	tooltip: any;
 	hasNextTip = false;
 	sliderBar: any;
-
-	tooltipStyles: string[] = [];
-	episodeMenuButtonLeftStyles: string[] = [];
-	episodeMenuButtonShadowStyles: string[] = [];
-	episodeMenuButtonImageStyles: string[] = [];
 
 	constructor(playerType: Types['playerType'], options: VideoPlayerOptions, playerId: Types['playerId'] = '') {
 		super(playerType, options, playerId);
 
 		this.on('ready', () => {
-
-			this.bottomBarStyles = this.mergeStyles('bottomBarStyles', bottomBarStyles);
-			this.bottomRowStyles = this.mergeStyles('bottomRowStyles', bottomRowStyles);
-			this.buttonBaseStyles = this.mergeStyles('buttonBaseStyle', buttonBaseStyle);
-			this.buttonStyles = this.mergeStyles('buttonStyles', buttonStyles);
-			this.centerStyles = this.mergeStyles('centerStyles', centerStyles);
-			this.chapterBarStyles = this.mergeStyles('chapterBarStyles', chapterBarStyles);
-			this.chapterMarkerBGStyles = this.mergeStyles('chapterMarkerBGStyles', chapterMarkerBGStyles);
-			this.chapterMarkerBufferStyles = this.mergeStyles('chapterMarkerBufferStyles', chapterMarkerBufferStyles);
-			this.chapterMarkerHoverStyles = this.mergeStyles('chapterMarkerHoverStyles', chapterMarkerHoverStyles);
-			this.chapterMarkerProgressStyles = this.mergeStyles('chapterMarkerProgressStyles', chapterMarkerProgressStyles);
-			this.chapterMarkersStyles = this.mergeStyles('chapterMarkersStyles', chapterMarkersStyles);
-			this.chapterTextStyles = this.mergeStyles('chapterTextStyles', chapterTextStyles);
-			this.dividerStyles = this.mergeStyles('dividerStyles', dividerStyles);
-			this.iconStyles = this.mergeStyles('iconStyles', iconStyles);
-			this.languageButtonSpanStyles = this.mergeStyles('languageButtonSpanStyles', languageButtonSpanStyles);
-			this.menuButtonTextStyles = this.mergeStyles('menuButtonTextStyles', menuButtonTextStyles);
-			this.mainMenuStyles = this.mergeStyles('mainMenuStyles', mainMenuStyles);
-			this.menuButtonStyles = this.mergeStyles('menuButtonStyles', menuButtonStyles);
-			this.menuContentStyles = this.mergeStyles('menuContentStyles', menuContentStyles);
-			this.menuFrameStyles = this.mergeStyles('menuFrameStyles', menuFrameStyles);
-			this.menuHeaderButtonTextStyles = this.mergeStyles('menuHeaderButtonTextStyles', menuHeaderButtonTextStyles);
-			this.menuHeaderStyles = this.mergeStyles('menuHeaderStyles', menuHeaderStyles);
-			this.overlayStyles = this.mergeStyles('overlayStyles', overlayStyles);
-			this.scrollContainerStyles = this.mergeStyles('scrollContainerStyles', scrollContainerStyles);
-			this.sliderBarStyles = this.mergeStyles('sliderBarStyles', sliderBarStyles);
-			this.sliderNippleStyles = this.mergeStyles('sliderNippleStyles', sliderNippleStyles);
-			this.sliderPopImageStyles = this.mergeStyles('sliderPopImageStyles', sliderPopImageStyles);
-			this.sliderPopStyles = this.mergeStyles('sliderPopStyles', sliderPopStyles);
-			this.sliderTextStyles = this.mergeStyles('sliderTextStyles', sliderTextStyles);
-			this.speedButtonTextStyles = this.mergeStyles('speedButtonTextStyles', speedButtonTextStyles);
-			this.subMenuStyles = this.mergeStyles('subMenuStyles', subMenuStyles);
-			this.subMenuContentStyles = this.mergeStyles('subMenuContentStyles', subMenuContentStyles);
-			this.svgSizeStyles = this.mergeStyles('svgSizeStyles', svgSizeStyles);
-			this.timeStyles = this.mergeStyles('timeStyles', timeStyles);
-			this.topBarStyles = this.mergeStyles('topBarStyles', topBarStyles);
-			this.topRowStyles = this.mergeStyles('topRowStyles', topRowStyles);
-			this.touchPlaybackStyles = this.mergeStyles('touchPlaybackStyles', touchPlaybackStyles);
-			this.touchPlaybackButtonStyles = this.mergeStyles('touchPlaybackButtonStyles', touchPlaybackButtonStyles);
-			this.buttonStyles = this.mergeStyles('buttonStyles', buttonStyles);
-			this.volumeContainerStyles = this.mergeStyles('volumeContainerStyles', volumeContainerStyles);
-			this.volumeSliderStyles = this.mergeStyles('volumeSliderStyles', volumeSliderStyles);
-			this.sliderBufferStyles = this.mergeStyles('sliderBufferStyles', sliderBufferStyles);
-			this.sliderHoverStyles = this.mergeStyles('sliderHoverStyles', sliderHoverStyles);
-			this.sliderProgressStyles = this.mergeStyles('sliderProgressStyles', sliderProgressStyles);
-			this.playerMessageStyles = this.mergeStyles('playerMessageStyles', playerMessageStyles);
-			this.playlistMenuStyles = this.mergeStyles('playlistMenuStyles', playlistMenuStyles);
-			this.playlistMenuButtonStyles = this.mergeStyles('playlistMenuButtonStyles', playlistMenuButtonStyles);
-			this.episodeMenuButtonLeftStyles = this.mergeStyles('episodeMenuButtonLeftStyles', episodeMenuButtonLeftStyles);
-			this.episodeMenuButtonShadowStyles = this.mergeStyles('episodeMenuButtonShadowStyles', episodeMenuButtonShadowStyles);
-			this.episodeMenuButtonImageStyles = this.mergeStyles('episodeMenuButtonImageStyles', episodeMenuButtonImageStyles);
-
-			this.tooltipStyles = this.mergeStyles('tooltipStyles', tooltipStyles);
-
-
 			this.fluentIcons = fluentIcons;
 			this.buttons = buttons(this.options);
 
@@ -187,6 +69,10 @@ export default class UI extends Functions {
 	mergeStyles(styleName: string, defaultStyles: string[]) {
 		const styles = this.options.styles?.[styleName] || [];
 		return [...defaultStyles, ...styles];
+	}
+
+	makeStyles = (name: string) => {
+		return this.mergeStyles(`${name}`, (styles as any)[name])
 	}
 
 	#eventHandlers() {
@@ -259,7 +145,7 @@ export default class UI extends Functions {
 		const overlay = document.createElement('div');
 		overlay.id = 'overlay';
 
-		this.addClasses(overlay, this.overlayStyles);
+		this.addClasses(overlay, this.makeStyles('overlayStyles'));
 
 		this.dispatchEvent('overlay', overlay);
 
@@ -333,7 +219,7 @@ export default class UI extends Functions {
 		this.createPIPButton(bottomRow);
 
 		this.createPlaylistsButton(bottomRow);
-		// this.createSpeedButton(bottomRow);
+		this.createSpeedButton(bottomRow);
 		this.createCaptionsButton(bottomRow);
 		this.createAudioButton(bottomRow);
 		this.createQualityButton(bottomRow);
@@ -359,8 +245,7 @@ export default class UI extends Functions {
 		topBar.id = 'top-bar';
 		topBar.style.transform = 'translateY(0)';
 
-		this.topBarStyles.push('top-bar');
-		this.addClasses(topBar, this.topBarStyles);
+		this.addClasses(topBar, this.makeStyles('topBarStyles'));
 
 		this.on('controls', (showing) => {
 			if (showing) {
@@ -379,7 +264,7 @@ export default class UI extends Functions {
 		const center = document.createElement('div');
 		center.id = 'center';
 
-		this.addClasses(center, this.centerStyles);
+		this.addClasses(center, this.makeStyles('centerStyles'));
 
 		['click', 'touchstart', 'touchend', 'mousemove'].forEach((event) => {
 			center.addEventListener(event, (e) => {
@@ -391,12 +276,17 @@ export default class UI extends Functions {
 		});
 
 		this.createOverlayCenterMessage(center);
-		this.createTouchSeekBack(center, { x: { start: 1, end: 1 }, y: { start: 2, end: 6 } });
-		this.createTouchPlayback(center, { x: { start: 2, end: 2 }, y: { start: 3, end: 5 } });
-		this.createTouchSeekForward(center, { x: { start: 3, end: 3 }, y: { start: 2, end: 6 } });
-		this.createTouchVolUp(center, { x: { start: 2, end: 2 }, y: { start: 1, end: 3 } });
-		this.createTouchVolDown(center, { x: { start: 2, end: 2 }, y: { start: 5, end: 7 } });
-
+		
+		if (this.isMobile()) {
+			this.createTouchSeekBack(center, { x: { start: 1, end: 1 }, y: { start: 2, end: 6 } });
+			this.createTouchPlayback(center, { x: { start: 2, end: 2 }, y: { start: 3, end: 5 } });
+			this.createTouchSeekForward(center, { x: { start: 3, end: 3 }, y: { start: 2, end: 6 } });
+			this.createTouchVolUp(center, { x: { start: 2, end: 2 }, y: { start: 1, end: 3 } });
+			this.createTouchVolDown(center, { x: { start: 2, end: 2 }, y: { start: 5, end: 7 } });
+		} else {
+			this.createTouchPlayback(center, { x: { start: 1, end: 4 }, y: { start: 2, end: 6 } });
+		}
+		
 		parent.appendChild(center);
 
 		return center;
@@ -434,7 +324,7 @@ export default class UI extends Functions {
 
 	createTouchPlayback(parent: HTMLElement, position: Position) {
 		const touchPlayback = this.createTouchBox(parent, 'touchPlayback', position);
-		this.addClasses(touchPlayback, this.touchPlaybackStyles);
+		this.addClasses(touchPlayback, this.makeStyles('touchPlaybackStyles'));
 
 		// touchPlayback.addEventListener('click', () => {
 		// 	this.togglePlayback();
@@ -448,9 +338,9 @@ export default class UI extends Functions {
 			));
 		});
 
-		// if (this.isMobile()) {
+		if (this.isMobile()) {
 			const playButton = this.createSVGElement(touchPlayback, 'bigPlay', this.buttons.bigPlay);
-			this.addClasses(playButton, this.touchPlaybackButtonStyles);
+			this.addClasses(playButton, this.makeStyles('touchPlaybackButtonStyles'));
 
 			this.on('pause', () => {
 				playButton.style.display = 'flex';
@@ -458,7 +348,7 @@ export default class UI extends Functions {
 			this.on('play', () => {
 				playButton.style.display = 'none';
 			});
-		// }
+		}
 
 		return touchPlayback;
 	}
@@ -509,8 +399,7 @@ export default class UI extends Functions {
 		bottomBar.id = 'bottom-bar';
 		bottomBar.style.transform = 'translateY(0)';
 
-		this.bottomBarStyles.push('bottom-bar');
-		this.addClasses(bottomBar, this.bottomBarStyles);
+		this.addClasses(bottomBar, this.makeStyles('bottomBarStyles'));
 
 		parent.appendChild(bottomBar);
 
@@ -528,9 +417,7 @@ export default class UI extends Functions {
 	createTopRow(parent: HTMLDivElement) {
 		const topRow = document.createElement('div');
 
-
-		this.bottomBarStyles.push('top-row');
-		this.addClasses(topRow, this.topRowStyles);
+		this.addClasses(topRow, this.makeStyles('topRowStyles'));
 
 		parent.appendChild(topRow);
 
@@ -540,8 +427,7 @@ export default class UI extends Functions {
 	createBottomRow(parent: HTMLDivElement) {
 		const bottomRow = document.createElement('div');
 
-		this.bottomBarStyles.push('bottom-row');
-		this.addClasses(bottomRow, this.bottomRowStyles);
+		this.addClasses(bottomRow, this.makeStyles('bottomRowStyles'));
 
 		parent.appendChild(bottomRow);
 
@@ -552,12 +438,12 @@ export default class UI extends Functions {
 		const divider = document.createElement('div');
 		divider.id = 'divider';
 
-		this.addClasses(divider, this.dividerStyles);
+		this.addClasses(divider, this.makeStyles('dividerStyles'));
 
 		if (content) {
 			divider.innerHTML = content;
 		} else {
-			this.addClasses(divider, this.dividerStyles);
+			this.addClasses(divider, this.makeStyles('dividerStyles'));
 		}
 
 		parent.appendChild(divider);
@@ -572,9 +458,9 @@ export default class UI extends Functions {
 
 		svg.id = id;
 		this.addClasses(svg, [
+			`${id}-icon`,
 			...icon.classes,
-			id,
-			...this.svgSizeStyles,
+			...this.makeStyles('svgSizeStyles'),
 			hidden ? 'nm-hidden' : 'nm-flex',
 		]);
 
@@ -609,10 +495,10 @@ export default class UI extends Functions {
 
 				if (x < 35) {
 					x = 35;
-				}
+				} 
 
-				if (x > playerRect.right - 160) {
-					x = playerRect.right - 160;
+				if (x > (playerRect.right - playerRect.left) - 45) {
+					x -= 45;
 				}
 
 				this.dispatchEvent('show-tooltip', {
@@ -686,8 +572,8 @@ export default class UI extends Functions {
 		button.type = 'button';
 		button.ariaLabel = this.buttons[icon]?.title;
 
-		const classes = this.buttonStyles;
-		classes.push(icon);
+		const classes = this.makeStyles('buttonStyles');
+		classes.unshift(`${icon}-button`);
 
 		this.addClasses(button, classes);
 
@@ -838,7 +724,7 @@ export default class UI extends Functions {
 
 		this.addClasses(time, [
 			...classes,
-			...this.timeStyles,
+			...this.makeStyles('timeStyles'),
 			`${type}-time`,
 		]);
 
@@ -900,7 +786,7 @@ export default class UI extends Functions {
 
 		const volumeContainer = document.createElement('div');
 
-		this.addClasses(volumeContainer, this.volumeContainerStyles);
+		this.addClasses(volumeContainer, this.makeStyles('volumeContainerStyles'));
 
 		const volumeButton = this.createButton(
 			volumeContainer,
@@ -916,7 +802,7 @@ export default class UI extends Functions {
 		volumeSlider.value = this.getVolume().toString();
 		volumeSlider.style.backgroundSize = `${this.getVolume()}% 100%`;
 
-		this.addClasses(volumeSlider, this.volumeSliderStyles);
+		this.addClasses(volumeSlider, this.makeStyles('volumeSliderStyles'));
 
 		volumeContainer.append(volumeSlider);
 
@@ -998,6 +884,27 @@ export default class UI extends Functions {
 		}
 	}
 
+	mousePosition(element: HTMLElement, parent: HTMLElement, offset = 60) {
+		const playerRect = element.getBoundingClientRect();
+		const tipRect = parent.getBoundingClientRect();
+
+		let x = Math.abs((tipRect.left - playerRect.left) + 100);
+		const y = Math.abs((tipRect.bottom - playerRect.bottom) - 60);
+
+		if (x < 30) {
+			x = 30;
+		}
+
+		if (x > (playerRect.right - playerRect.left) - offset) {
+			x = (playerRect.right - playerRect.left) - offset;
+		}
+
+		return {
+			x,
+			y,
+		};
+	}
+
 	createPreviousButton(parent: HTMLDivElement) {
 		if (this.isMobile()) return;
 		const previousButton = this.createButton(
@@ -1030,7 +937,20 @@ export default class UI extends Functions {
 		});
 
 		previousButton.addEventListener('mouseenter', () => {
-			const { x, y } = this.mousePosition(previousButton, parent);
+
+			const playerRect = previousButton.getBoundingClientRect();
+			const tipRect = parent.getBoundingClientRect();
+	
+			let x = Math.abs((tipRect.left - playerRect.left) + 50);
+			const y = Math.abs((tipRect.bottom - playerRect.bottom) - 60);
+	
+			if (x < 30) {
+				x = 30;
+			}
+	
+			if (x > (playerRect.right - playerRect.left) - 10) {
+				x = (playerRect.right - playerRect.left) - 10;
+			}
 
 			this.dispatchEvent('show-episode-tip', {
 				direction: 'previous',
@@ -1047,27 +967,6 @@ export default class UI extends Functions {
 
 		parent.appendChild(previousButton);
 		return previousButton;
-	}
-
-	mousePosition(element: HTMLElement, parent: HTMLElement, offset = 60) {
-		const playerRect = element.getBoundingClientRect();
-		const tipRect = parent.getBoundingClientRect();
-
-		let x = Math.abs((tipRect.left - playerRect.left) + 100);
-		const y = Math.abs((tipRect.bottom - playerRect.bottom) - 60);
-
-		if (x < 30) {
-			x = 30;
-		}
-
-		if (x > playerRect.right - offset) {
-			x = playerRect.right - offset;
-		}
-
-		return {
-			x,
-			y,
-		};
 	}
 
 	createNextButton(parent: HTMLDivElement) {
@@ -1103,8 +1002,20 @@ export default class UI extends Functions {
 
 		nextButton.addEventListener('mouseenter', () => {
 
-			const { x, y } = this.mousePosition(nextButton, parent);
-
+			const playerRect = nextButton.getBoundingClientRect();
+			const tipRect = parent.getBoundingClientRect();
+	
+			let x = Math.abs((tipRect.left - playerRect.left) + 50);
+			const y = Math.abs((tipRect.bottom - playerRect.bottom) - 60);
+	
+			if (x < 30) {
+				x = 30;
+			}
+	
+			if (x > (playerRect.right - playerRect.left) - 10) {
+				x = (playerRect.right - playerRect.left) - 10;
+			}
+	
 			this.dispatchEvent('show-episode-tip', {
 				direction: 'next',
 				position: 'bottom',
@@ -1408,43 +1319,43 @@ export default class UI extends Functions {
 		return playlistButton;
 	}
 
-	// createSpeedButton(parent: HTMLDivElement) {
-	// 	if (this.isMobile()) return;
-	// 	const speedButton = this.createButton(
-	// 		parent,
-	// 		'speed'
-	// 	);
-	//
-	// 	if (this.hasSpeeds()) {
-	// 		speedButton.style.display = 'flex';
-	// 	} else {
-	// 		speedButton.style.display = 'none';
-	// 	}
-	//
-	// 	this.createSVGElement(speedButton, 'speed', this.buttons.speed);
-	//
-	// 	speedButton.addEventListener('click', (event) => {
-	// 		event.stopPropagation();
-	// 		this.dispatchEvent('hide-tooltip');
-	//
-	// 		if (this.speedMenuOpen) {
-	// 			this.dispatchEvent('show-menu', false);
-	// 		} else {
-	// 			this.dispatchEvent('show-speed-menu', true);
-	// 		}
-	// 	});
-	//
-	// 	this.on('pip', (data) => {
-	// 		if (data) {
-	// 			speedButton.style.display = 'none';
-	// 		} else if (this.hasSpeeds()) {
-	// 			speedButton.style.display = 'flex';
-	// 		}
-	// 	});
-	//
-	// 	parent.appendChild(speedButton);
-	// 	return speedButton;
-	// }
+	createSpeedButton(parent: HTMLDivElement) {
+		if (this.isMobile()) return;
+		const speedButton = this.createButton(
+			parent,
+			'speed'
+		);
+	
+		if (this.hasSpeeds()) {
+			speedButton.style.display = 'flex';
+		} else {
+			speedButton.style.display = 'none';
+		}
+	
+		this.createSVGElement(speedButton, 'speed', this.buttons.speed);
+	
+		speedButton.addEventListener('click', (event) => {
+			event.stopPropagation();
+			this.dispatchEvent('hide-tooltip');
+	
+			if (this.speedMenuOpen) {
+				this.dispatchEvent('show-menu', false);
+			} else {
+				this.dispatchEvent('show-speed-menu', true);
+			}
+		});
+	
+		this.on('pip', (data) => {
+			if (data) {
+				speedButton.style.display = 'none';
+			} else if (this.hasSpeeds()) {
+				speedButton.style.display = 'flex';
+			}
+		});
+	
+		parent.appendChild(speedButton);
+		return speedButton;
+	}
 
 	createPIPButton(parent: HTMLDivElement) {
 		if (this.isMobile()) return;
@@ -1500,11 +1411,11 @@ export default class UI extends Functions {
 
 		const menuFrame = document.createElement('div');
 		menuFrame.id = 'menu-frame';
-		this.addClasses(menuFrame, this.menuFrameStyles);
+		this.addClasses(menuFrame, this.makeStyles('menuFrameStyles'));
 
 		const menuContent = document.createElement('div');
 		menuContent.id = 'menu-content';
-		this.addClasses(menuContent, this.menuContentStyles);
+		this.addClasses(menuContent, this.makeStyles('menuContentStyles'));
 
 		menuContent.style.maxHeight = `${this.getElement().getBoundingClientRect().height - 80}px`;
 		this.on('resize', () => {
@@ -1650,7 +1561,7 @@ export default class UI extends Functions {
 		main.id = 'main-menu';
 		main.style.transform = 'translateX(0)';
 
-		this.addClasses(main, this.mainMenuStyles);
+		this.addClasses(main, this.makeStyles('mainMenuStyles'));
 
 		this.createMenuButton(main, 'language');
 		this.createMenuButton(main, 'subtitles');
@@ -1671,7 +1582,7 @@ export default class UI extends Functions {
 		submenu.id = 'sub-menu';
 		submenu.style.transform = 'translateX(0)';
 
-		this.addClasses(submenu, this.subMenuStyles);
+		this.addClasses(submenu, this.makeStyles('subMenuStyles'));
 
 		this.createLanguageMenu(submenu);
 		this.createSubtitleMenu(submenu);
@@ -1691,7 +1602,7 @@ export default class UI extends Functions {
 		const menuHeader = document.createElement('div');
 		menuHeader.id = 'menu-header';
 
-		this.addClasses(menuHeader, this.menuHeaderStyles);
+		this.addClasses(menuHeader, this.makeStyles('menuHeaderStyles'));
 
 		if (title !== 'Episodes') {
 			const back = this.createButton(
@@ -1716,7 +1627,7 @@ export default class UI extends Functions {
 
 		const menuButtonText = document.createElement('span');
 		menuButtonText.classList.add('menu-button-text');
-		this.addClasses(menuButtonText, this.menuHeaderButtonTextStyles);
+		this.addClasses(menuButtonText, this.makeStyles('menuHeaderButtonTextStyles'));
 		menuHeader.append(menuButtonText);
 		menuButtonText.textContent = this.localize(title).toTitleCase();
 
@@ -1748,7 +1659,7 @@ export default class UI extends Functions {
 		const menuButton = document.createElement('div');
 		menuButton.id = `menu-button-${item}`;
 
-		this.addClasses(menuButton, this.menuButtonStyles);
+		this.addClasses(menuButton, this.makeStyles('menuButtonStyles'));
 
 		if (item !== 'speed') {
 			menuButton.style.display = 'none';
@@ -1762,7 +1673,7 @@ export default class UI extends Functions {
 
 		const menuButtonText = document.createElement('span');
 		menuButtonText.classList.add('menu-button-text');
-		this.addClasses(menuButtonText, this.menuButtonTextStyles);
+		this.addClasses(menuButtonText, this.makeStyles('menuButtonTextStyles'));
 		menuButton.append(menuButtonText);
 		menuButtonText.textContent = this.localize(item).toTitleCase();
 
@@ -1815,7 +1726,7 @@ export default class UI extends Functions {
 	createLanguageMenu(parent: HTMLDivElement) {
 		const languageMenu = document.createElement('div');
 		languageMenu.id = 'language-menu';
-		this.addClasses(languageMenu, this.subMenuContentStyles);
+		this.addClasses(languageMenu, this.makeStyles('subMenuContentStyles'));
 
 		this.createMenuHeader(languageMenu, 'Language');
 
@@ -1823,7 +1734,7 @@ export default class UI extends Functions {
 		scrollContainer.id = 'language-scroll-container';
 		scrollContainer.style.transform = 'translateX(0)';
 
-		this.addClasses(scrollContainer, this.scrollContainerStyles);
+		this.addClasses(scrollContainer, this.makeStyles('scrollContainerStyles'));
 		languageMenu.appendChild(scrollContainer);
 
 		this.on('audio', (event) => {
@@ -1853,7 +1764,7 @@ export default class UI extends Functions {
 	createSubtitleMenu(parent: HTMLDivElement) {
 		const subtitleMenu = document.createElement('div');
 		subtitleMenu.id = 'subtitle-menu';
-		this.addClasses(subtitleMenu, this.subMenuContentStyles);
+		this.addClasses(subtitleMenu, this.makeStyles('subMenuContentStyles'));
 
 		this.createMenuHeader(subtitleMenu, 'subtitles');
 
@@ -1861,7 +1772,7 @@ export default class UI extends Functions {
 		scrollContainer.id = 'language-scroll-container';
 		scrollContainer.style.transform = 'translateX(0)';
 
-		this.addClasses(scrollContainer, this.scrollContainerStyles);
+		this.addClasses(scrollContainer, this.makeStyles('scrollContainerStyles'));
 		subtitleMenu.appendChild(scrollContainer);
 
 		this.on('captions', (event) => {
@@ -1892,7 +1803,7 @@ export default class UI extends Functions {
 	createSpeedMenu(parent: HTMLDivElement) {
 		const speedMenu = document.createElement('div');
 		speedMenu.id = 'speed-menu';
-		this.addClasses(speedMenu, this.subMenuContentStyles);
+		this.addClasses(speedMenu, this.makeStyles('subMenuContentStyles'));
 
 		this.createMenuHeader(speedMenu, 'speed');
 
@@ -1900,21 +1811,21 @@ export default class UI extends Functions {
 		scrollContainer.id = 'speed-scroll-container';
 		scrollContainer.style.transform = 'translateX(0)';
 
-		this.addClasses(scrollContainer, this.scrollContainerStyles);
+		this.addClasses(scrollContainer, this.makeStyles('scrollContainerStyles'));
 		speedMenu.appendChild(scrollContainer);
 
 		for (const speed of this.getSpeeds() ?? []) {
 			const speedButton = document.createElement('div');
 			speedButton.id = `speed-button-${speed}`;
 
-			this.addClasses(speedButton, this.menuButtonStyles);
+			this.addClasses(speedButton, this.makeStyles('menuButtonStyles'));
 
 			const spanChild = document.createElement('div');
 			speedButton.append(spanChild);
 
 			const speedButtonText = document.createElement('span');
 			speedButtonText.classList.add('menu-button-text');
-			this.addClasses(speedButtonText, this.speedButtonTextStyles);
+			this.addClasses(speedButtonText, this.makeStyles('speedButtonTextStyles'));
 
 			speedButtonText.textContent = speed == 1 ? this.localize('Normal') : speed.toString();
 			speedButton.append(speedButtonText);
@@ -1956,7 +1867,7 @@ export default class UI extends Functions {
 	createQualityMenu(parent: HTMLDivElement) {
 		const qualityMenu = document.createElement('div');
 		qualityMenu.id = 'quality-menu';
-		this.addClasses(qualityMenu, this.subMenuContentStyles);
+		this.addClasses(qualityMenu, this.makeStyles('subMenuContentStyles'));
 
 		this.createMenuHeader(qualityMenu, 'quality');
 
@@ -1964,7 +1875,7 @@ export default class UI extends Functions {
 		scrollContainer.id = 'quality-scroll-container';
 		scrollContainer.style.transform = 'translateX(0)';
 
-		this.addClasses(scrollContainer, this.scrollContainerStyles);
+		this.addClasses(scrollContainer, this.makeStyles('scrollContainerStyles'));
 		qualityMenu.appendChild(scrollContainer);
 
 		this.on('show-quality-menu', (showing) => {
@@ -1983,12 +1894,12 @@ export default class UI extends Functions {
 		const languageButton = document.createElement('div');
 		languageButton.id = `language-button-${data.language}`;
 
-		this.addClasses(languageButton, this.menuButtonStyles);
+		this.addClasses(languageButton, this.makeStyles('menuButtonStyles'));
 
 		const spanChild = document.createElement(data.language == 'off' || data.label.slice(0, 3) == 'Off' || data.label.slice(0, 3) == 'seg' ? 'span' : 'img');
 		this.addClasses(spanChild, [
 			`${data.type}-active`,
-			...this.languageButtonSpanStyles,
+			...this.makeStyles('languageButtonSpanStyles'),
 		]);
 
 		if (data.language == 'off' || data.label.slice(0, 3) == 'Off' || data.label.slice(0, 3) == 'seg') {
@@ -2005,7 +1916,7 @@ export default class UI extends Functions {
 
 		const languageButtonText = document.createElement('span');
 		languageButtonText.classList.add('menu-button-text');
-		this.addClasses(languageButtonText, this.menuButtonTextStyles);
+		this.addClasses(languageButtonText, this.makeStyles('menuButtonTextStyles'));
 
 		languageButtonText.textContent = `${this.localize(data.label)
 			?.replace('segment-metadata', 'Off')}`;
@@ -2106,41 +2017,31 @@ export default class UI extends Functions {
 	createProgressBar(parent: HTMLDivElement) {
 
 		this.sliderBar = document.createElement('div');
-		this.addClasses(this.sliderBar, this.sliderBarStyles);
+		this.addClasses(this.sliderBar, this.makeStyles('sliderBarStyles'));
 		this.progressBar = this.sliderBar;
 
 		const sliderBuffer = document.createElement('div');
 		sliderBuffer.id = 'slider-buffer';
-		this.addClasses(sliderBuffer, this.sliderBufferStyles);
+		this.addClasses(sliderBuffer, this.makeStyles('sliderBufferStyles'));
 		this.sliderBar.append(sliderBuffer);
 
 		const sliderHover = document.createElement('div');
 		sliderHover.id = 'slider-hover';
-		this.addClasses(sliderHover, this.sliderHoverStyles);
+		this.addClasses(sliderHover, this.makeStyles('sliderHoverStyles'));
 		this.sliderBar.append(sliderHover);
 
 		const sliderProgress = document.createElement('div');
 		sliderProgress.id = 'slider-progress';
-		this.addClasses(sliderProgress, this.sliderProgressStyles);
+		this.addClasses(sliderProgress, this.makeStyles('sliderProgressStyles'));
 		this.sliderBar.append(sliderProgress);
-
-		this.on('chapters', () => {
-			if (this.getChapters()?.length > 0) {
-				sliderProgress.classList.remove('nm-bg-purple-600');
-				sliderBuffer.classList.remove('nm-bg-purple-900/50');
-			} else {
-				sliderProgress.classList.add('nm-bg-purple-600');
-				sliderBuffer.classList.add('nm-bg-purple-900/50');
-			}
-		});
 
 		this.chapterBar = document.createElement('div');
 		this.chapterBar.id = 'chapter-progress';
-		this.addClasses(this.chapterBar, this.chapterBarStyles);
+		this.addClasses(this.chapterBar, this.makeStyles('chapterBarStyles'));
 		this.sliderBar.append(this.chapterBar);
 
 		const sliderNipple = document.createElement('div');
-		this.addClasses(sliderNipple, this.sliderNippleStyles);
+		this.addClasses(sliderNipple, this.makeStyles('sliderNippleStyles'));
 		sliderNipple.id = 'slider-nipple';
 
 		if (this.options.nipple) {
@@ -2151,28 +2052,28 @@ export default class UI extends Functions {
 		sliderPop.id = 'slider-pop';
 		sliderPop.style.setProperty('--visibility', '0');
 		sliderPop.style.opacity = 'var(--visibility)';
-		this.addClasses(sliderPop, this.sliderPopStyles);
+		this.addClasses(sliderPop, this.makeStyles('sliderPopStyles'));
 
 		this.sliderPopImage = document.createElement('div');
-		this.addClasses(this.sliderPopImage, this.sliderPopImageStyles);
+		this.addClasses(this.sliderPopImage, this.makeStyles('sliderPopImageStyles'));
 		this.sliderPopImage.id = 'slider-pop-image';
 		sliderPop.append(this.sliderPopImage);
 
 		const sliderText = document.createElement('div');
 		sliderText.id = 'slider-text';
 		sliderText.classList.add('slider-text');
-		this.addClasses(sliderText, this.sliderTextStyles);
+		this.addClasses(sliderText, this.makeStyles('sliderTextStyles'));
 		sliderPop.append(sliderText);
 
 		const chapterText = document.createElement('div');
 		chapterText.id = 'chapter-text';
 		chapterText.classList.add('chapter-text');
-		this.addClasses(chapterText, this.chapterTextStyles);
+		this.addClasses(chapterText, this.makeStyles('chapterTextStyles'));
 		sliderPop.append(chapterText);
 
 		this.sliderBar.append(sliderPop);
 
-		if (this.options.chapters != false) {
+		if (this.options.chapters != false && this.getChapters()?.length > 0) {
 			this.sliderBar.style.background = 'transparent';
 		}
 
@@ -2185,7 +2086,7 @@ export default class UI extends Functions {
 				const sliderPopOffsetX = this.#getSliderPopOffsetX(sliderPop, scrubTime);
 				sliderPop.style.left = `${sliderPopOffsetX}%`;
 
-				if (this.options.chapters == false) {
+				if (this.options.chapters == false || this.getChapters()?.length == 0) {
 					sliderHover.style.width = `${scrubTime.scrubTime}%`;
 				}
 
@@ -2244,6 +2145,8 @@ export default class UI extends Functions {
 			this.sliderBar.classList.add('nm-bg-white/40');
 			this.previewTime = [];
 			this.chapters = [];
+			sliderBuffer.style.width = `0`;
+			sliderProgress.style.width = `0`;
 		});
 
 		this.on('chapters', () => {
@@ -2302,26 +2205,26 @@ export default class UI extends Functions {
 		chapterMarker.style.left = `${chapter.left}%`;
 		chapterMarker.style.width = `calc(${chapter.width}% - 2px)`;
 
-		this.addClasses(chapterMarker, this.chapterMarkersStyles);
+		this.addClasses(chapterMarker, this.makeStyles('chapterMarkersStyles'));
 
 		const chapterMarkerBG = document.createElement('div');
 		chapterMarkerBG.id = `chapter-marker-bg-${chapter.id.replace(/\s/gu, '-')}`;
-		this.addClasses(chapterMarkerBG, this.chapterMarkerBGStyles);
+		this.addClasses(chapterMarkerBG, this.makeStyles('chapterMarkerBGStyles'));
 		chapterMarker.append(chapterMarkerBG);
 
 		const chapterMarkerBuffer = document.createElement('div');
 		chapterMarkerBuffer.id = `chapter-marker-hover-${chapter.id.replace(/\s/gu, '-')}`;
-		this.addClasses(chapterMarkerBuffer, this.chapterMarkerBufferStyles);
+		this.addClasses(chapterMarkerBuffer, this.makeStyles('chapterMarkerBufferStyles'));
 		chapterMarker.append(chapterMarkerBuffer);
 
 		const chapterMarkerHover = document.createElement('div');
 		chapterMarkerHover.id = 'chapterMarker-hover';
-		this.addClasses(chapterMarkerHover, this.chapterMarkerHoverStyles);
+		this.addClasses(chapterMarkerHover, this.makeStyles('chapterMarkerHoverStyles'));
 		chapterMarker.append(chapterMarkerHover);
 
 		const chapterMarkerProgress = document.createElement('div');
 		chapterMarkerProgress.id = `chapter-marker-progress-${chapter.id.replace(/\s/gu, '-')}`;
-		this.addClasses(chapterMarkerProgress, this.chapterMarkerProgressStyles);
+		this.addClasses(chapterMarkerProgress, this.makeStyles('chapterMarkerProgressStyles'));
 		chapterMarker.append(chapterMarkerProgress);
 
 		const left = chapter.left;
@@ -2472,7 +2375,7 @@ export default class UI extends Functions {
 		const playerMessage = document.createElement('div');
 
 		playerMessage.id = 'player-message';
-		this.addClasses(playerMessage, this.playerMessageStyles);
+		this.addClasses(playerMessage, this.makeStyles('playerMessageStyles'));
 		playerMessage.classList.add('player-message');
 
 		this.on('display-message', (val: string | null) => {
@@ -2495,7 +2398,7 @@ export default class UI extends Functions {
 		const playlistMenu = document.createElement('div');
 		playlistMenu.id = 'playlist-menu';
 		this.addClasses(playlistMenu, [
-			...this.subMenuContentStyles,
+			...this.makeStyles('subMenuContentStyles'),
 			'!nm-flex-row',
 			'!nm-gap-0',
 		]);
@@ -2504,7 +2407,7 @@ export default class UI extends Functions {
 		const seasonsMenu = document.createElement('div');
 		seasonsMenu.id = 'season-menu';
 		this.addClasses(seasonsMenu, [
-			...this.subMenuContentStyles,
+			...this.makeStyles('subMenuContentStyles'),
 			'!nm-flex',
 			'!nm-w-1/3',
 			'nm-border-r-2',
@@ -2518,7 +2421,7 @@ export default class UI extends Functions {
 		seasonScrollContainer.id = 'playlist-scroll-container';
 		seasonScrollContainer.style.transform = 'translateX(0)';
 
-		this.addClasses(seasonScrollContainer, this.scrollContainerStyles);
+		this.addClasses(seasonScrollContainer, this.makeStyles('scrollContainerStyles'));
 		seasonsMenu.appendChild(seasonScrollContainer);
 
 		seasonScrollContainer.innerHTML = '';
@@ -2529,7 +2432,7 @@ export default class UI extends Functions {
 		const episodeMenu = document.createElement('div');
 		episodeMenu.id = 'episode-menu';
 		this.addClasses(episodeMenu, [
-			...this.subMenuContentStyles,
+			...this.makeStyles('subMenuContentStyles'),
 			'!nm-flex',
 			'!nm-w/2/3',
 		]);
@@ -2541,7 +2444,7 @@ export default class UI extends Functions {
 		scrollContainer.id = 'playlist-scroll-container';
 		scrollContainer.style.transform = 'translateX(0)';
 
-		this.addClasses(scrollContainer, this.scrollContainerStyles);
+		this.addClasses(scrollContainer, this.makeStyles('scrollContainerStyles'));
 		episodeMenu.appendChild(scrollContainer);
 
 		scrollContainer.innerHTML = '';
@@ -2563,7 +2466,7 @@ export default class UI extends Functions {
 	createSeasonMenuButton(parent: HTMLDivElement, item: PlaylistItem) {
 		const seasonButton = document.createElement('button');
 		seasonButton.id = `season-${item.id}`;
-		this.addClasses(seasonButton, this.languageButtonStyles);
+		this.addClasses(seasonButton, this.makeStyles('menuButtonStyles'));
 
 		if (this.getPlaylistItem().season === item.season) {
 			seasonButton.classList.add('active');
@@ -2594,7 +2497,7 @@ export default class UI extends Functions {
 
 		const buttonSpan = document.createElement('span');
 		buttonSpan.id = `season-${item.id}-span`;
-		this.addClasses(seasonButton, this.menuButtonStyles);
+		this.addClasses(seasonButton, this.makeStyles('menuButtonStyles'));
 		seasonButton.appendChild(buttonSpan);
 
 		buttonSpan.innerText = `Season ${item.season}`;
@@ -2617,25 +2520,25 @@ export default class UI extends Functions {
 			button.style.display = 'none';
 		}
 
-		this.addClasses(button, this.playlistMenuButtonStyles);
+		this.addClasses(button, this.makeStyles('playlistMenuButtonStyles'));
 
 		const imageBaseUrl = 'https://image.tmdb.org/t/p/w185';
 
 		const leftSide = document.createElement('div');
 		leftSide.id = `playlist-${item.id}-left`;
-		this.addClasses(leftSide, this.episodeMenuButtonLeftStyles);
+		this.addClasses(leftSide, this.makeStyles('episodeMenuButtonLeftStyles'));
 		button.append(leftSide);
 
 		const shadow = document.createElement('div');
 		shadow.id = `episode-${item.id}-shadow`;
-		this.addClasses(shadow, this.episodeMenuButtonShadowStyles);
+		this.addClasses(shadow, this.makeStyles('episodeMenuButtonShadowStyles'));
 		shadow.style.margin = item.video_type == 'movie' ? '0px 30%' : '0';
 		shadow.style.width = item.video_type == 'movie' ? 'calc(120px / 3 * 2)' : '100%';
 		leftSide.append(shadow);
 
 		const image = document.createElement('img');
 		image.id = `playlist-${item.id}-image`;
-		this.addClasses(image, episodeMenuButtonImageStyles);
+		this.addClasses(image, this.makeStyles('episodeMenuButtonImageStyles'));
 		image.setAttribute('loading', 'lazy');
 		image.src = item.image && item.image != '' ? `${imageBaseUrl}${item.image}` : '';
 
@@ -2792,7 +2695,7 @@ export default class UI extends Functions {
 	createToolTip(parent: HTMLDivElement) {
 		this.tooltip = document.createElement('div');
 		this.tooltip.id = 'tooltip';
-		this.addClasses(this.tooltip, this.tooltipStyles);
+		this.addClasses(this.tooltip, this.makeStyles('tooltipStyles'));
 
 		this.tooltip.style.transform = 'translateX(10px)';
 		this.tooltip.innerText = 'Play (space)';
@@ -2840,7 +2743,7 @@ export default class UI extends Functions {
 			'nm-bg-neutral-900/95',
 		]);
 
-		this.addClasses(nextTip, this.playlistMenuButtonStyles);
+		this.addClasses(nextTip, this.makeStyles('playlistMenuButtonStyles'));
 
 		const leftSide = document.createElement('div');
 		leftSide.id = 'next-tip-left';
@@ -2967,7 +2870,6 @@ export default class UI extends Functions {
 		creditsButton.id = 'next-up';
 		this.addClasses(creditsButton, [
 			'nm-next-up',
-			'nm-next-button',
 			'nm-bg-neutral-900/95',
 			'nm-block',
 			'!nm-text-[0.9rem]',
@@ -2985,8 +2887,7 @@ export default class UI extends Functions {
 		const nextButton = document.createElement('button');
 		nextButton.id = 'next-up';
 		this.addClasses(nextButton, [
-			'nm-next-up',
-			'nm-next-button',
+			'nm-next-up-button',
 			'nm-animated',
 			'nm-bg-neutral-100',
 			'nm-w-[55%]',
