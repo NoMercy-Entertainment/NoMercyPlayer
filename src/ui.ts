@@ -6,7 +6,7 @@ import Functions from './functions';
 
 import * as styles from './styles';
 
-import type { VideoPlayerOptions, VideoPlayer as Types, Chapter, VolumeState, PlaylistItem } from './nomercyplayer.d';
+import type { VideoPlayerOptions, VideoPlayer as Types, Chapter, VolumeState, PlaylistItem } from './index.d';
 
 export interface Position {
 	x: {
@@ -33,6 +33,8 @@ export default class UI extends Functions {
 	qualityMenuOpen = false;
 	speedMenuOpen = false;
 	playlistMenuOpen = false;
+	theaterModeEnabled = false;
+	pipEnabled = false;
 
 	previewTime: {
 		start: number;
@@ -72,8 +74,8 @@ export default class UI extends Functions {
 	}
 
 	makeStyles = (name: string) => {
-		return this.mergeStyles(`${name}`, (styles as any)[name])
-	}
+		return this.mergeStyles(`${name}`, (styles as any)[name]);
+	};
 
 	#eventHandlers() {
 		this.on('item', () => {
@@ -276,7 +278,7 @@ export default class UI extends Functions {
 		});
 
 		this.createOverlayCenterMessage(center);
-		
+
 		if (this.isMobile()) {
 			this.createTouchSeekBack(center, { x: { start: 1, end: 1 }, y: { start: 2, end: 6 } });
 			this.createTouchPlayback(center, { x: { start: 2, end: 2 }, y: { start: 3, end: 5 } });
@@ -286,7 +288,7 @@ export default class UI extends Functions {
 		} else {
 			this.createTouchPlayback(center, { x: { start: 1, end: 4 }, y: { start: 2, end: 6 } });
 		}
-		
+
 		parent.appendChild(center);
 
 		return center;
@@ -495,7 +497,7 @@ export default class UI extends Functions {
 
 				if (x < 35) {
 					x = 35;
-				} 
+				}
 
 				if (x > (playerRect.right - playerRect.left) - 45) {
 					x -= 45;
@@ -940,14 +942,14 @@ export default class UI extends Functions {
 
 			const playerRect = previousButton.getBoundingClientRect();
 			const tipRect = parent.getBoundingClientRect();
-	
+
 			let x = Math.abs((tipRect.left - playerRect.left) + 50);
 			const y = Math.abs((tipRect.bottom - playerRect.bottom) - 60);
-	
+
 			if (x < 30) {
 				x = 30;
 			}
-	
+
 			if (x > (playerRect.right - playerRect.left) - 10) {
 				x = (playerRect.right - playerRect.left) - 10;
 			}
@@ -1004,18 +1006,18 @@ export default class UI extends Functions {
 
 			const playerRect = nextButton.getBoundingClientRect();
 			const tipRect = parent.getBoundingClientRect();
-	
+
 			let x = Math.abs((tipRect.left - playerRect.left) + 50);
 			const y = Math.abs((tipRect.bottom - playerRect.bottom) - 60);
-	
+
 			if (x < 30) {
 				x = 30;
 			}
-	
+
 			if (x > (playerRect.right - playerRect.left) - 10) {
 				x = (playerRect.right - playerRect.left) - 10;
 			}
-	
+
 			this.dispatchEvent('show-episode-tip', {
 				direction: 'next',
 				position: 'bottom',
@@ -1207,14 +1209,14 @@ export default class UI extends Functions {
 
 			if (this.theaterModeEnabled) {
 				this.theaterModeEnabled = false;
-				theaterButton.querySelector<any>('.theater-enabled').style.display = 'none';
-				theaterButton.querySelector<any>('.theater').style.display = 'flex';
+				theaterButton.querySelector<any>('.theater-enabled-icon').style.display = 'none';
+				theaterButton.querySelector<any>('.theater-icon').style.display = 'flex';
 				this.dispatchEvent('theaterMode', false);
 				this.dispatchEvent('resize');
 			} else {
 				this.theaterModeEnabled = true;
-				theaterButton.querySelector<any>('.theater').style.display = 'none';
-				theaterButton.querySelector<any>('.theater-enabled').style.display = 'flex';
+				theaterButton.querySelector<any>('.theater-icon').style.display = 'none';
+				theaterButton.querySelector<any>('.theater-enabled-icon').style.display = 'flex';
 				this.dispatchEvent('theaterMode', true);
 				this.dispatchEvent('resize');
 			}
@@ -1325,26 +1327,26 @@ export default class UI extends Functions {
 			parent,
 			'speed'
 		);
-	
+
 		if (this.hasSpeeds()) {
 			speedButton.style.display = 'flex';
 		} else {
 			speedButton.style.display = 'none';
 		}
-	
+
 		this.createSVGElement(speedButton, 'speed', this.buttons.speed);
-	
+
 		speedButton.addEventListener('click', (event) => {
 			event.stopPropagation();
 			this.dispatchEvent('hide-tooltip');
-	
+
 			if (this.speedMenuOpen) {
 				this.dispatchEvent('show-menu', false);
 			} else {
 				this.dispatchEvent('show-speed-menu', true);
 			}
 		});
-	
+
 		this.on('pip', (data) => {
 			if (data) {
 				speedButton.style.display = 'none';
@@ -1352,7 +1354,7 @@ export default class UI extends Functions {
 				speedButton.style.display = 'flex';
 			}
 		});
-	
+
 		parent.appendChild(speedButton);
 		return speedButton;
 	}
@@ -1381,14 +1383,14 @@ export default class UI extends Functions {
 
 			if (this.pipEnabled) {
 				this.pipEnabled = false;
-				pipButton.querySelector<any>('.pip-exit').style.display = 'none';
-				pipButton.querySelector<any>('.pip-enter').style.display = 'flex';
+				pipButton.querySelector<any>('.pip-exit-icon').style.display = 'none';
+				pipButton.querySelector<any>('.pip-enter-icon').style.display = 'flex';
 				pipButton.ariaLabel = this.buttons.pipEnter?.title;
 				this.dispatchEvent('pip', false);
 			} else {
 				this.pipEnabled = true;
-				pipButton.querySelector<any>('.pip-enter').style.display = 'none';
-				pipButton.querySelector<any>('.pip-exit').style.display = 'flex';
+				pipButton.querySelector<any>('.pip-enter-icon').style.display = 'none';
+				pipButton.querySelector<any>('.pip-exit-icon').style.display = 'flex';
 				pipButton.ariaLabel = this.buttons.pipExit?.title;
 				this.dispatchEvent('pip', true);
 				this.dispatchEvent('show-menu', false);
@@ -2145,8 +2147,8 @@ export default class UI extends Functions {
 			this.sliderBar.classList.add('nm-bg-white/40');
 			this.previewTime = [];
 			this.chapters = [];
-			sliderBuffer.style.width = `0`;
-			sliderProgress.style.width = `0`;
+			sliderBuffer.style.width = '0';
+			sliderProgress.style.width = '0';
 		});
 
 		this.on('chapters', () => {
