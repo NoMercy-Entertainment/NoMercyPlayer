@@ -2213,7 +2213,7 @@ export default class UI extends Functions {
 		chapterMarker.append(chapterMarkerBG);
 
 		const chapterMarkerBuffer = document.createElement('div');
-		chapterMarkerBuffer.id = `chapter-marker-hover-${chapter.id.replace(/\s/gu, '-')}`;
+		chapterMarkerBuffer.id = `chapter-marker-buffer-${chapter.id.replace(/\s/gu, '-')}`;
 		this.addClasses(chapterMarkerBuffer, this.makeStyles('chapterMarkerBufferStyles'));
 		chapterMarker.append(chapterMarkerBuffer);
 
