@@ -2154,9 +2154,11 @@ export default class UI extends Functions {
 		this.on('chapters', () => {
 			setTimeout(() => {
 				if (this.getChapters()?.length > 0) {
-					this.sliderBar.classList.remove('nm-bg-white/40');
+					// this.sliderBar.classList.remove('nm-bg-white/40'); // removing bg causes issues when settings custom bg
+					this.sliderBar.classList.add('nm-hidden'); // added to hide the slider bar
 				} else {
-					this.sliderBar.classList.add('nm-bg-white/40');
+					// this.sliderBar.classList.add('nm-bg-white/40'); // adding bg causes issues when settings custom bg
+					this.sliderBar.classList.remove('nm-hidden'); // removed to show the slider bar
 				}
 			}, 0);
 		});
