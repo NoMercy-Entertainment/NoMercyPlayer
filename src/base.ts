@@ -31,6 +31,10 @@ export default class Base {
 	controlsVisible = true;
 	eventElement: HTMLDivElement = <HTMLDivElement>{};
 
+	hasPipEventHandler = false;
+	hasTheaterEventHandler = false;
+	hasBackEventHandler = false;
+
 	constructor(playerType: Types['playerType'], options: VideoPlayerOptions, playerId: Types['playerId'] = '') {
 
 		if (document.querySelector<HTMLDivElement>('#videojs-events')) {
@@ -712,6 +716,10 @@ export default class Base {
 		return document.getElementById(this.playerId) as HTMLDivElement;
 	}
 
+	getVideoElement(): HTMLVideoElement {
+		return this.getElement().querySelector<HTMLVideoElement>('video')!;
+	}
+
 	isInViewport() {
 		if (this.isJwplayer) {
 			return this.player.getViewable();
@@ -1029,6 +1037,7 @@ export default class Base {
 	dispatchEvent(eventType: 'overlay', data?: any): void;
 	dispatchEvent(eventType: 'pause', data?: any): void;
 	dispatchEvent(eventType: 'pip', enabled: boolean): void;
+	dispatchEvent(eventType: 'pip-internal', enabled: boolean): void;
 	dispatchEvent(eventType: 'play', data?: any): void;
 	dispatchEvent(eventType: 'playing', data?: any): void;
 	dispatchEvent(eventType: 'playlist-menu-button-clicked', data?: any): void;
@@ -1055,6 +1064,7 @@ export default class Base {
 	dispatchEvent(eventType: 'switch-season', season: number): void;
 	dispatchEvent(eventType: 'theaterMode', enabled: boolean): void;
 	dispatchEvent(eventType: 'time', data: PlaybackState): void;
+	dispatchEvent(eventType: 'lastTimeTrigger', data: PlaybackState): void;
 	dispatchEvent(eventType: 'waiting', data?: any): void;
 	dispatchEvent(eventType: 'stalled', data?: any): void;
 	dispatchEvent(eventType: 'playlist', data?: any): void;
@@ -1100,6 +1110,7 @@ export default class Base {
 	on(event: 'overlay', callback: () => void): void;
 	on(event: 'pause', callback: () => void): void;
 	on(event: 'pip', callback: (enabled: boolean) => void): void;
+	on(event: 'pip-internal', callback: (enabled: boolean) => void): void;
 	on(event: 'play', callback: () => void): void;
 	on(event: 'playing', callback: () => void): void;
 	on(event: 'playlist-menu-button-clicked', callback: () => void): void;
@@ -1126,6 +1137,7 @@ export default class Base {
 	on(event: 'switch-season', callback: (season: number) => void): void;
 	on(event: 'theaterMode', callback: (enabled: boolean) => void): void;
 	on(event: 'time', callback: (data: PlaybackState) => void): void;
+	on(event: 'lastTimeTrigger', callback: (data: PlaybackState) => void): void;
 	on(event: 'waiting', callback: (data: any) => void): void;
 	on(event: 'stalled', callback: (data: any) => void): void;
 	on(event: 'playlist', callback: (data: any) => void): void;
@@ -1137,6 +1149,7 @@ export default class Base {
 	on(event: 'volume', callback: (data: VolumeState) => void): void;
 	on(event: 'dispose', callback: (data: any) => void): void;
 	on(event: any, callback: (arg0: any) => any) {
+		this.eventHooks(event, true);
 		// this.eventElement?.addEventListener(event, e => callback((e as any).detail));
 		this.eventElement?.addEventListener(event, (e: { detail: any; }) => callback(e.detail));
 	}
@@ -1162,6 +1175,7 @@ export default class Base {
 	off(event: 'overlay', callback: () => void): void;
 	off(event: 'pause', callback: () => void): void;
 	off(event: 'pip', callback: () => void): void;
+	off(event: 'pip-internal', callback: () => void): void;
 	off(event: 'play', callback: () => void): void;
 	off(event: 'playing', callback: () => void): void;
 	off(event: 'playlist-menu-button-clicked', callback: () => void): void;
@@ -1188,6 +1202,7 @@ export default class Base {
 	off(event: 'switch-season', callback: () => void): void;
 	off(event: 'theaterMode', callback: () => void): void;
 	off(event: 'time', callback: () => void): void;
+	off(event: 'lastTimeTrigger', callback: () => void): void;
 	off(event: 'waiting', callback: () => any): void;
 	off(event: 'stalled', callback: () => any): void;
 	off(event: 'playlist', callback: () => any): void;
@@ -1199,6 +1214,7 @@ export default class Base {
 	off(event: 'volume', callback: () => void): void;
 	off(event: 'dispose', callback: () => void): void;
 	off(event: any, callback: () => void) {
+		this.eventHooks(event, false);
 		this.eventElement?.removeEventListener(event, () => callback());
 	}
 
@@ -1223,6 +1239,7 @@ export default class Base {
 	once(event: 'overlay', callback: () => void): void;
 	once(event: 'pause', callback: () => void): void;
 	once(event: 'pip', callback: (enabled: boolean) => void): void;
+	once(event: 'pip-internal', callback: (enabled: boolean) => void): void;
 	once(event: 'play', callback: () => void): void;
 	once(event: 'playing', callback: () => void): void;
 	once(event: 'playlist-menu-button-clicked', callback: () => void): void;
@@ -1249,6 +1266,7 @@ export default class Base {
 	once(event: 'switch-season', callback: (season: number) => void): void;
 	once(event: 'theaterMode', callback: (enabled: boolean) => void): void;
 	once(event: 'time', callback: (data: PlaybackState) => void): void;
+	once(event: 'lastTimeTrigger', callback: (data: PlaybackState) => void): void;
 	once(event: 'waiting', callback: (data: any) => void): void;
 	once(event: 'stalled', callback: (data: any) => void): void;
 	once(event: 'playlist', callback: (data: any) => void): void;
@@ -1260,7 +1278,18 @@ export default class Base {
 	once(event: 'volume', callback: (data: VolumeState) => void): void;
 	once(event: 'dispose', callback: (data: any) => void): void;
 	once(event: any, callback: (arg0: any) => any) {
+		this.eventHooks(event, true);
 		this.eventElement?.addEventListener(event, e => callback((e as any).detail), { once: true });
+	}
+
+	eventHooks(event: any, enabled: boolean) {
+		if (event == 'pip') {
+			this.hasPipEventHandler = enabled;
+		} else if (event == 'theaterMode') {
+			this.hasTheaterEventHandler = enabled;
+		} else if (event == 'back') {
+			this.hasBackEventHandler = enabled;
+		}
 	}
 
 }

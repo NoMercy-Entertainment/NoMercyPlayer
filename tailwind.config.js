@@ -7,6 +7,7 @@ module.exports = {
 	content: [
 		"./src/**/*.{js,ts}",
 		'./index.html',
+		'./index.js',
 	],
 	darkMode: 'media',
 	theme: {

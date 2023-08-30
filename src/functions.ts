@@ -20,6 +20,8 @@ export default class Functions extends Base {
 	currentFontFile = '';
 	fonts: any;
 
+	lastTime = 0;
+
 	constructor(playerType: Types['playerType'], options: VideoPlayerOptions, playerId: Types['playerId'] = '') {
 		super(playerType, options, playerId);
 		this.#eventHandlers();
@@ -75,12 +77,40 @@ export default class Functions extends Base {
 			
 			document.querySelector<HTMLDivElement>(`#videojs-events`)?.remove();
 		});
+		
+		this.on('time', (data) => {
+			if (data.position > this.lastTime + 5) {
+				this.dispatchEvent('lastTimeTrigger', data);
+				this.lastTime = data.position;
+			}
+		});
+
+		this.on('seeked', () => {
+			this.lastTime = 0;
+		});
+		
+		this.once('duration', () => {
+			const playlistItem = this.getPlaylist().find(i => !i.progress || i.progress < 95);
+			if (!playlistItem) return;
+
+			this.setPlaylistItem(this.getPlaylist().indexOf(playlistItem));
+
+			setTimeout(() => {
+				this.play();
+			}, 1000);
+
+			this.once('play', () => {
+				if (!playlistItem.progress) return;
+				console.log('seek', this.convertToSeconds(playlistItem.duration) / 100 * playlistItem.progress);
+
+				this.seek(this.convertToSeconds(playlistItem.duration) / 100 * playlistItem.progress);
+			});
+		});
 
 		this.keyEvents();
 	}
 
 	keyEvents() {
-		console.log('keyEvents');
 		document.removeEventListener('keyup', this.keyHandler.bind(this), false);
 		document.addEventListener('keyup', this.keyHandler.bind(this), false);
 	};
@@ -571,7 +601,7 @@ export default class Functions extends Base {
 		if (subtitleURL) {
 			await this.fetchFontFile();
 			const options = {
-				video: this.getElement().querySelector('video'),
+				video: this.getVideoElement(),
 				lossyRender: true,
 				subUrl: subtitleURL,
 				debug: this.options.debug,

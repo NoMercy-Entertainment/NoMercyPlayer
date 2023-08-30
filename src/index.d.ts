@@ -209,6 +209,7 @@ export interface PlaylistItem {
     year: string;
     progress?: number;
     video_type?: string;
+    uuid?: string;
 }
 
 export interface QualityTrack {

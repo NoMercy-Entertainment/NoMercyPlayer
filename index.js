@@ -193,35 +193,41 @@ const config = {
 const js = new VideoPlayer('videojs', config, 'player1');
 window.js = js;
 
+js.on('lastTimeTrigger', (data) => {
+    console.log('lastTimeTrigger', data);
+});
+
 js.on('theaterMode', (data) => {
     // handle resize container
     console.log('theaterMode', data);
     if (data) {
         document.querySelector('body').classList.remove('nm-justify-center');
         document.querySelector('#container').classList.remove('sm:nm-flex-row');
-        document.querySelector('#wrapper1').classList.remove('max-nm-w-4xl');
         document.querySelector('#wrapper1').classList.remove('nm-w-full');
         document.querySelector('#wrapper1').classList.add('nm-w-2/3');
+        document.querySelector('#wrapper1').classList.remove('nm-max-w-4xl');
     } else {
         document.querySelector('body').classList.add('nm-justify-center');
         document.querySelector('#container').classList.add('sm:nm-flex-row');
-        document.querySelector('#wrapper1').classList.add('max-nm-w-4xl');
-        document.querySelector('#wrapper1').classList.add('nm-w-full');
         document.querySelector('#wrapper1').classList.remove('nm-w-2/3');
+        document.querySelector('#wrapper1').classList.add('nm-w-full');
+        document.querySelector('#wrapper1').classList.add('nm-max-w-4xl');
     }
 });
 js.on('pip', (data) => {
     console.log('pip', data);
     if (data) {
-        document.querySelector('#wrapper1').classList.add('absolute');
-        document.querySelector('#wrapper1').classList.add('bottom-4');
-        document.querySelector('#wrapper1').classList.add('right-4');
-        document.querySelector('#wrapper1').classList.add('max-nm-w-sm');
+        document.querySelector('#wrapper1').classList.add('nm-absolute');
+        document.querySelector('#wrapper1').classList.add('nm-bottom-4');
+        document.querySelector('#wrapper1').classList.add('nm-right-4');
+        document.querySelector('#wrapper1').classList.add('nm-max-w-sm');
+        document.querySelector('#wrapper1').classList.remove('nm-max-w-4xl');
     } else {
-        document.querySelector('#wrapper1').classList.remove('absolute');
-        document.querySelector('#wrapper1').classList.remove('bottom-4');
-        document.querySelector('#wrapper1').classList.remove('right-4');
-        document.querySelector('#wrapper1').classList.remove('max-nm-w-sm');
+        document.querySelector('#wrapper1').classList.remove('nm-absolute');
+        document.querySelector('#wrapper1').classList.remove('nm-bottom-4');
+        document.querySelector('#wrapper1').classList.remove('nm-right-4');
+        document.querySelector('#wrapper1').classList.remove('nm-max-w-sm');
+        document.querySelector('#wrapper1').classList.add('nm-max-w-4xl');
     }
 });
 
@@ -231,19 +237,23 @@ const jw = new VideoPlayer('jwplayer', config, 'player2');
 
 window.jw = jw;
 
+jw.on('lastTimeTrigger', (data) => {
+    console.log('lastTimeTrigger', data);
+});
+
 jw.on('theaterMode', (data) => {
     // handle resize container
     console.log('theaterMode', data);
     if (data) {
         document.querySelector('body').classList.remove('nm-justify-center');
         document.querySelector('#container').classList.remove('sm:nm-flex-row');
-        document.querySelector('#wrapper2').classList.remove('max-nm-w-4xl');
+        document.querySelector('#wrapper2').classList.remove('nm-max-w-4xl');
         document.querySelector('#wrapper2').classList.remove('nm-w-full');
         document.querySelector('#wrapper2').classList.add('nm-w-2/3');
     } else {
         document.querySelector('body').classList.add('nm-justify-center');
         document.querySelector('#container').classList.add('sm:nm-flex-row');
-        document.querySelector('#wrapper2').classList.add('max-nm-w-4xl');
+        document.querySelector('#wrapper2').classList.add('nm-max-w-4xl');
         document.querySelector('#wrapper2').classList.add('nm-w-full');
         document.querySelector('#wrapper2').classList.remove('nm-w-2/3');
     }
@@ -251,14 +261,14 @@ jw.on('theaterMode', (data) => {
 jw.on('pip', (data) => {
     console.log('pip', data);
     if (data) {
-        document.querySelector('#wrapper2').classList.add('absolute');
-        document.querySelector('#wrapper2').classList.add('bottom-4');
-        document.querySelector('#wrapper2').classList.add('right-4');
-        document.querySelector('#wrapper2').classList.add('max-nm-w-sm');
+        document.querySelector('#wrapper2').classList.add('nm-absolute');
+        document.querySelector('#wrapper2').classList.add('nm-bottom-4');
+        document.querySelector('#wrapper2').classList.add('nm-right-4');
+        document.querySelector('#wrapper2').classList.add('nm-max-w-sm');
     } else {
-        document.querySelector('#wrapper2').classList.remove('absolute');
-        document.querySelector('#wrapper2').classList.remove('bottom-4');
-        document.querySelector('#wrapper2').classList.remove('right-4');
-        document.querySelector('#wrapper2').classList.remove('max-nm-w-sm');
+        document.querySelector('#wrapper2').classList.remove('nm-absolute');
+        document.querySelector('#wrapper2').classList.remove('nm-bottom-4');
+        document.querySelector('#wrapper2').classList.remove('nm-right-4');
+        document.querySelector('#wrapper2').classList.remove('nm-max-w-sm');
     }
 });

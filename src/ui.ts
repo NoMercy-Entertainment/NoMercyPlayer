@@ -161,11 +161,7 @@ export default class UI extends Functions {
 			this.dynamicControls();
 		};
 
-		overlay.onmouseout = (e) => {
-			const playerRect = this.getElement().getBoundingClientRect();
-
-			if (e.x > playerRect.left && e.x < playerRect.right && e.y > playerRect.top && e.y < playerRect.bottom) return;
-
+		overlay.onmouseleave = (e) => {
 			this.hideControls();
 		};
 
@@ -181,6 +177,10 @@ export default class UI extends Functions {
 		this.createCenter(overlay);
 
 		this.bottomBar = this.createBottomBar(overlay);
+
+		this.bottomBar.onmouseleave = (e) => {
+			this.hideControls();
+		};
 
 		this.topRow = this.createTopRow(this.bottomBar);
 
@@ -626,7 +626,7 @@ export default class UI extends Functions {
 			}
 		});
 
-		this.on('pip', (data) => {
+		this.on('pip-internal', (data) => {
 			if (data) {
 				settingsButton.style.display = 'none';
 			} else {
@@ -651,7 +651,7 @@ export default class UI extends Functions {
 			this.dispatchEvent('back');
 		});
 
-		this.on('pip', (data) => {
+		this.on('pip-internal', (data) => {
 			if (data) {
 				backButton.style.display = 'none';
 			} else {
@@ -689,7 +689,7 @@ export default class UI extends Functions {
 	}
 
 	createSeekBackButton(parent: HTMLDivElement) {
-		if (this.isMobile()) return;
+		if (this.isMobile() || !this.hasBackEventHandler) return;
 		const seekBack = this.createButton(
 			parent,
 			'seekBack'
@@ -702,7 +702,7 @@ export default class UI extends Functions {
 			this.rewindVideo();
 		});
 
-		this.on('pip', (data) => {
+		this.on('pip-internal', (data) => {
 			if (data) {
 				seekBack.style.display = 'none';
 			} else {
@@ -728,7 +728,7 @@ export default class UI extends Functions {
 			this.forwardVideo();
 		});
 
-		this.on('pip', (data) => {
+		this.on('pip-internal', (data) => {
 			if (data) {
 				seekForward.style.display = 'none';
 			} else {
@@ -791,7 +791,7 @@ export default class UI extends Functions {
 			break;
 		}
 
-		this.on('pip', (data) => {
+		this.on('pip-internal', (data) => {
 			if (data) {
 				time.style.display = 'none';
 			} else {
@@ -950,7 +950,7 @@ export default class UI extends Functions {
 			}
 		});
 
-		this.on('pip', (data) => {
+		this.on('pip-internal', (data) => {
 			if (data) {
 				previousButton.style.display = 'none';
 			} else if (this.getPlaylistIndex() == 0) {
@@ -1014,7 +1014,7 @@ export default class UI extends Functions {
 			}
 		});
 
-		this.on('pip', (data) => {
+		this.on('pip-internal', (data) => {
 			if (data) {
 				nextButton.style.display = 'none';
 			} else if (this.isLastPlaylistItem()) {
@@ -1108,7 +1108,7 @@ export default class UI extends Functions {
 			}
 		});
 
-		this.on('pip', (data) => {
+		this.on('pip-internal', (data) => {
 			if (data) {
 				captionButton.style.display = 'none';
 			} else if (this.hasTextTracks()) {
@@ -1148,7 +1148,7 @@ export default class UI extends Functions {
 			}
 		});
 
-		this.on('pip', (data) => {
+		this.on('pip-internal', (data) => {
 			if (data) {
 				audioButton.style.display = 'none';
 			} else if (this.hasAudioTracks()) {
@@ -1201,7 +1201,7 @@ export default class UI extends Functions {
 			}
 		});
 
-		this.on('pip', (data) => {
+		this.on('pip-internal', (data) => {
 			if (data) {
 				qualityButton.style.display = 'none';
 			} else if (this.hasQualities()) {
@@ -1214,7 +1214,8 @@ export default class UI extends Functions {
 	}
 
 	createTheaterButton(parent: HTMLDivElement) {
-		if (this.isMobile()) return;
+		if (this.isMobile() || !this.hasTheaterEventHandler) return;
+
 		const theaterButton = this.createButton(
 			parent,
 			'theater'
@@ -1251,7 +1252,7 @@ export default class UI extends Functions {
 				theaterButton.style.display = 'flex';
 			}
 		});
-		this.on('pip', (data) => {
+		this.on('pip-internal', (data) => {
 			if (data) {
 				theaterButton.style.display = 'none';
 			} else {
@@ -1287,7 +1288,7 @@ export default class UI extends Functions {
 			}
 		});
 
-		this.on('pip', (enabled) => {
+		this.on('pip-internal', (enabled) => {
 			if (enabled) {
 				fullscreenButton.style.display = 'none';
 			} else {
@@ -1330,7 +1331,7 @@ export default class UI extends Functions {
 			}
 		});
 
-		this.on('pip', (data) => {
+		this.on('pip-internal', (data) => {
 			if (data) {
 				playlistButton.style.display = 'none';
 			} else if (this.hasPlaylists()) {
@@ -1368,7 +1369,7 @@ export default class UI extends Functions {
 			}
 		});
 
-		this.on('pip', (data) => {
+		this.on('pip-internal', (data) => {
 			if (data) {
 				speedButton.style.display = 'none';
 			} else if (this.hasSpeeds()) {
@@ -1381,7 +1382,7 @@ export default class UI extends Functions {
 	}
 
 	createPIPButton(parent: HTMLDivElement) {
-		if (this.isMobile()) return;
+		if (this.isMobile() || !this.hasPipEventHandler) return;
 		const pipButton = this.createButton(
 			parent,
 			'pip'
@@ -1398,21 +1399,42 @@ export default class UI extends Functions {
 		this.createSVGElement(pipButton, 'pip-enter', this.buttons.pipEnter);
 		this.createSVGElement(pipButton, 'pip-exit', this.buttons.pipExit, true);
 
+		document.addEventListener("visibilitychange", () => {
+			if (this.pipEnabled) {
+				if (document.hidden) {
+					console.log('show real pip');
+					if (document.pictureInPictureEnabled) {
+						this.getVideoElement().requestPictureInPicture();
+					}
+				} else {
+
+					console.log('hide real pip');
+					if (document.pictureInPictureElement) {
+						document.exitPictureInPicture();
+					}
+				}
+			}
+		  });
+
 		pipButton.addEventListener('click', (event) => {
 			event.stopPropagation();
 			this.dispatchEvent('hide-tooltip');
+			
+			this.dispatchEvent('controls', false);
 
 			if (this.pipEnabled) {
 				this.pipEnabled = false;
 				pipButton.querySelector<any>('.pip-exit-icon').style.display = 'none';
 				pipButton.querySelector<any>('.pip-enter-icon').style.display = 'flex';
 				pipButton.ariaLabel = this.buttons.pipEnter?.title;
+				this.dispatchEvent('pip-internal', false);
 				this.dispatchEvent('pip', false);
 			} else {
 				this.pipEnabled = true;
 				pipButton.querySelector<any>('.pip-enter-icon').style.display = 'none';
 				pipButton.querySelector<any>('.pip-exit-icon').style.display = 'flex';
 				pipButton.ariaLabel = this.buttons.pipExit?.title;
+				this.dispatchEvent('pip-internal', true);
 				this.dispatchEvent('pip', true);
 				this.dispatchEvent('show-menu', false);
 			}
@@ -2221,7 +2243,7 @@ export default class UI extends Functions {
 			}
 		});
 
-		this.on('pip', (data) => {
+		this.on('pip-internal', (data) => {
 			if (data) {
 				this.progressBar.style.display = 'none';
 			} else {
@@ -2748,6 +2770,13 @@ export default class UI extends Functions {
 				button.style.display = 'flex';
 			} else {
 				button.style.display = 'none';
+			}
+		});
+			
+		this.on('time', (data) => {
+			if (this.getPlaylistItem()?.uuid == item.uuid) {
+				progressBar.style.width = `${data.percentage}%`;
+				sliderContainer.style.display = 'flex';
 			}
 		});
 

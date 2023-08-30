@@ -441,6 +441,7 @@ export const timeStyles = [
 
 export const topBarStyles = [
 	'top-bar',
+	'nm-z-10',
 	'nm--translate-y-full',
 	'nm-absolute',
 	'nm-bg-gradient-to-b',
