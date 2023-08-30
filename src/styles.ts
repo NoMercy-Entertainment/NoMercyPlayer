@@ -5,25 +5,32 @@
 export const bottomBarStyles = [
 	'bottom-bar',
 	'nm-absolute',
-	'nm-bg-gradient-to-t',
 	'nm-bottom-0',
 	'nm-duration-300',
 	'nm-flex',
 	'nm-flex-col',
-	'nm-from-black/90',
 	'nm-gap-1',
-	'nm-p-1',
-	// 'nm-pt-[10%]',
 	'nm-transition-transform',
 	'nm-translate-y-full',
 	'nm-w-full',
 ];
 
+export const bottomBarShadowStyles = [
+	'nm-absolute',
+	'nm-pointer-events-none',
+	'nm-bg-gradient-to-t',
+	'nm-bottom-0',
+	'nm-from-black/90',
+	'nm-pt-[10%]',
+	'nm-w-full',
+]
+
 export const bottomRowStyles = [
 	'bottom-row',
 	'nm-flex',
 	'nm-h-10',
-	'nm-my-2',
+	'nm-mb-2',
+	'nm-p-1',
 	'nm-items-center',
 	'nm-relative',
 	'nm-w-full',
@@ -288,6 +295,7 @@ export const scrollContainerStyles = [
 
 export const sliderBarStyles = [
 	'slider-bar',
+	'nm-group/slider',
 	'nm-flex',
 	'nm-bg-white/40',
 	'nm-rounded-full',
@@ -305,6 +313,8 @@ export const sliderBufferStyles = [
 	'nm-rounded-full',
 	'nm-bg-gray-300/50',
 	'nm-z-0',
+	'nm-overflow-hidden',
+	'nm-overflow-clip',
 ];
 
 export const sliderHoverStyles = [
@@ -316,8 +326,10 @@ export const sliderHoverStyles = [
 	'nm-h-full',
 	'nm-pointer-events-none',
 	'nm-rounded-full',
-	'nm-bg-gray-400',
+	'nm-bg-gray-400/70',
 	'nm-z-0',
+	'nm-overflow-hidden',
+	'nm-overflow-clip',
 ];
 
 export const sliderProgressStyles = [
@@ -330,6 +342,8 @@ export const sliderProgressStyles = [
 	'nm-bg-purple-500',
 	'nm-rounded-full',
 	'nm-z-10',
+	'nm-overflow-hidden',
+	'nm-overflow-clip',
 ];
 
 
@@ -338,6 +352,8 @@ export const sliderNippleStyles = [
 	'nm--translate-x-1/2',
 	'nm--translate-y-[25%]',
 	'nm-absolute',
+	'nm-hidden',
+	'group-hover/slider:nm-flex',
 	'nm-bg-purple-600',
 	'nm-h-4',
 	'nm-left-0',
@@ -482,7 +498,7 @@ export const volumeSliderStyles = [
 	'group-hover/volume:nm-opacity-100',
 	'nm-appearance-none',
 	'nm-volume-slider',
-	'nm-bg-gray-400',
+	'nm-bg-gray-400/70',
 	'nm-bg-gradient-to-r',
 	'nm-from-purple-600',
 	'nm-to-purple-600',

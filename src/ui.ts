@@ -405,6 +405,13 @@ export default class UI extends Functions {
 
 		parent.appendChild(bottomBar);
 
+
+		const bottomBarShadow = document.createElement('div');
+		bottomBarShadow.id = 'bottom-bar-shadow';
+		this.addClasses(bottomBarShadow, this.makeStyles('bottomBarShadowStyles'));
+
+		bottomBar.appendChild(bottomBarShadow);
+
 		this.on('controls', (showing) => {
 			if (showing) {
 				bottomBar.style.transform = 'translateY(0)';
@@ -453,7 +460,7 @@ export default class UI extends Functions {
 		return divider;
 	}
 
-	createSVGElement(parent: HTMLElement, id: string, icon: Icon['path'], hidden?: boolean) {
+	createSVGElement(parent: HTMLElement, id: string, icon: Icon['path'], hidden = false) {
 
 		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 		svg.setAttribute('viewBox', '0 0 24 24');
@@ -486,6 +493,20 @@ export default class UI extends Functions {
 		if (!parent.classList.contains('menu-button')) {
 			parent.addEventListener('mouseenter', () => {
 				if (icon.title.length == 0 || (['Next', 'Previous'].includes(icon.title) && this.hasNextTip)) return;
+
+				if (icon.title == 'Fullscreen' && this.isFullscreen()) {
+					return;
+				} if (icon.title == 'Exit fullscreen' && !this.isFullscreen()) {
+					return;
+				} if (icon.title == 'Play' && this.isPlaying()) {
+					return;
+				} if (icon.title == 'Pause' && !this.isPlaying()) {
+					return;
+				} if (icon.title == 'Mute' && this.isMuted()) {
+					return;
+				} if (icon.title == 'Unmute' && !this.isMuted()) {
+					return;
+				}
 
 				const text = `${icon.title} ${this.getButtonKeyCode(id)}`;
 
@@ -529,11 +550,10 @@ export default class UI extends Functions {
 			case 'pause':
 				return `(${this.localize('SPACE')})`;
 			case 'volumeMuted':
+				case 'volumeLow':
+				case 'volumeMedium':
+				case 'volumeHigh':
 				return '(m)';
-			case 'volumeLow':
-			case 'volumeMedium':
-			case 'volumeHigh':
-				return '(^v)';
 			case 'seekBack':
 				return '(<)';
 			case 'seekForward':
@@ -1072,7 +1092,7 @@ export default class UI extends Functions {
 		});
 
 		this.on('captions', (data) => {
-			if (data.tracks.length > 0) {
+			if (this.getTextTracks().length > 0) {
 				captionButton.style.display = 'flex';
 			} else {
 				captionButton.style.display = 'none';
@@ -1249,7 +1269,7 @@ export default class UI extends Functions {
 			'fullscreen'
 		);
 
-		this.createSVGElement(fullscreenButton, 'fullscreen-enable', this.buttons.exitFullscreen, true);
+		this.createSVGElement(fullscreenButton, 'fullscreen-enabled', this.buttons.exitFullscreen, true);
 		this.createSVGElement(fullscreenButton, 'fullscreen', this.buttons.fullscreen);
 
 		fullscreenButton.addEventListener('click', (event) => {
@@ -1257,18 +1277,18 @@ export default class UI extends Functions {
 			this.toggleFullscreen();
 			this.dispatchEvent('hide-tooltip');
 		});
-		this.on('fullscreen', () => {
-			if (this.isFullscreen()) {
-				fullscreenButton.querySelector<any>('.fullscreen').style.display = 'none';
-				fullscreenButton.querySelector<any>('.fullscreen-enable').style.display = 'flex';
+		this.on('fullscreen', (enabled) => {
+			if (enabled) {
+				fullscreenButton.querySelector<any>('.fullscreen-icon').style.display = 'none';
+				fullscreenButton.querySelector<any>('.fullscreen-enabled-icon').style.display = 'flex';
 			} else {
-				fullscreenButton.querySelector<any>('.fullscreen-enable').style.display = 'none';
-				fullscreenButton.querySelector<any>('.fullscreen').style.display = 'flex';
+				fullscreenButton.querySelector<any>('.fullscreen-enabled-icon').style.display = 'none';
+				fullscreenButton.querySelector<any>('.fullscreen-icon').style.display = 'flex';
 			}
 		});
 
-		this.on('pip', (data) => {
-			if (data) {
+		this.on('pip', (enabled) => {
+			if (enabled) {
 				fullscreenButton.style.display = 'none';
 			} else {
 				fullscreenButton.style.display = 'flex';
@@ -1298,6 +1318,7 @@ export default class UI extends Functions {
 				this.dispatchEvent('show-menu', false);
 			} else {
 				this.dispatchEvent('show-playlist-menu', true);
+				this.dispatchEvent('switch-season', this.getPlaylistItem().season);
 			}
 		});
 
@@ -1779,12 +1800,14 @@ export default class UI extends Functions {
 
 		this.on('captions', (event) => {
 			scrollContainer.innerHTML = '';
-			for (const track of event.tracks ?? []) {
+
+			for (const [index, track] of event.tracks.entries() ?? []) {
+
 				this.createLanguageMenuButton(scrollContainer, {
 					language: track.language,
 					label: track.label,
 					type: 'subtitle',
-					index: event.tracks.indexOf(track),
+					index: index - 1,
 					styled: (track.src ?? track.id).endsWith('.ass'),
 				});
 			}
@@ -1922,7 +1945,6 @@ export default class UI extends Functions {
 
 		languageButtonText.textContent = `${this.localize(data.label)
 			?.replace('segment-metadata', 'Off')}`;
-			// ?.replace('segment-metadata', 'Off')} ${data.styled ? '🎨' : ''}`;
 		languageButton.append(languageButtonText);
 
 		if (data.styled) {
@@ -1945,11 +1967,27 @@ export default class UI extends Functions {
 				}
 			});
 		} else if (data.type == 'subtitle') {
+
 			this.on('caption-change', (track) => {
-				if (track.track == data.index || (track.track === -1 && data.index === 0)) {
+				
+				let index = data.index;
+				let currentTrack = track.track;
+				
+				if (this.isJwplayer) {
+					index += 1;
+					if(track.track == -1){
+						currentTrack = 0;
+					}
+				} else if (this.isVideojs) {
+					if(track.track >= 0 ){
+						currentTrack -= 1;
+					}
+				}
+
+				chevron.classList.add('nm-hidden');
+				 
+				if (currentTrack == index) {
 					chevron.classList.remove('nm-hidden');
-				} else {
-					chevron.classList.add('nm-hidden');
 				}
 			});
 		}
@@ -1960,7 +1998,12 @@ export default class UI extends Functions {
 			if (data.type == 'audio') {
 				this.setAudioTrack(data.index);
 			} else if (data.type == 'subtitle') {
-				this.setTextTrack(data.index - 1);
+				
+				if (this.getCurrentSrc()?.endsWith('.mp4')) {
+					this.setTextTrack(data.index - 1);
+				} else {
+					this.setTextTrack(data.index);
+				}
 			}
 
 			this.dispatchEvent('show-menu', false);
@@ -2046,7 +2089,7 @@ export default class UI extends Functions {
 		this.addClasses(sliderNipple, this.makeStyles('sliderNippleStyles'));
 		sliderNipple.id = 'slider-nipple';
 
-		if (this.options.nipple) {
+		if (this.options.nipple != false) {
 			this.sliderBar.append(sliderNipple);
 		}
 
@@ -2149,6 +2192,7 @@ export default class UI extends Functions {
 			this.chapters = [];
 			sliderBuffer.style.width = '0';
 			sliderProgress.style.width = '0';
+			this.#fetchPreviewTime();
 		});
 
 		this.on('chapters', () => {
@@ -2298,25 +2342,54 @@ export default class UI extends Functions {
 		return offsetX;
 	}
 
-	#fetchSliderPopImage(scrubTime: any) {
+	getPngArray(pngString: string) {
+		const pngArray = new Uint8Array(pngString.length);
+		for (let i = 0; i < pngString.length; i++) {
+			pngArray[i] = pngString.charCodeAt(i);
+		}
+		return pngArray;
+	}
+
+	#fetchPreviewTime() {
 		if (this.previewTime.length === 0) {
-			const image = this.getSpriteFile();
-			if (image) {
-				this.sliderPopImage.style.backgroundImage = `url('${image}')`;
+			const imageFile = this.getSpriteFile();
+
+			if (imageFile) {
+				if (this.options.token) {
+					this.getFileContents({
+						url: imageFile,
+						options: {
+							type: 'blob',
+						},
+						callback: (data) => {
+							const dataURL = URL.createObjectURL(data as Blob);
+							this.sliderPopImage.style.backgroundImage = `url('${dataURL}')`;
+							// release memory
+							this.once('item', () => {
+								URL.revokeObjectURL(dataURL);
+							});
+						},
+					}).then();
+				} else {
+					this.sliderPopImage.style.backgroundImage = `url('${imageFile}')`;
+				}
 			}
-			const file = this.getTimeFile();
-			if (file && this.currentTimeFile !== file) {
-				this.currentTimeFile = file;
+
+			const timeFile = this.getTimeFile();
+			if (timeFile && this.currentTimeFile !== timeFile) {
+				this.currentTimeFile = timeFile;
 				this.getFileContents({
-					url: file,
-					options: {},
-					callback: (data: string) => {
+					url: timeFile,
+					options: {
+						type: 'text',
+					},
+					callback: (data) => {
 						// eslint-disable-next-line max-len
 						const regex
 							= /(\d{2}:\d{2}:\d{2})\.\d{3}\s-->\s(\d{2}:\d{2}:\d{2})\.\d{3}\nsprite\.webp#(xywh=\d+,\d+,\d+,\d+)/gmu;
 
 						let m: any;
-						while ((m = regex.exec(data)) !== null) {
+						while ((m = regex.exec(data as string)) !== null) {
 							if (m.index === regex.lastIndex) {
 								regex.lastIndex += 1;
 							}
@@ -2334,11 +2407,14 @@ export default class UI extends Functions {
 						}
 					},
 				}).then(() => {
-					// this.#fetchSliderPopImage(scrubTime);
+					// this.#loadSliderPopImage(scrubTime);
 				});
 			}
 		}
+	}
 
+	#loadSliderPopImage(scrubTime?: any) {
+		this.#fetchPreviewTime();
 		let img = this.previewTime.find(
 			(p: { start: number; end: number }) => scrubTime.scrubTimePlayer >= p.start && scrubTime.scrubTimePlayer < p.end
 		);
@@ -2350,7 +2426,7 @@ export default class UI extends Functions {
 
 	#getSliderPopImage(scrubTime: any) {
 
-		const img = this.#fetchSliderPopImage(scrubTime);
+		const img = this.#loadSliderPopImage(scrubTime);
 
 		if (img) {
 			this.sliderPopImage.style.backgroundPosition = `-${img.x}px -${img.y}px`;
@@ -2524,7 +2600,7 @@ export default class UI extends Functions {
 
 		this.addClasses(button, this.makeStyles('playlistMenuButtonStyles'));
 
-		const imageBaseUrl = 'https://image.tmdb.org/t/p/w185';
+		const imageBaseUrl = this.options.basePath ? '' : 'https://image.tmdb.org/t/p/w185';
 
 		const leftSide = document.createElement('div');
 		leftSide.id = `playlist-${item.id}-left`;
@@ -2835,7 +2911,7 @@ export default class UI extends Functions {
 	getTipData({ direction, header, title, image }:
 		{ direction: string; header: HTMLSpanElement; title: HTMLSpanElement; image: HTMLImageElement; }) {
 
-		const imageBaseUrl = 'https://image.tmdb.org/t/p/w185';
+		const imageBaseUrl = this.options.basePath ? '' : 'https://image.tmdb.org/t/p/w185';
 
 		const item = this.getTipDataIndex(direction);
 		if (!item) return;

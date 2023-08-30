@@ -29,10 +29,20 @@ export default class Base {
 
 	lock = false;
 	controlsVisible = true;
+	eventElement: HTMLDivElement = <HTMLDivElement>{};
 
 	constructor(playerType: Types['playerType'], options: VideoPlayerOptions, playerId: Types['playerId'] = '') {
 
+		if (document.querySelector<HTMLDivElement>('#videojs-events')) {
+			this.dispatchEvent('dispose');
+		}
+
 		this.setupTime = Date.now();
+
+		this.eventElement = document.createElement('div');
+		this.eventElement.id = `${playerId}-events`;
+		this.eventElement.style.display = 'none';
+		document.body.appendChild(this.eventElement);
 
 		if (playerId) {
 			this.playerId = playerId;
@@ -134,6 +144,9 @@ export default class Base {
 
 			return string;
 		};
+
+		// @ts-ignore
+		window[`${this.playerId}player`] = this;
 	}
 
 	#loadJWPlayer() {
@@ -203,11 +216,11 @@ export default class Base {
 			'https://cdn.jsdelivr.net/npm/webvtt-parser@2.2.0/parser.min.js',
 		])
 			.then(() => {
-				// @ts-ignore
+
 				this.player = window.videojs(this.playerId, this.options);
+
 				this.#loadPlaylist();
 
-				// @ts-ignore
 				window.videojs.log.level('off');
 
 				this.player.landscapeFullscreen({
@@ -415,19 +428,19 @@ export default class Base {
 				case 'displayClick':
 					break;
 				case 'duringplaylistchange':
-					console.log('duringplaylistchange');
+					// console.log('duringplaylistchange');
 					this.dispatchEvent('duringplaylistchange');
 					break;
 				case 'ended': // videojs
 					this.dispatchEvent('ended');
 					break;
 				case 'error':
-					console.log('error');
+					console.log('error', data);
 					this.dispatchEvent('error', data);
 					break;
 				case 'fullscreen': // jwplayer
 				case 'fullscreenchange': // videojs
-					this.dispatchEvent('fullscreen', data);
+					this.dispatchEvent('fullscreen', this.isFullscreen());
 					break;
 				case 'idle': // jwplayer
 					break;
@@ -527,15 +540,29 @@ export default class Base {
 	}
 
 	getCaptionState(manual = false): CaptionsEvent {
+
+		const tracks = this.player.textTracks().tracks_
+			.filter((t: any) => (t.kind == 'captions' || t.kind == 'subtitles') && t.label !== 'segment-metadata');
+
+		tracks.unshift({
+			id: 'off', 
+			label: 'Off',
+			language: 'off',
+			type: 'subtitle',
+			index: -1,
+			styled: false,
+		});
+		
 		let index = -1;
-		for (const track of this.player.textTracks().tracks_) {
+
+		for (const track of tracks) {
 			if (track.mode == 'showing') {
-				index = this.player.textTracks().tracks_.findIndex((t: TextTrack) => t.id == track.id);
+				index = tracks.findIndex((t: TextTrack) => t.id == track.id);
 			}
 		}
 		return {
 			track: index,
-			tracks: this.player.textTracks().tracks_,
+			tracks: tracks,
 			type: manual ? 'captionsChanged' : 'captionsList',
 		};
 	}
@@ -598,7 +625,19 @@ export default class Base {
 	}
 
 	async #fetchPlaylist(url: string) {
-		const response = await fetch(url);
+
+		const headers: { [arg: string]: string; } = {
+			'Accept-Language': localStorage.getItem('NoMercy-displayLanguage') ?? navigator.language,
+			'Content-Type': 'application/json',
+		};
+
+		if (this.options.token) {
+			headers.Authorization = `Bearer ${this.options.token}`;
+		}
+		const response = await fetch(url, {
+			headers,
+			method: 'GET',
+		});
 		const json = await response.json();
 		return this.convertPlaylistToCurrentPlayer(json);
 	}
@@ -659,257 +698,6 @@ export default class Base {
 
 			appendFile(filePaths[0]);
 		});
-	}
-
-	dispatchEvent(eventType: `show-${string}-menu`, data: boolean): void;
-	dispatchEvent(eventType: 'audio-change', data: AudioEvent): void;
-	dispatchEvent(eventType: 'audio', data: AudioEvent): void;
-	dispatchEvent(eventType: 'back', callback?: (arg?: any) => any): void;
-	dispatchEvent(eventType: 'caption-change', data: CaptionsEvent): void;
-	dispatchEvent(eventType: 'captions', data: CaptionsEvent): void;
-	dispatchEvent(eventType: 'chapters', data: Chapter[]): void;
-	dispatchEvent(eventType: 'controls', showing: boolean): void;
-	dispatchEvent(eventType: 'display-message', value: string): void;
-	dispatchEvent(eventType: 'duration', data: PlaybackState): void;
-	dispatchEvent(eventType: 'error', data: any): void;
-	dispatchEvent(eventType: 'error', data: any): void;
-	dispatchEvent(eventType: 'forward', amount: number): void;
-	dispatchEvent(eventType: 'fullscreen', data?: any): void;
-	dispatchEvent(eventType: 'hide-tooltip', data?: any): void;
-	dispatchEvent(eventType: 'hide-episode-tip', data?: any): void;
-	dispatchEvent(eventType: 'item', data?: any): void;
-	dispatchEvent(eventType: 'mute', data: VolumeState): void;
-	dispatchEvent(eventType: 'overlay', data?: any): void;
-	dispatchEvent(eventType: 'pause', data?: any): void;
-	dispatchEvent(eventType: 'pip', enabled: boolean): void;
-	dispatchEvent(eventType: 'play', data?: any): void;
-	dispatchEvent(eventType: 'playing', data?: any): void;
-	dispatchEvent(eventType: 'playlist-menu-button-clicked', data?: any): void;
-	dispatchEvent(eventType: 'pop-image', url: string): void;
-	dispatchEvent(eventType: 'quality', data: number[]): void;
-	dispatchEvent(eventType: 'ready', data?: any): void;
-	dispatchEvent(eventType: 'remove-forward', data?: any): void;
-	dispatchEvent(eventType: 'remove-message', value: string): void;
-	dispatchEvent(eventType: 'remove-rewind', data?: any): void;
-	dispatchEvent(eventType: 'resize', data?: any): void;
-	dispatchEvent(eventType: 'rewind', amount: number): void;
-	dispatchEvent(eventType: 'seeked', data?: any): void;
-	dispatchEvent(eventType: 'show-language-menu', open: boolean): void;
-	dispatchEvent(eventType: 'show-main-menu', open: boolean): void;
-	dispatchEvent(eventType: 'show-menu', open: boolean): void;
-	dispatchEvent(eventType: 'show-next-up'): void;
-	dispatchEvent(eventType: 'show-playlist-menu', open: boolean): void;
-	dispatchEvent(eventType: 'show-quality-menu', open: boolean): void;
-	dispatchEvent(eventType: 'show-speed-menu', open: boolean): void;
-	dispatchEvent(eventType: 'show-subtitles-menu', open: boolean): void;
-	dispatchEvent(eventType: 'show-tooltip', data: toolTooltip): void;
-	dispatchEvent(eventType: 'show-episode-tip', data: EpisodeTooltip): void;
-	dispatchEvent(eventType: 'speed', enabled: number): void;
-	dispatchEvent(eventType: 'switch-season', season: number): void;
-	dispatchEvent(eventType: 'theaterMode', enabled: boolean): void;
-	dispatchEvent(eventType: 'time', data: PlaybackState): void;
-	dispatchEvent(eventType: 'waiting', data?: any): void;
-	dispatchEvent(eventType: 'stalled', data?: any): void;
-	dispatchEvent(eventType: 'playlist', data?: any): void;
-	dispatchEvent(eventType: 'playlistchange', data?: any): void;
-	dispatchEvent(eventType: 'beforeplay', data?: any): void;
-	dispatchEvent(eventType: 'beforeplaylistitem', data?: any): void;
-	dispatchEvent(eventType: 'beforeplay', data?: any): void;
-	dispatchEvent(eventType: 'bufferedEnd', data?: any): void;
-	dispatchEvent(eventType: 'duringplaylistchange', data?: any): void;
-	dispatchEvent(eventType: 'ended', data?: any): void;
-	dispatchEvent(eventType: 'volume', data: VolumeState): void;
-	dispatchEvent(eventType: any, data?: any): void {
-		if (!data || typeof data === 'string') {
-			data = data ?? '';
-		} else if (typeof data === 'object') {
-			data = { ...(data ?? {}) };
-		}
-
-		this.getElement().parentElement?.dispatchEvent(new CustomEvent(eventType, {
-			detail: data,
-		}));
-	}
-
-	on(event: `show-${string}-menu`, callback: (showing: boolean) => void): void;
-	on(event: 'audio-change', callback: (data: AudioEvent) => void): void;
-	on(event: 'audio', callback: (data: AudioEvent) => void): void;
-	on(event: 'back', callback?: (callback: (arg?: any) => any) => void): void;
-	on(event: 'caption-change', callback: (data: CaptionsEvent) => void): void;
-	on(event: 'captions', callback: (data: CaptionsEvent) => void): void;
-	on(event: 'chapters', callback: (data: Chapter[]) => void): void;
-	on(event: 'controls', callback: (showing: boolean) => void): void;
-	on(event: 'display-message', callback: (value: string) => void): void;
-	on(event: 'duration', callback: (data: PlaybackState) => void): void;
-	on(event: 'duringplaylistchange', callback: (data: PlaybackState) => void): void;
-	on(event: 'error', callback: (data: any) => void): void;
-	on(event: 'forward', callback: (amount: number) => void): void;
-	on(event: 'fullscreen', callback: () => void): void;
-	on(event: 'hide-tooltip', callback: () => void): void;
-	on(event: 'hide-episode-tip', callback: () => void): void;
-	on(event: 'item', callback: () => void): void;
-	on(event: 'mute', callback: (data: VolumeState) => void): void;
-	on(event: 'overlay', callback: () => void): void;
-	on(event: 'pause', callback: () => void): void;
-	on(event: 'pip', callback: (enabled: boolean) => void): void;
-	on(event: 'play', callback: () => void): void;
-	on(event: 'playing', callback: () => void): void;
-	on(event: 'playlist-menu-button-clicked', callback: () => void): void;
-	on(event: 'pop-image', callback: (url: string) => void): void;
-	on(event: 'quality', callback: (data: number[]) => void): void;
-	on(event: 'ready', callback: () => void): void;
-	on(event: 'remove-forward', callback: () => void): void;
-	on(event: 'remove-message', callback: (value: string) => void): void;
-	on(event: 'remove-rewind', callback: () => void): void;
-	on(event: 'resize', callback: (data: any) => void): void;
-	on(event: 'rewind', callback: (amount: number) => void): void;
-	on(event: 'seeked', callback: () => void): void;
-	on(event: 'show-language-menu', callback: (open: boolean) => void): void;
-	on(event: 'show-main-menu', callback: (open: boolean) => void): void;
-	on(event: 'show-menu', callback: (open: boolean) => void): void;
-	on(event: 'show-next-up', callback: (data?: any) => void): void;
-	on(event: 'show-playlist-menu', callback: (open: boolean) => void): void;
-	on(event: 'show-quality-menu', callback: (open: boolean) => void): void;
-	on(event: 'show-speed-menu', callback: (open: boolean) => void): void;
-	on(event: 'show-subtitles-menu', callback: (open: boolean) => void): void;
-	on(event: 'show-tooltip', callback: (data: toolTooltip) => void): void;
-	on(event: 'show-episode-tip', callback: (data: EpisodeTooltip) => void): void;
-	on(event: 'speed', callback: (enabled: number) => void): void;
-	on(event: 'switch-season', callback: (season: number) => void): void;
-	on(event: 'theaterMode', callback: (enabled: boolean) => void): void;
-	on(event: 'time', callback: (data: PlaybackState) => void): void;
-	on(event: 'waiting', callback: (data: any) => void): void;
-	on(event: 'stalled', callback: (data: any) => void): void;
-	on(event: 'playlist', callback: (data: any) => void): void;
-	on(event: 'playlistchange', callback: (data: any) => void): void;
-	on(event: 'beforeplay', callback: (data: any) => void): void;
-	on(event: 'beforeplaylistitem', callback: (data: any) => void): void;
-	on(event: 'bufferedEnd', callback: (data: any) => void): void;
-	on(event: 'ended', callback: (data: any) => void): void;
-	on(event: 'volume', callback: (data: VolumeState) => void): void;
-	on(event: any, callback: (arg0: any) => any) {
-		// this.getElement().parentElement?.addEventListener(event, e => callback((e as any).detail));
-		this.getElement().parentElement?.addEventListener(event, (e: { detail: any; }) => callback(e.detail));
-	}
-
-	off(event: `show-${string}-menu`, callback: () => void): void;
-	off(event: 'audio-change', callback: () => void): void;
-	off(event: 'audio', callback: () => void): void;
-	off(event: 'back', callback?: (callback: (arg?: any) => any) => void): void;
-	off(event: 'caption-change', callback: () => void): void;
-	off(event: 'captions', callback: () => void): void;
-	off(event: 'chapters', callback: () => void): void;
-	off(event: 'controls', callback: () => void): void;
-	off(event: 'display-message', callback: () => void): void;
-	off(event: 'duration', callback: () => void): void;
-	off(event: 'duringplaylistchange', callback: () => void): void;
-	off(event: 'error', callback: () => void): void;
-	off(event: 'forward', callback: () => void): void;
-	off(event: 'fullscreen', callback: () => void): void;
-	off(event: 'hide-tooltip', callback: () => void): void;
-	off(event: 'hide-episode-tip', callback: () => void): void;
-	off(event: 'item', callback: () => void): void;
-	off(event: 'mute', callback: () => void): void;
-	off(event: 'overlay', callback: () => void): void;
-	off(event: 'pause', callback: () => void): void;
-	off(event: 'pip', callback: () => void): void;
-	off(event: 'play', callback: () => void): void;
-	off(event: 'playing', callback: () => void): void;
-	off(event: 'playlist-menu-button-clicked', callback: () => void): void;
-	off(event: 'pop-image', callback: () => void): void;
-	off(event: 'quality', callback: () => void): void;
-	off(event: 'ready', callback: () => void): void;
-	off(event: 'remove-forward', callback: () => void): void;
-	off(event: 'remove-message', callback: () => void): void;
-	off(event: 'remove-rewind', callback: () => void): void;
-	off(event: 'resize', callback: () => void): void;
-	off(event: 'rewind', callback: () => void): void;
-	off(event: 'seeked', callback: () => void): void;
-	off(event: 'show-language-menu', callback: () => void): void;
-	off(event: 'show-main-menu', callback: () => void): void;
-	off(event: 'show-menu', callback: () => void): void;
-	off(event: 'show-next-up', callback: () => void): void;
-	off(event: 'show-playlist-menu', callback: () => void): void;
-	off(event: 'show-quality-menu', callback: () => void): void;
-	off(event: 'show-speed-menu', callback: () => void): void;
-	off(event: 'show-subtitles-menu', callback: () => void): void;
-	off(event: 'show-tooltip', callback: () => void): void;
-	off(event: 'show-episode-tip', callback: () => void): void;
-	off(event: 'speed', callback: () => void): void;
-	off(event: 'switch-season', callback: () => void): void;
-	off(event: 'theaterMode', callback: () => void): void;
-	off(event: 'time', callback: () => void): void;
-	off(event: 'waiting', callback: () => any): void;
-	off(event: 'stalled', callback: () => any): void;
-	off(event: 'playlist', callback: () => any): void;
-	off(event: 'playlistchange', callback: () => any): void;
-	off(event: 'beforeplay', callback: () => any): void;
-	off(event: 'beforeplaylistitem', callback: () => any): void;
-	off(event: 'bufferedEnd', callback: () => any): void;
-	off(event: 'ended', callback: () => any): void;
-	off(event: 'volume', callback: () => void): void;
-	off(event: any, callback: () => void) {
-		this.getElement().parentElement?.removeEventListener(event, () => callback());
-	}
-
-	once(event: `show-${string}-menu`, callback: (showing: boolean) => void): void;
-	once(event: 'audio-change', callback: (data: AudioEvent) => void): void;
-	once(event: 'audio', callback: (data: AudioEvent) => void): void;
-	once(event: 'back', callback?: (callback: (arg?: any) => any) => void): void;
-	once(event: 'caption-change', callback: (data: CaptionsEvent) => void): void;
-	once(event: 'captions', callback: (data: CaptionsEvent) => void): void;
-	once(event: 'chapters', callback: (data: Chapter[]) => void): void;
-	once(event: 'controls', callback: (showing: boolean) => void): void;
-	once(event: 'display-message', callback: (value: string) => void): void;
-	once(event: 'duration', callback: (data: PlaybackState) => void): void;
-	once(event: 'duringplaylistchange', callback: (data: PlaybackState) => void): void;
-	once(event: 'error', callback: (data: any) => void): void;
-	once(event: 'forward', callback: (amount: number) => void): void;
-	once(event: 'fullscreen', callback: () => void): void;
-	once(event: 'hide-tooltip', callback: () => void): void;
-	once(event: 'hide-episode-tip', callback: () => void): void;
-	once(event: 'item', callback: () => void): void;
-	once(event: 'mute', callback: (data: VolumeState) => void): void;
-	once(event: 'overlay', callback: () => void): void;
-	once(event: 'pause', callback: () => void): void;
-	once(event: 'pip', callback: (enabled: boolean) => void): void;
-	once(event: 'play', callback: () => void): void;
-	once(event: 'playing', callback: () => void): void;
-	once(event: 'playlist-menu-button-clicked', callback: () => void): void;
-	once(event: 'pop-image', callback: (url: string) => void): void;
-	once(event: 'quality', callback: (data: number[]) => void): void;
-	once(event: 'ready', callback: () => void): void;
-	once(event: 'remove-forward', callback: () => void): void;
-	once(event: 'remove-message', callback: (value: string) => void): void;
-	once(event: 'remove-rewind', callback: () => void): void;
-	once(event: 'resize', callback: (data: any) => void): void;
-	once(event: 'rewind', callback: (amount: number) => void): void;
-	once(event: 'seeked', callback: () => void): void;
-	once(event: 'show-language-menu', callback: (open: boolean) => void): void;
-	once(event: 'show-main-menu', callback: (open: boolean) => void): void;
-	once(event: 'show-menu', callback: (open: boolean) => void): void;
-	once(event: 'show-next-up', callback: () => void): void;
-	once(event: 'show-playlist-menu', callback: (open: boolean) => void): void;
-	once(event: 'show-quality-menu', callback: (open: boolean) => void): void;
-	once(event: 'show-speed-menu', callback: (open: boolean) => void): void;
-	once(event: 'show-subtitles-menu', callback: (open: boolean) => void): void;
-	once(event: 'show-tooltip', callback: (data: toolTooltip) => void): void;
-	once(event: 'show-episode-tip', callback: (data: EpisodeTooltip) => void): void;
-	once(event: 'speed', callback: (enabled: number) => void): void;
-	once(event: 'switch-season', callback: (season: number) => void): void;
-	once(event: 'theaterMode', callback: (enabled: boolean) => void): void;
-	once(event: 'time', callback: (data: PlaybackState) => void): void;
-	once(event: 'waiting', callback: (data: any) => void): void;
-	once(event: 'stalled', callback: (data: any) => void): void;
-	once(event: 'playlist', callback: (data: any) => void): void;
-	once(event: 'playlistchange', callback: (data: any) => void): void;
-	once(event: 'beforeplay', callback: (data: any) => void): void;
-	once(event: 'beforeplaylistitem', callback: (data: any) => void): void;
-	once(event: 'bufferedEnd', callback: (data: any) => void): void;
-	once(event: 'ended', callback: (data: any) => void): void;
-	once(event: 'volume', callback: (data: VolumeState) => void): void;
-	once(event: any, callback: (arg0: any) => any) {
-		this.getElement().parentElement?.addEventListener(event, e => callback((e as any).detail), { once: true });
 	}
 
 	displayMessage(data: string, time = 2000) {
@@ -996,24 +784,29 @@ export default class Base {
 		return '';
 	};
 
-	getFileContents = async ({ url, options, callback }: { url: string, options: any, callback: (arg: string) => void; }) => {
+	getFileContents = async ({ url, options, callback }: { url: string, options: any, callback: (arg: string|Blob) => void; }) => {
 
 		const headers: { [arg: string]: string; } = {
 			'Accept-Language': localStorage.getItem('NoMercy-displayLanguage') ?? 'en',
 		};
 		if (this.options.token && !options.anonymous) {
-			headers.Authorization = this.options.token;
+			headers.Authorization = `Bearer ${this.options.token}`;
 		}
 
-		return await fetch(url, {
+		let basePath = '';
+		if (this.options.basePath && !url.startsWith('http')) {
+			basePath = this.options.basePath;
+		}
+
+		return await fetch(basePath + url, {
 			...options,
 			headers,
 		})
 			.then(async (body) => {
-				callback(await body.text());
+				options.type === 'blob' ? callback(await body.blob()) : callback(await body.text());
 			})
-			.catch(() => {
-				// console.error(error);
+			.catch((error) => {
+				console.error(error);
 			});
 	};
 
@@ -1029,18 +822,46 @@ export default class Base {
 
 		for (const item of playlist) {
 
+			let basePath = '';
+			if (this.options.basePath) {
+				basePath = this.options.basePath;
+			}
+
+			const file = basePath + (item.sources?.[0]?.src || item.file);
+
+			const token = this.options.token 
+				? `?token=${this.options.token}` 
+				: '';
+
 			const newItem: PlaylistItem = {
 				...item,
-				image: item.poster ?? item.image,
-				poster: item.image ?? item.poster,
-				sources: [
-					{
-						src: item.file as string,
-						type: item.file?.endsWith('.m3u8') ? 'application/x-mpegURL' : 'video/mp4',
-					},
-					...item.sources ?? [],
-				],
-				file: item.sources?.[0]?.src || item.file,
+				image: basePath + (item.poster ?? item.image),
+				poster: basePath + (item.image ?? item.poster),
+
+				sources: item.file 
+					? [
+						{
+							src: item.file?.endsWith('.m3u8') 
+								? basePath + item.file 
+								: `${basePath + item.file}${token}`,
+
+							type: item.file?.endsWith('.m3u8') 
+								? 'application/x-mpegURL' 
+								: 'video/mp4',
+						}] 
+					: item.sources?.map((i) => {
+						return {
+							src: i.src?.endsWith('.m3u8') 
+								? basePath + i.src 
+								: `${basePath + i.src}${token}`,
+							type: i.src?.endsWith('.m3u8') 
+								? 'application/x-mpegURL' 
+								: 'video/mp4',
+						};
+					}) ?? [],
+				file: file.endsWith('.m3u8') 
+					? file 
+					: `${file}${token}`,
 			};
 
 			if (this.playerType === 'jwplayer') {
@@ -1050,26 +871,57 @@ export default class Base {
 				delete newItem.sources;
 
 				newItem.tracks = [
-					...item.tracks?.filter(t => t.kind == 'captions')?.map(t => ({ ...t, file: t.file })) ?? [],
-					...item.textTracks?.map(t => ({ ...t, file: t.src })) ?? [],
+					...item.tracks?.filter(t => t.kind == 'captions')?.map(t => ({
+						...t,
+						file: basePath + t.file,
+					})) ?? [],
+					...item.textTracks?.map(t => ({
+						...t,
+						file: basePath + t.src,
+					})) ?? [],
 				];
 
-				newItem.metadata = [...item.tracks?.filter(t => t.kind !== 'captions') ?? []];
+				newItem.metadata = [
+					...item.tracks?.filter(t => t.kind !== 'captions').map((m) => {
+						return {
+							...m,
+							src: basePath + m.file,
+						};
+					}) ?? [],
+				];
 			} else {
 				delete newItem.file;
 				delete newItem.tracks;
 
 				newItem.textTracks = [
-					...item.textTracks ?? [],
+					...item.textTracks?.map((m) => {
+						return {
+							...m,
+							src: basePath + m.src,
+						};
+					}) ?? [],
 					...item.tracks?.filter(t => t.kind === 'captions')
 						.map(t => ({
 							kind: 'subtitles',
-							src: t.file,
+							src: basePath + t.file,
 							label: t.label,
 						})) ?? [],
 				 ] as unknown as PlaylistItem['textTracks'];
 
-				newItem.metadata = [...item.tracks?.filter(t => t.kind !== 'captions') ?? []];
+				newItem.metadata = [
+					...item.tracks?.filter(t => t.kind !== 'captions').map((m) => {
+						return {
+							...m,
+							file: basePath + m.file,
+						};
+					}) ?? [],
+					...item.metadata?.filter(t => t.kind !== 'captions').map((m) => {
+						return {
+							...m,
+							file: basePath + m.file,
+						};
+					}) ?? [],
+				];
 			}
 
 			newPlaylist.push(newItem);
@@ -1148,4 +1000,267 @@ export default class Base {
 		return array.filter((obj: any, pos, arr) => arr
 			.map((mapObj: any) => mapObj[key]).indexOf(obj[key]) === pos);
 	};
+
+	isFullscreen() {
+		if (this.isJwplayer) {
+			return this.player.getFullscreen();
+		}
+		return this.player.isFullscreen();
+	}
+	
+	dispatchEvent(eventType: `show-${string}-menu`, data: boolean): void;
+	dispatchEvent(eventType: 'audio-change', data: AudioEvent): void;
+	dispatchEvent(eventType: 'audio', data: AudioEvent): void;
+	dispatchEvent(eventType: 'back', callback?: (arg?: any) => any): void;
+	dispatchEvent(eventType: 'caption-change', data: CaptionsEvent): void;
+	dispatchEvent(eventType: 'captions', data: CaptionsEvent): void;
+	dispatchEvent(eventType: 'chapters', data: Chapter[]): void;
+	dispatchEvent(eventType: 'controls', showing: boolean): void;
+	dispatchEvent(eventType: 'display-message', value: string): void;
+	dispatchEvent(eventType: 'duration', data: PlaybackState): void;
+	dispatchEvent(eventType: 'error', data: any): void;
+	dispatchEvent(eventType: 'error', data: any): void;
+	dispatchEvent(eventType: 'forward', amount: number): void;
+	dispatchEvent(eventType: 'fullscreen', enabled?: boolean): void;
+	dispatchEvent(eventType: 'hide-tooltip', data?: any): void;
+	dispatchEvent(eventType: 'hide-episode-tip', data?: any): void;
+	dispatchEvent(eventType: 'item', data?: any): void;
+	dispatchEvent(eventType: 'mute', data: VolumeState): void;
+	dispatchEvent(eventType: 'overlay', data?: any): void;
+	dispatchEvent(eventType: 'pause', data?: any): void;
+	dispatchEvent(eventType: 'pip', enabled: boolean): void;
+	dispatchEvent(eventType: 'play', data?: any): void;
+	dispatchEvent(eventType: 'playing', data?: any): void;
+	dispatchEvent(eventType: 'playlist-menu-button-clicked', data?: any): void;
+	dispatchEvent(eventType: 'pop-image', url: string): void;
+	dispatchEvent(eventType: 'quality', data: number[]): void;
+	dispatchEvent(eventType: 'ready', data?: any): void;
+	dispatchEvent(eventType: 'remove-forward', data?: any): void;
+	dispatchEvent(eventType: 'remove-message', value: string): void;
+	dispatchEvent(eventType: 'remove-rewind', data?: any): void;
+	dispatchEvent(eventType: 'resize', data?: any): void;
+	dispatchEvent(eventType: 'rewind', amount: number): void;
+	dispatchEvent(eventType: 'seeked', data?: any): void;
+	dispatchEvent(eventType: 'show-language-menu', open: boolean): void;
+	dispatchEvent(eventType: 'show-main-menu', open: boolean): void;
+	dispatchEvent(eventType: 'show-menu', open: boolean): void;
+	dispatchEvent(eventType: 'show-next-up'): void;
+	dispatchEvent(eventType: 'show-playlist-menu', open: boolean): void;
+	dispatchEvent(eventType: 'show-quality-menu', open: boolean): void;
+	dispatchEvent(eventType: 'show-speed-menu', open: boolean): void;
+	dispatchEvent(eventType: 'show-subtitles-menu', open: boolean): void;
+	dispatchEvent(eventType: 'show-tooltip', data: toolTooltip): void;
+	dispatchEvent(eventType: 'show-episode-tip', data: EpisodeTooltip): void;
+	dispatchEvent(eventType: 'speed', enabled: number): void;
+	dispatchEvent(eventType: 'switch-season', season: number): void;
+	dispatchEvent(eventType: 'theaterMode', enabled: boolean): void;
+	dispatchEvent(eventType: 'time', data: PlaybackState): void;
+	dispatchEvent(eventType: 'waiting', data?: any): void;
+	dispatchEvent(eventType: 'stalled', data?: any): void;
+	dispatchEvent(eventType: 'playlist', data?: any): void;
+	dispatchEvent(eventType: 'playlistchange', data?: any): void;
+	dispatchEvent(eventType: 'beforeplay', data?: any): void;
+	dispatchEvent(eventType: 'beforeplaylistitem', data?: any): void;
+	dispatchEvent(eventType: 'beforeplay', data?: any): void;
+	dispatchEvent(eventType: 'bufferedEnd', data?: any): void;
+	dispatchEvent(eventType: 'duringplaylistchange', data?: any): void;
+	dispatchEvent(eventType: 'ended', data?: any): void;
+	dispatchEvent(eventType: 'volume', data: VolumeState): void;
+	dispatchEvent(eventType: 'dispose'): void;
+	dispatchEvent(eventType: any, data?: any): void {
+		if (!data || typeof data === 'string') {
+			data = data ?? '';
+		} else if (typeof data === 'object') {
+			data = { ...(data ?? {}) };
+		}
+
+		this.eventElement?.dispatchEvent?.(new CustomEvent(eventType, {
+			detail: data,
+		}));
+	}
+
+	on(event: `show-${string}-menu`, callback: (showing: boolean) => void): void;
+	on(event: 'audio-change', callback: (data: AudioEvent) => void): void;
+	on(event: 'audio', callback: (data: AudioEvent) => void): void;
+	on(event: 'back', callback?: (callback: (arg?: any) => any) => void): void;
+	on(event: 'caption-change', callback: (data: CaptionsEvent) => void): void;
+	on(event: 'captions', callback: (data: CaptionsEvent) => void): void;
+	on(event: 'chapters', callback: (data: Chapter[]) => void): void;
+	on(event: 'controls', callback: (showing: boolean) => void): void;
+	on(event: 'display-message', callback: (value: string) => void): void;
+	on(event: 'duration', callback: (data: PlaybackState) => void): void;
+	on(event: 'duringplaylistchange', callback: (data: PlaybackState) => void): void;
+	on(event: 'error', callback: (data: any) => void): void;
+	on(event: 'forward', callback: (amount: number) => void): void;
+	on(event: 'fullscreen', callback: (enabled: boolean) => void): void;
+	on(event: 'hide-tooltip', callback: () => void): void;
+	on(event: 'hide-episode-tip', callback: () => void): void;
+	on(event: 'item', callback: () => void): void;
+	on(event: 'mute', callback: (data: VolumeState) => void): void;
+	on(event: 'overlay', callback: () => void): void;
+	on(event: 'pause', callback: () => void): void;
+	on(event: 'pip', callback: (enabled: boolean) => void): void;
+	on(event: 'play', callback: () => void): void;
+	on(event: 'playing', callback: () => void): void;
+	on(event: 'playlist-menu-button-clicked', callback: () => void): void;
+	on(event: 'pop-image', callback: (url: string) => void): void;
+	on(event: 'quality', callback: (data: number[]) => void): void;
+	on(event: 'ready', callback: () => void): void;
+	on(event: 'remove-forward', callback: () => void): void;
+	on(event: 'remove-message', callback: (value: string) => void): void;
+	on(event: 'remove-rewind', callback: () => void): void;
+	on(event: 'resize', callback: (data: any) => void): void;
+	on(event: 'rewind', callback: (amount: number) => void): void;
+	on(event: 'seeked', callback: () => void): void;
+	on(event: 'show-language-menu', callback: (open: boolean) => void): void;
+	on(event: 'show-main-menu', callback: (open: boolean) => void): void;
+	on(event: 'show-menu', callback: (open: boolean) => void): void;
+	on(event: 'show-next-up', callback: (data?: any) => void): void;
+	on(event: 'show-playlist-menu', callback: (open: boolean) => void): void;
+	on(event: 'show-quality-menu', callback: (open: boolean) => void): void;
+	on(event: 'show-speed-menu', callback: (open: boolean) => void): void;
+	on(event: 'show-subtitles-menu', callback: (open: boolean) => void): void;
+	on(event: 'show-tooltip', callback: (data: toolTooltip) => void): void;
+	on(event: 'show-episode-tip', callback: (data: EpisodeTooltip) => void): void;
+	on(event: 'speed', callback: (enabled: number) => void): void;
+	on(event: 'switch-season', callback: (season: number) => void): void;
+	on(event: 'theaterMode', callback: (enabled: boolean) => void): void;
+	on(event: 'time', callback: (data: PlaybackState) => void): void;
+	on(event: 'waiting', callback: (data: any) => void): void;
+	on(event: 'stalled', callback: (data: any) => void): void;
+	on(event: 'playlist', callback: (data: any) => void): void;
+	on(event: 'playlistchange', callback: (data: any) => void): void;
+	on(event: 'beforeplay', callback: (data: any) => void): void;
+	on(event: 'beforeplaylistitem', callback: (data: any) => void): void;
+	on(event: 'bufferedEnd', callback: (data: any) => void): void;
+	on(event: 'ended', callback: (data: any) => void): void;
+	on(event: 'volume', callback: (data: VolumeState) => void): void;
+	on(event: 'dispose', callback: (data: any) => void): void;
+	on(event: any, callback: (arg0: any) => any) {
+		// this.eventElement?.addEventListener(event, e => callback((e as any).detail));
+		this.eventElement?.addEventListener(event, (e: { detail: any; }) => callback(e.detail));
+	}
+
+	off(event: `show-${string}-menu`, callback: () => void): void;
+	off(event: 'audio-change', callback: () => void): void;
+	off(event: 'audio', callback: () => void): void;
+	off(event: 'back', callback?: (callback: (arg?: any) => any) => void): void;
+	off(event: 'caption-change', callback: () => void): void;
+	off(event: 'captions', callback: () => void): void;
+	off(event: 'chapters', callback: () => void): void;
+	off(event: 'controls', callback: () => void): void;
+	off(event: 'display-message', callback: () => void): void;
+	off(event: 'duration', callback: () => void): void;
+	off(event: 'duringplaylistchange', callback: () => void): void;
+	off(event: 'error', callback: () => void): void;
+	off(event: 'forward', callback: () => void): void;
+	off(event: 'fullscreen', callback: () => void): void;
+	off(event: 'hide-tooltip', callback: () => void): void;
+	off(event: 'hide-episode-tip', callback: () => void): void;
+	off(event: 'item', callback: () => void): void;
+	off(event: 'mute', callback: () => void): void;
+	off(event: 'overlay', callback: () => void): void;
+	off(event: 'pause', callback: () => void): void;
+	off(event: 'pip', callback: () => void): void;
+	off(event: 'play', callback: () => void): void;
+	off(event: 'playing', callback: () => void): void;
+	off(event: 'playlist-menu-button-clicked', callback: () => void): void;
+	off(event: 'pop-image', callback: () => void): void;
+	off(event: 'quality', callback: () => void): void;
+	off(event: 'ready', callback: () => void): void;
+	off(event: 'remove-forward', callback: () => void): void;
+	off(event: 'remove-message', callback: () => void): void;
+	off(event: 'remove-rewind', callback: () => void): void;
+	off(event: 'resize', callback: () => void): void;
+	off(event: 'rewind', callback: () => void): void;
+	off(event: 'seeked', callback: () => void): void;
+	off(event: 'show-language-menu', callback: () => void): void;
+	off(event: 'show-main-menu', callback: () => void): void;
+	off(event: 'show-menu', callback: () => void): void;
+	off(event: 'show-next-up', callback: () => void): void;
+	off(event: 'show-playlist-menu', callback: () => void): void;
+	off(event: 'show-quality-menu', callback: () => void): void;
+	off(event: 'show-speed-menu', callback: () => void): void;
+	off(event: 'show-subtitles-menu', callback: () => void): void;
+	off(event: 'show-tooltip', callback: () => void): void;
+	off(event: 'show-episode-tip', callback: () => void): void;
+	off(event: 'speed', callback: () => void): void;
+	off(event: 'switch-season', callback: () => void): void;
+	off(event: 'theaterMode', callback: () => void): void;
+	off(event: 'time', callback: () => void): void;
+	off(event: 'waiting', callback: () => any): void;
+	off(event: 'stalled', callback: () => any): void;
+	off(event: 'playlist', callback: () => any): void;
+	off(event: 'playlistchange', callback: () => any): void;
+	off(event: 'beforeplay', callback: () => any): void;
+	off(event: 'beforeplaylistitem', callback: () => any): void;
+	off(event: 'bufferedEnd', callback: () => any): void;
+	off(event: 'ended', callback: () => any): void;
+	off(event: 'volume', callback: () => void): void;
+	off(event: 'dispose', callback: () => void): void;
+	off(event: any, callback: () => void) {
+		this.eventElement?.removeEventListener(event, () => callback());
+	}
+
+	once(event: `show-${string}-menu`, callback: (showing: boolean) => void): void;
+	once(event: 'audio-change', callback: (data: AudioEvent) => void): void;
+	once(event: 'audio', callback: (data: AudioEvent) => void): void;
+	once(event: 'back', callback?: (callback: (arg?: any) => any) => void): void;
+	once(event: 'caption-change', callback: (data: CaptionsEvent) => void): void;
+	once(event: 'captions', callback: (data: CaptionsEvent) => void): void;
+	once(event: 'chapters', callback: (data: Chapter[]) => void): void;
+	once(event: 'controls', callback: (showing: boolean) => void): void;
+	once(event: 'display-message', callback: (value: string) => void): void;
+	once(event: 'duration', callback: (data: PlaybackState) => void): void;
+	once(event: 'duringplaylistchange', callback: (data: PlaybackState) => void): void;
+	once(event: 'error', callback: (data: any) => void): void;
+	once(event: 'forward', callback: (amount: number) => void): void;
+	once(event: 'fullscreen', callback: (enabled: boolean) => void): void;
+	once(event: 'hide-tooltip', callback: () => void): void;
+	once(event: 'hide-episode-tip', callback: () => void): void;
+	once(event: 'item', callback: () => void): void;
+	once(event: 'mute', callback: (data: VolumeState) => void): void;
+	once(event: 'overlay', callback: () => void): void;
+	once(event: 'pause', callback: () => void): void;
+	once(event: 'pip', callback: (enabled: boolean) => void): void;
+	once(event: 'play', callback: () => void): void;
+	once(event: 'playing', callback: () => void): void;
+	once(event: 'playlist-menu-button-clicked', callback: () => void): void;
+	once(event: 'pop-image', callback: (url: string) => void): void;
+	once(event: 'quality', callback: (data: number[]) => void): void;
+	once(event: 'ready', callback: () => void): void;
+	once(event: 'remove-forward', callback: () => void): void;
+	once(event: 'remove-message', callback: (value: string) => void): void;
+	once(event: 'remove-rewind', callback: () => void): void;
+	once(event: 'resize', callback: (data: any) => void): void;
+	once(event: 'rewind', callback: (amount: number) => void): void;
+	once(event: 'seeked', callback: () => void): void;
+	once(event: 'show-language-menu', callback: (open: boolean) => void): void;
+	once(event: 'show-main-menu', callback: (open: boolean) => void): void;
+	once(event: 'show-menu', callback: (open: boolean) => void): void;
+	once(event: 'show-next-up', callback: () => void): void;
+	once(event: 'show-playlist-menu', callback: (open: boolean) => void): void;
+	once(event: 'show-quality-menu', callback: (open: boolean) => void): void;
+	once(event: 'show-speed-menu', callback: (open: boolean) => void): void;
+	once(event: 'show-subtitles-menu', callback: (open: boolean) => void): void;
+	once(event: 'show-tooltip', callback: (data: toolTooltip) => void): void;
+	once(event: 'show-episode-tip', callback: (data: EpisodeTooltip) => void): void;
+	once(event: 'speed', callback: (enabled: number) => void): void;
+	once(event: 'switch-season', callback: (season: number) => void): void;
+	once(event: 'theaterMode', callback: (enabled: boolean) => void): void;
+	once(event: 'time', callback: (data: PlaybackState) => void): void;
+	once(event: 'waiting', callback: (data: any) => void): void;
+	once(event: 'stalled', callback: (data: any) => void): void;
+	once(event: 'playlist', callback: (data: any) => void): void;
+	once(event: 'playlistchange', callback: (data: any) => void): void;
+	once(event: 'beforeplay', callback: (data: any) => void): void;
+	once(event: 'beforeplaylistitem', callback: (data: any) => void): void;
+	once(event: 'bufferedEnd', callback: (data: any) => void): void;
+	once(event: 'ended', callback: (data: any) => void): void;
+	once(event: 'volume', callback: (data: VolumeState) => void): void;
+	once(event: 'dispose', callback: (data: any) => void): void;
+	once(event: any, callback: (arg0: any) => any) {
+		this.eventElement?.addEventListener(event, e => callback((e as any).detail), { once: true });
+	}
+
 }

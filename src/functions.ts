@@ -37,20 +37,22 @@ export default class Functions extends Base {
 			});
 
 			this.once('captions', () => {
-				if (localStorage.getItem('subtitle-language') && localStorage.getItem('subtitle-type') && localStorage.getItem('subtitle-ext')) {
-					this.setTextTrack(this.getTextTrackIndexBy(
-						localStorage.getItem('subtitle-language') as string,
-						localStorage.getItem('subtitle-type') as string,
-						localStorage.getItem('subtitle-ext') as string
-					));
-				} else {
-					this.setTextTrack(-1);
-					try {
-						this.octopusInstance.dispose();
-					} catch (error) {
-						//
+				this.once('play', () => {
+					if (localStorage.getItem('subtitle-language') && localStorage.getItem('subtitle-type') && localStorage.getItem('subtitle-ext')) {
+						this.setTextTrack(this.getTextTrackIndexBy(
+							localStorage.getItem('subtitle-language') as string,
+							localStorage.getItem('subtitle-type') as string,
+							localStorage.getItem('subtitle-ext') as string
+						));
+					} else {
+						this.setTextTrack(-1);
+						try {
+							this.octopusInstance.dispose();
+						} catch (error) {
+							//
+						}
 					}
-				}
+				});
 			});
 			this.once('audio', () => {
 				if (localStorage.getItem('audio-language')) {
@@ -67,13 +69,21 @@ export default class Functions extends Base {
 				});
 			});
 		});
+		
+		this.on('dispose', () => {
+			console.log('dispose keyEvents');
+			document.removeEventListener('keyup', this.keyHandler.bind(this), false);
+			
+			document.querySelector<HTMLDivElement>(`#videojs-events`)?.remove();
+		});
 
 		this.keyEvents();
 	}
 
 	keyEvents() {
-		document.removeEventListener('keydown', this.keyHandler.bind(this), false);
-		document.addEventListener('keydown', this.keyHandler.bind(this), false);
+		console.log('keyEvents');
+		document.removeEventListener('keyup', this.keyHandler.bind(this), false);
+		document.addEventListener('keyup', this.keyHandler.bind(this), false);
 	};
 
 	keyHandler(event: KeyboardEvent) {
@@ -110,6 +120,7 @@ export default class Functions extends Base {
 	}
 
 	togglePlayback() {
+		console.log('togglePlayback', this.isPlaying());
 		if (this.isPlaying()) {
 			this.pause();
 		} else {
@@ -339,6 +350,13 @@ export default class Functions extends Base {
 		}
 	}
 
+	getCurrentSrc() {
+		if (this.isJwplayer) {
+			return this.player.getPlaylistItem()?.file;
+		}
+		return this.getPlaylistItem()?.sources?.[0]?.src;
+	}
+
 	getPlaylist() {
 		if (this.isJwplayer) {
 			return this.player.getPlaylist();
@@ -419,7 +437,6 @@ export default class Functions extends Base {
 		return this.getAudioTracks().findIndex((t: any) => t.language == language);
 	}
 
-
 	hasAudioTracks() {
 		return this.getAudioTracks().length > 1;
 	}
@@ -428,8 +445,8 @@ export default class Functions extends Base {
 		if (this.isJwplayer) {
 			return this.player.getCaptionsList().filter((t: any) => t.id.endsWith('vtt') || t.id.endsWith('ass'));
 		}
-		return this.player.textTracks().tracks_.filter((t: any) => t.kind == 'captions' || t.kind == 'subtitles');
 
+		return this.player.textTracks().tracks_.filter((t: any) => (t.kind == 'captions' || t.kind == 'subtitles') && t.label !== 'segment-metadata');
 	}
 
 	getTextTrack() {
@@ -458,10 +475,15 @@ export default class Functions extends Base {
 	}
 
 	getTextTrackSrc() {
+		
+		const token = this.options.token 
+			? `?token=${this.options.token}` 
+			: '';
+
 		if (this.isJwplayer) {
-			return this.getTextTrack().id;
+			return this.getTextTrack()?.id + token;
 		}
-		return this.getTextTrack().src;
+		return this.getTextTrack()?.src + token;
 	}
 
 	getTextTrackLabel() {
@@ -483,7 +505,8 @@ export default class Functions extends Base {
 	setTextTrack(index: number) {
 
 		if (this.isJwplayer) {
-			const number = this.player.getCaptionsList().findIndex((t: any) => t.id == this.getTextTracks()[index]?.id);
+			const number = this.player.getCaptionsList()
+				.findIndex((t: any) => t.id == this.getTextTracks()[index]?.id);
 			this.player.setCurrentCaptions(number);
 
 			if (index >= 0) {
@@ -567,7 +590,7 @@ export default class Functions extends Base {
 				},
 			};
 
-			if (subtitleURL && subtitleURL.endsWith('ass')) {
+			if (subtitleURL && subtitleURL.includes('.ass')) {
 				this.octopusInstance = new SubtitlesOctopus(options);
 			}
 		}
@@ -649,15 +672,20 @@ export default class Functions extends Base {
 		const file = this.getFontsFile();
 		if (file && this.currentFontFile !== file) {
 			this.currentFontFile = file;
+			
+			const token = this.options.token 
+				? `?token=${this.options.token}` 
+				: '';
+
 			await this.getFileContents({
 				url: file,
 				options: {},
-				callback: (data: string) => {
-					this.fonts = JSON.parse(data).map((f: { file: string; mimeType: string }) => {
+				callback: (data) => {
+					this.fonts = JSON.parse(data as string).map((f: { file: string; mimeType: string }) => {
 						const baseFolder = file.replace(/\/[^/]*$/u, '');
 						return {
 							...f,
-							file: `${baseFolder}/fonts/${f.file}`,
+							file: `${baseFolder}/fonts/${f.file}${token}`,
 						};
 					});
 
@@ -674,7 +702,7 @@ export default class Functions extends Base {
 			this.getFileContents({
 				url: file,
 				options: {},
-				callback: (data: string) => {
+				callback: (data) => {
 					// @ts-ignore
 					const parser = new window.WebVTTParser();
 					this.chapters = parser.parse(data, 'metadata');

@@ -258,6 +258,7 @@ export interface VideoPlayer {
 }
 
 export interface VideoPlayerOptions {
+	basePath: string;
     autoplay?: boolean;
     buttons?: any;
     buttonStyles?: any;
@@ -297,3 +298,32 @@ export interface EpisodeTooltip {
     x: string;
     y: string;
 };
+
+
+interface AudioTracks extends videojs.AudioTrack {
+    tracks_: AudioTrack[];
+}
+interface AudioTrack extends videojs.AudioTrack {
+    enabled: boolean;
+}
+
+interface TextTracks extends videojs.TextTrack {
+    tracks_: TextTrack[];
+}
+interface TextTrack extends videojs.TextTrack {
+    enabled: boolean;
+}
+
+interface QualityLevels {
+    levels_: QualityLevel[];
+    selectedIndex: number;
+}
+interface QualityLevel {
+    enabled: boolean;
+    id: string;
+    width: number;
+    label: string;
+    height: number;
+    bitrate: number;
+    selectedIndex: number;
+}
