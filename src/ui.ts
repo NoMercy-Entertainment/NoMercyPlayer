@@ -162,6 +162,9 @@ export default class UI extends Functions {
 		};
 
 		overlay.onmouseleave = (e) => {
+			const playerRect = this.getVideoElement().getBoundingClientRect();
+			if (e.x > playerRect.left && e.x < playerRect.right && e.y > playerRect.top && e.y < playerRect.bottom) return;
+
 			this.hideControls();
 		};
 
@@ -179,6 +182,9 @@ export default class UI extends Functions {
 		this.bottomBar = this.createBottomBar(overlay);
 
 		this.bottomBar.onmouseleave = (e) => {
+			const playerRect = this.getVideoElement().getBoundingClientRect();
+			if (e.x > playerRect.left && e.x < playerRect.right && e.y > playerRect.top && e.y < playerRect.bottom) return;
+			
 			this.hideControls();
 		};
 
