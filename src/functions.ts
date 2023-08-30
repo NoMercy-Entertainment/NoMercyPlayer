@@ -36,24 +36,23 @@ export default class Functions extends Base {
 				this.setMediaAPI();
 			});
 
-			this.once('captions', () => {
-				this.once('play', () => {
-					if (localStorage.getItem('subtitle-language') && localStorage.getItem('subtitle-type') && localStorage.getItem('subtitle-ext')) {
-						this.setTextTrack(this.getTextTrackIndexBy(
-							localStorage.getItem('subtitle-language') as string,
-							localStorage.getItem('subtitle-type') as string,
-							localStorage.getItem('subtitle-ext') as string
-						));
-					} else {
-						this.setTextTrack(-1);
-						try {
-							this.octopusInstance.dispose();
-						} catch (error) {
-							//
-						}
+			this.once('playing', () => {
+				if (localStorage.getItem('subtitle-language') && localStorage.getItem('subtitle-type') && localStorage.getItem('subtitle-ext')) {
+					this.setTextTrack(this.getTextTrackIndexBy(
+						localStorage.getItem('subtitle-language') as string,
+						localStorage.getItem('subtitle-type') as string,
+						localStorage.getItem('subtitle-ext') as string
+					));
+				} else {
+					this.setTextTrack(-1);
+					try {
+						this.octopusInstance.dispose();
+					} catch (error) {
+						//
 					}
-				});
+				}
 			});
+			
 			this.once('audio', () => {
 				if (localStorage.getItem('audio-language')) {
 					this.setAudioTrack(this.getAudioTrackIndexByLanguage(localStorage.getItem('audio-language') as string));
