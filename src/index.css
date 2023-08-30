@@ -203,7 +203,7 @@
 canvas {
     transition: all 420ms ease-in-out;
 }
-.nomercyplayer.controls-visible canvas {
+.nomercyplayer[active="true"]  canvas {
     padding-bottom: 4rem
 }
 
@@ -321,6 +321,14 @@ canvas {
 
 .jwplayer.jw-tab-focus:focus {
     outline: none !important;
+}
+
+.jw-text-track-display {
+    translate: 0 2rem;
+    transition: translate 420ms ease-in-out;
+}
+.nomercyplayer[active="true"] .jw-text-track-display {
+    translate: 0 0rem;
 }
 
 /* 

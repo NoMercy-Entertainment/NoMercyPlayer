@@ -1,6 +1,7 @@
 import Base from './base';
 import { keyBindings } from './keyEvents';
 import SubtitlesOctopus from './subtitles-octopus.js';
+import translations from './translations';
 
 import type { VideoPlayerOptions, VideoPlayer as Types, TextTrack, PlaylistItem } from './index.d';
 export default class Functions extends Base {
@@ -90,14 +91,18 @@ export default class Functions extends Base {
 		});
 		
 		this.once('duration', () => {
-			const playlistItem = this.getPlaylist().find(i => !i.progress || i.progress < 95);
-			if (!playlistItem) return;
+			const playlistItem = this.getPlaylist().filter(i => i.progress).at(-1);
+			if (!playlistItem?.progress) return;
 
-			this.setPlaylistItem(this.getPlaylist().indexOf(playlistItem));
+			if (playlistItem.progress > 95) {
+				this.setPlaylistItem(this.getPlaylist().indexOf(playlistItem) + 1);
+			} else {
+				this.setPlaylistItem(this.getPlaylist().indexOf(playlistItem));
+			}
 
 			setTimeout(() => {
 				this.play();
-			}, 1000);
+			}, 100);
 
 			this.once('play', () => {
 				if (!playlistItem.progress) return;
@@ -107,7 +112,42 @@ export default class Functions extends Base {
 			});
 		});
 
+		window.addEventListener('orientationchange', this.rotationHandler.bind(this));
+		
+		// this.on('fullscreen', () => {
+		// 	if (IS_ANDROID || IS_IOS) {
+		// 		if (!this.angle() && this.isFullscreen() && this.options.fullscreen?.alwaysInLandscapeMode) {
+		// 			// @ts-ignore
+		// 			screen.lockOrientationUniversal('landscape');
+		// 		}
+		// 	}
+		// });
+
 		this.keyEvents();
+	}
+	
+	angle() {
+		// iOS
+		if (typeof window.orientation === 'number') {
+			return window.orientation;
+		}
+		// Android
+		if (window.screen && window.screen.orientation && window.screen.orientation.angle) {
+			return window.screen.orientation.angle;
+		}
+		return 0;
+	}
+
+	rotationHandler() {
+		const currentAngle = this.angle();
+
+		if (currentAngle === 90 || currentAngle === 270 || currentAngle === -90) {
+			this.enterFullscreen();
+		}
+		if (currentAngle === 0 || currentAngle === 180) {
+			this.exitFullscreen();
+		}
+
 	}
 
 	keyEvents() {
@@ -422,6 +462,10 @@ export default class Functions extends Base {
 
 	}
 
+	hasAudioTracks() {
+		return this.getAudioTracks().length > 1;
+	}
+
 	getAudioTrack() {
 		return this.getAudioTracks()[this.getAudioTrackIndex()];
 	}
@@ -441,7 +485,7 @@ export default class Functions extends Base {
 	}
 
 	getAudioTrackLabel() {
-		return this.getAudioTrack().label;
+		return this.getAudioTrack()?.label ?? this.getAudioTrack()?.language;
 	}
 
 	getAudioTrackKind() {
@@ -462,12 +506,23 @@ export default class Functions extends Base {
 		}
 	}
 
+	cycleAudioTracks() {
+
+		if(!this.hasAudioTracks()) {
+			return;
+		}
+
+		if (this.getAudioTrackIndex() === this.getAudioTracks().length - 1) {
+			this.setAudioTrack(0);
+		} else {
+			this.setAudioTrack(this.getAudioTrackIndex() + 1);
+		}
+
+		this.displayMessage(`${this.localize('Audio')}: ${this.localize(this.getAudioTrackLabel()) || this.localize('Unknown')}`);
+	};
+
 	getAudioTrackIndexByLanguage(language: string) {
 		return this.getAudioTracks().findIndex((t: any) => t.language == language);
-	}
-
-	hasAudioTracks() {
-		return this.getAudioTracks().length > 1;
 	}
 
 	getTextTracks() {
@@ -491,7 +546,10 @@ export default class Functions extends Base {
 
 	getTextTrackIndex() {
 		if (this.isJwplayer) {
-			return this.player.getCurrentCaptions();
+			if (this.player.getCurrentCaptions() == -1) {
+				return -1;
+			}
+			return this.player.getCurrentCaptions() - 1;
 		}
 		let index = -1;
 		for (const track of this.player.textTracks().tracks_) {
@@ -516,7 +574,7 @@ export default class Functions extends Base {
 	}
 
 	getTextTrackLabel() {
-		return this.getTextTrack().label;
+		return this.getTextTrack()?.label ?? this.getTextTrack()?.language;
 	}
 
 	getTextTrackKind() {
@@ -528,7 +586,7 @@ export default class Functions extends Base {
 	}
 
 	getTextTrackLanguage() {
-		return this.getTextTrack().language;
+		return this.getTextTrack()?.language ? this.localize(this.getTextTrack().language) + ' ' : null;
 	}
 
 	setTextTrack(index: number) {
@@ -589,6 +647,22 @@ export default class Functions extends Base {
 		}
 	}
 
+	cycleSubtitles() {
+		
+		if(!this.hasTextTracks()) {
+			return;
+		}
+
+		if (this.getTextTrackIndex() === this.getTextTracks().length - 1) {
+			this.setTextTrack(-1);
+		} else {
+			this.setTextTrack(this.getTextTrackIndex() + 1);
+		}
+
+		this.displayMessage(`${this.localize('Subtitle')}: ${(this.getTextTrackLanguage() + this.getTextTrackLabel()) || this.localize('Off')}`);
+	};
+
+
 	async opus() {
 		try {
 			this.octopusInstance.dispose();
@@ -612,7 +686,7 @@ export default class Functions extends Base {
 				workerUrl: '/js/octopus/subtitles-octopus-worker.js',
 				legacyWorkerUrl: '/js/octopus/subtitles-octopus-worker-legacy.js',
 				onReady: async () => {
-					// player.nomercy.play();
+					// this.play();
 				},
 				onError: (event: any) => {
 					console.log('opus error', event);
@@ -621,6 +695,9 @@ export default class Functions extends Base {
 
 			if (subtitleURL && subtitleURL.includes('.ass')) {
 				this.octopusInstance = new SubtitlesOctopus(options);
+				this.once('item', () => {
+					this.octopusInstance.dispose();
+				})
 			}
 		}
 	};
@@ -829,6 +906,13 @@ export default class Functions extends Base {
 	}
 
 	localize(value: string): string {
+		// const language = navigator.language.split('-')[0] ?? 'en';
+		const language = 'en';
+
+		if ((translations as any)[language] && (translations as any)[language][value]) {
+			return (translations as any)[language][value];
+		}
+
 		return value;
 	}
 

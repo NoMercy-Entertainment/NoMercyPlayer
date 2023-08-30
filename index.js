@@ -19,6 +19,13 @@ const config = {
         1.75,
         2,
     ],
+    fullscreen: {
+        iOS: true,
+        alwaysInLandscapeMode: true,
+        enable: true,
+        enterOnRotate: true,
+        exitOnRotate: true,
+    },
     styles: {
         // sliderProgressStyles: ['nm-bg-theme-500'],
         // chapterMarkerProgressStyles: ['nm-bg-theme-500'],
@@ -194,7 +201,7 @@ const js = new VideoPlayer('videojs', config, 'player1');
 window.js = js;
 
 js.on('lastTimeTrigger', (data) => {
-    console.log('lastTimeTrigger', data);
+    // console.log('lastTimeTrigger', data);
 });
 
 js.on('theaterMode', (data) => {
@@ -238,7 +245,7 @@ const jw = new VideoPlayer('jwplayer', config, 'player2');
 window.jw = jw;
 
 jw.on('lastTimeTrigger', (data) => {
-    console.log('lastTimeTrigger', data);
+    // console.log('lastTimeTrigger', data);
 });
 
 jw.on('theaterMode', (data) => {

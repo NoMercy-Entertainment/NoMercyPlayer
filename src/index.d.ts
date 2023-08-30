@@ -259,6 +259,7 @@ export interface VideoPlayer {
 }
 
 export interface VideoPlayerOptions {
+	fullscreen: any;
 	basePath: string;
     autoplay?: boolean;
     buttons?: any;

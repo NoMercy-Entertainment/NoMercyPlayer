@@ -106,6 +106,16 @@ export default class UI extends Functions {
 				this.displayMessage(`Volume: ${data.volume}%`);
 			}
 		});
+		
+		this.on('controls', (showing) => {
+			if (showing) {
+				this.getElement().style.cursor = 'default';
+				this.getElement()?.setAttribute('active', 'true');
+			} else {
+				this.getElement().style.cursor = 'none';
+				this.getElement()?.setAttribute('active', 'false');
+			}
+		});
 	}
 
 	unlockControls() {
@@ -514,7 +524,7 @@ export default class UI extends Functions {
 					return;
 				}
 
-				const text = `${icon.title} ${this.getButtonKeyCode(id)}`;
+				const text = `${this.localize(icon.title)} ${this.getButtonKeyCode(id)}`;
 
 				const playerRect = this.getElement().getBoundingClientRect();
 				const tipRect = parent.getBoundingClientRect();
@@ -526,8 +536,8 @@ export default class UI extends Functions {
 					x = 35;
 				}
 
-				if (x > (playerRect.right - playerRect.left) - 45) {
-					x -= 45;
+				if (x > (playerRect.right - playerRect.left) - 75) {
+					x = (playerRect.right - playerRect.left) - 75;
 				}
 
 				this.dispatchEvent('show-tooltip', {
@@ -581,7 +591,9 @@ export default class UI extends Functions {
 				return '';
 			case 'subtitle':
 			case 'subtitled':
-				return '(c)';
+				return '(v)';
+			case 'audio':
+				return '(b)';
 			case 'settings':
 				return '';
 			case 'fullscreen-enable':
@@ -1081,20 +1093,6 @@ export default class UI extends Functions {
 			} else {
 				this.dispatchEvent('show-subtitles-menu', true);
 			}
-
-			// if (this.subsEnabled) {
-			// 	this.subsEnabled = false;
-			// 	onButton.style.display = 'none';
-			// 	offButton.style.display = 'flex';
-			// 	this.setTextTrack(-1);
-			// } else {
-			// 	this.subsEnabled = true;
-			// 	offButton.style.display = 'none';
-			// 	onButton.style.display = 'flex';
-			// 	this.setTextTrack(this.getTextTrackIndexBy('eng', 'full', 'ass'));
-			// }
-
-			// this.toggleLanguage();
 		});
 
 		this.on('captions', (data) => {
@@ -1408,13 +1406,10 @@ export default class UI extends Functions {
 		document.addEventListener("visibilitychange", () => {
 			if (this.pipEnabled) {
 				if (document.hidden) {
-					console.log('show real pip');
 					if (document.pictureInPictureEnabled) {
 						this.getVideoElement().requestPictureInPicture();
 					}
 				} else {
-
-					console.log('hide real pip');
 					if (document.pictureInPictureElement) {
 						document.exitPictureInPicture();
 					}
@@ -1481,7 +1476,6 @@ export default class UI extends Functions {
 		this.on('show-menu', (showing) => {
 			this.menuOpen = showing;
 			if (showing) {
-				// menuContent.style.height = this.growMenu(0);
 				menuFrame.style.display = 'flex';
 			} else {
 				menuFrame.style.display = 'none';
@@ -1498,7 +1492,6 @@ export default class UI extends Functions {
 		this.on('show-main-menu', (showing) => {
 			this.mainMenuOpen = showing;
 			if (showing) {
-				// menuContent.style.height = this.growMenu(0);
 				this.dispatchEvent('show-language-menu', false);
 				this.dispatchEvent('show-subtitles-menu', false);
 				this.dispatchEvent('show-quality-menu', false);
@@ -1512,7 +1505,6 @@ export default class UI extends Functions {
 		this.on('show-language-menu', (showing) => {
 			this.languageMenuOpen = showing;
 			if (showing) {
-				// menuContent.style.height = this.growMenu(this.getAudioTracks().length);
 				this.dispatchEvent('show-main-menu', false);
 				this.dispatchEvent('show-subtitles-menu', false);
 				this.dispatchEvent('show-quality-menu', false);
@@ -1526,7 +1518,6 @@ export default class UI extends Functions {
 		this.on('show-subtitles-menu', (showing) => {
 			this.subtitlesMenuOpen = showing;
 			if (showing) {
-				// menuContent.style.height = this.growMenu(this.getTextTracks().length + 1);
 				this.dispatchEvent('show-main-menu', false);
 				this.dispatchEvent('show-language-menu', false);
 				this.dispatchEvent('show-quality-menu', false);
@@ -1540,7 +1531,6 @@ export default class UI extends Functions {
 		this.on('show-quality-menu', (showing) => {
 			this.qualityMenuOpen = showing;
 			if (showing) {
-				// menuContent.style.height = this.growMenu(this.getQualities().length);
 				this.dispatchEvent('show-main-menu', false);
 				this.dispatchEvent('show-language-menu', false);
 				this.dispatchEvent('show-subtitles-menu', false);
@@ -1554,7 +1544,6 @@ export default class UI extends Functions {
 		this.on('show-speed-menu', (showing) => {
 			this.speedMenuOpen = showing;
 			if (showing) {
-				// menuContent.style.height = this.growMenu(this.getSpeeds().length);
 				this.dispatchEvent('show-main-menu', false);
 				this.dispatchEvent('show-language-menu', false);
 				this.dispatchEvent('show-subtitles-menu', false);
@@ -1961,18 +1950,26 @@ export default class UI extends Functions {
 					<path d="M18.3 5.71a.9959.9959 0 0 0-1.41 0L12 10.59 7.11 5.7a.9959.9959 0 0 0-1.41 0c-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l4.89 4.89c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z" style="fill: currentColor;"></path>
 				</svg>
 			`;
-		} else {
+		} else if (data.type == 'subtitle') {
 			(spanChild as HTMLImageElement).src = `https://vscode.nomercy.tv/img/flags/${data.language || data.label.slice(0, 3).toLocaleLowerCase()}.svg`;
 		}
 
-		languageButton.append(spanChild);
+		// languageButton.append(spanChild);
 
 		const languageButtonText = document.createElement('span');
 		languageButtonText.classList.add('menu-button-text');
 		this.addClasses(languageButtonText, this.makeStyles('menuButtonTextStyles'));
 
-		languageButtonText.textContent = `${this.localize(data.label)
-			?.replace('segment-metadata', 'Off')}`;
+		if (data.type == 'subtitle') {
+			if (data.label == 'segment-metadata') {
+				languageButtonText.textContent = `${this.localize('Off')}`;
+			} else {
+				languageButtonText.textContent = `${this.localize(data.language ?? '')} ${this.localize(data.label)}`;
+			}
+		} else if (data.type == 'audio') {
+			languageButtonText.textContent = `${this.localize(data.label
+				?.replace('segment-metadata', 'Off'))}`;
+		}
 		languageButton.append(languageButtonText);
 
 		if (data.styled) {
@@ -2659,6 +2656,7 @@ export default class UI extends Functions {
 			'nm-w-full',
 			'nm-flex',
 			'nm-flex-col',
+			'nm-px-3',
 		]);
 		leftSide.append(progressContainer);
 
@@ -2669,9 +2667,9 @@ export default class UI extends Functions {
 			'nm-flex',
 			'nm-justify-between',
 			'nm-h-full',
-			'nm-mx-1',
 			'nm-sm:mx-2',
 			'nm-mb-1',
+			'nm-px-1',
 		]);
 
 		const progressContainerItemText = document.createElement('div');
@@ -2681,7 +2679,6 @@ export default class UI extends Functions {
 			'nm-text-[0.7rem]',
 			'',
 		]);
-
 
 		progressContainer.append(progressContainerItemBox);
 		progressContainerItemText.innerText = `${this.localize('E')}${item.episode}`;
@@ -2952,7 +2949,7 @@ export default class UI extends Functions {
 		if (!item) return;
 
 		image.src = item.image && item.image != '' ? `${imageBaseUrl}${item.image}` : '';
-		header.textContent = `${this.localize(`${direction.toTitleCase()} Episode`)}: ${this.getButtonKeyCode(direction)}`;
+		header.textContent = `${this.localize(`${direction.toTitleCase()} Episode`)} ${this.getButtonKeyCode(direction)}`;
 		title.textContent = `${this.localize('S')}${item.season} ${this.localize('E')}${item.episode}: ${this.lineBreakShowTitle(item.title.replace('%S', this.localize('S')).replace('%E', this.localize('E')))}`;
 
 		this.once('item', () => {

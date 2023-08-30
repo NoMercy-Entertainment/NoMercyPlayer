@@ -13,6 +13,7 @@ export const bottomBarStyles = [
 	'nm-transition-transform',
 	'nm-translate-y-full',
 	'nm-w-full',
+	'nm-z-50',
 ];
 
 export const bottomBarShadowStyles = [

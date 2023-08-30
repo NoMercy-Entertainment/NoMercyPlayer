@@ -593,7 +593,7 @@ export default class Base {
 				position: this.player.getPosition(),
 				duration: this.player.getDuration(),
 				remaining: this.player.getDuration() - this.player.getPosition(),
-				buffered: (((this.player.getPosition() + this.player.getBuffer()) / this.player.getDuration()) * 100),
+				buffered: this.player.getBuffer(),
 				percentage: (this.player.getPosition() / this.player.getDuration()) * 100,
 				type: data.type,
 				viewable: data.viewable == 1,
