@@ -51,6 +51,7 @@ module.exports = {
 	plugins: [
 		require('@tailwindcss/forms'),
 		require('@tailwindcss/line-clamp'),
+		require('tailwindcss-children'),
 		plugin(({ addVariant }) => {
 			addVariant('range-track', [
 				'&::-webkit-slider-runnable-track',

@@ -146,10 +146,10 @@ const SubtitlesOctopus = function (options) {
         const testImage = new ImageData(testBuf, 1, 1);
         self.bufferCanvasCtx.clearRect(0, 0, 1, 1);
         self.ctx.clearRect(0, 0, 1, 1);
-        const prePut = self.ctx.getImageData(0, 0, 1, 1).data;
+        const prePut = self.ctx.getImageData(0, 0, 1, 1, { willReadFrequently: true}).data;
         self.bufferCanvasCtx.putImageData(testImage, 0, 0);
         self.ctx.drawImage(self.bufferCanvas, 0, 0);
-        const postPut = self.ctx.getImageData(0, 0, 1, 1).data;
+        const postPut = self.ctx.getImageData(0, 0, 1, 1, { willReadFrequently: true}).data;
         self.hasAlphaBug = prePut[1] !== postPut[1];
         if (self.hasAlphaBug) {
             console.log('Detected a browser having issue with transparent pixels, applying workaround');

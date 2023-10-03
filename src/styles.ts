@@ -1,7 +1,4 @@
 
-/* eslint-disable no-irregular-whitespace */
-
-
 export const bottomBarStyles = [
 	'bottom-bar',
 	'nm-absolute',
@@ -10,19 +7,20 @@ export const bottomBarStyles = [
 	'nm-flex',
 	'nm-flex-col',
 	'nm-gap-1',
-	'nm-transition-transform',
+	// 'nm-transition-transform',
 	'nm-translate-y-full',
 	'nm-w-full',
-	'nm-z-50',
+	'nm-z-40',
 ];
 
 export const bottomBarShadowStyles = [
 	'nm-absolute',
 	'nm-pointer-events-none',
-	'nm-bg-gradient-to-t',
 	'nm-bottom-0',
+	'nm-bg-gradient-to-t',
+	'nm-via-black/40',
 	'nm-from-black/90',
-	'nm-pt-[10%]',
+	'nm-pt-[20%]',
 	'nm-w-full',
 ]
 
@@ -61,6 +59,7 @@ export const buttonStyles = [
 	'nm-relative',
 	'nm-rounded-full',
 	'nm-w-10',
+	'nm-min-w-[40px]',
 ];
 
 export const centerStyles = [
@@ -123,7 +122,7 @@ export const chapterMarkerHoverStyles = [
 	'chapter-marker-hover',
 	'nm-absolute',
 	'nm-bg-gray-200',
-	'nm-transition-opacity',
+	// 'nm-transition-opacity',
 	'nm-h-full',
 	'nm-left-0',
 	'nm-origin-left',
@@ -174,7 +173,7 @@ export const mainMenuStyles = [
 	'nm-gap-1',
 	'nm-p-2',
 	'nm-overflow-clip',
-	'nm-transform-all',
+	// 'nm-transition-all',
 	'nm-w-1/2',
 ];
 
@@ -208,7 +207,7 @@ export const menuContentStyles = [
 	'nm-flex',
 	'nm-flex-row',
 	'nm-overflow-clip',
-	'nm-transform-all',
+	// 'nm-transition-all',
 	'nm-w-[200%]',
 ];
 
@@ -225,8 +224,8 @@ export const menuFrameStyles = [
 	'nm-overflow-clip',
 	'nm-right-[2%]',
 	'nm-rounded-lg',
-	'nm-transform-all',
-	'nm-w-52',
+	// 'nm-transition-all',
+	'nm-w-56',
 	'nm-z-50',
 ];
 
@@ -268,6 +267,7 @@ export const menuHeaderStyles = [
 
 export const overlayStyles = [
 	'overlay',
+	'nm-grid',
 	'nm-absolute',
 	'nm-fill-white',
 	'nm-font-Poppins',
@@ -298,7 +298,7 @@ export const sliderBarStyles = [
 	'slider-bar',
 	'nm-group/slider',
 	'nm-flex',
-	'nm-bg-white/40',
+	// 'nm-bg-white/40',
 	'nm-rounded-full',
 	'nm-h-2',
 	'nm-relative',
@@ -322,7 +322,7 @@ export const sliderHoverStyles = [
 	'slider-hover',
 	'nm-absolute',
 	'nm-opacity-1',
-	'nm-transition-[opacity,transform]',
+	// 'nm-transition-[opacity,transform]',
 	'nm-flex',
 	'nm-h-full',
 	'nm-pointer-events-none',
@@ -383,7 +383,7 @@ export const sliderPopStyles = [
 	'nm-pointer-events-none',
 	'nm-rounded-md',
 	'nm-text-center',
-	'nm-transition-[opacity,transform]',
+	// 'nm-transition-[opacity,transform]',
 	'nm-z-20',
 ];
 
@@ -417,7 +417,7 @@ export const subMenuStyles = [
 	'nm-flex',
 	'nm-flex-col',
 	'nm-gap-1',
-	'nm-transform-all',
+	// 'nm-transition-all',
 	'nm-w-1/2',
 ];
 
@@ -425,9 +425,10 @@ export const svgSizeStyles = [
 	'svg-size',
 	'nm-h-5',
 	'nm-w-5',
+	'nm-pointer-events-none',
 	'group-hover/button:nm-scale-110',
 	'nm-duration-700',
-	'nm-transition-transform',
+	// 'nm-transition-transform',
 ];
 
 export const timeStyles = [
@@ -454,7 +455,7 @@ export const topBarStyles = [
 	'nm-p-1',
 	'nm-pb-[10%]',
 	'nm-top-0',
-	'nm-transition-transform',
+	// 'nm-transition-transform',
 	'nm-w-full',
 ];
 
@@ -478,6 +479,7 @@ export const touchPlaybackButtonStyles = [
 export const touchPlaybackStyles = [
 	'touch-playback',
 	'nm-flex',
+	'-nm-ml-2',
 	'nm-items-center',
 	'nm-justify-center',
 ];
@@ -494,7 +496,7 @@ export const volumeSliderStyles = [
 	'nm-w-0',
 	'nm-rounded-full',
 	'nm-opacity-0',
-	'nm-transition-[width,opacity]',
+	// 'nm-transition-[width,opacity]',
 	'nm-duration-300',
 	'group-hover/volume:nm-w-20',
 	'group-hover/volume:nm-opacity-100',
@@ -520,7 +522,7 @@ export const volumeSliderStyles = [
 	'range-thumb:nm-bg-white',
 	'range-thumb:nm-shadow-sm',
 	'range-thumb:nm-border-none',
-	'range-thumb:nm-transition-all',
+	// 'range-thumb:nm-transition-all',
 ];
 
 export const playerMessageStyles = [
@@ -536,7 +538,7 @@ export const playerMessageStyles = [
 	'nm-text-center',
 	'nm-top-12',
 	'nm--translate-x-1/2',
-	'nm-',
+	'nm-z-50',
 ];
 
 export const playlistMenuStyles = [
@@ -551,8 +553,14 @@ export const playlistMenuButtonStyles = [
 	'nm-w-full',
 	'nm-p-1',
 	'nm-gap-2',
-	'hover:nm-bg-white/10',
 	'nm-rounded-lg',
+	'nm-snap-center',
+	'nm-outline-transparent',
+	'nm-outline',
+	'nm-outline-1',
+	'nm-outline-solid',
+	'focus:nm-outline-2',
+	'focus:nm-outline-purple-500',
 ];
 
 export const episodeMenuButtonLeftStyles = [
@@ -583,6 +591,72 @@ export const episodeMenuButtonImageStyles = [
 	'',
 ];
 
+export const episodeMenuProgressContainerStyles = [
+	'progress-container',
+	'nm-absolute',
+	'nm-bottom-0',
+	'nm-w-full',
+	'nm-flex',
+	'nm-flex-col',
+	'nm-px-3',
+];
+
+export const episodeMenuProgressBoxStyles = [
+	'progress-box',
+	'nm-flex',
+	'nm-justify-between',
+	'nm-h-full',
+	'nm-sm:mx-2',
+	'nm-mb-1',
+	'nm-px-1',
+];
+export const progressContainerItemTextStyles = [
+	'progress-item',
+	'nm-text-[0.7rem]',
+	'',
+];
+export const progressContainerDurationTextStyles = [
+	'progress-duration',
+	'nm-text-[0.7rem]',
+];
+export const sliderContainerStyles = [
+	'slider-container',
+	'nm-rounded-md',
+	'nm-overflow-clip',
+	'nm-bg-gray-500/80',
+	'nm-h-1',
+	'nm-mb-2',
+	'nm-mx-1',
+	'nm-sm:mx-2',
+];
+export const progressBarStyles = [
+	'progress-bar',
+	'nm-bg-purple-500',
+	'nm-w-1/2',
+];
+export const episodeMenuButtonRightSideStyles = [
+	'playlist-card-right',
+	'nm-w-3/4',
+	'nm-flex',
+	'nm-flex-col',
+	'nm-text-left',
+	'nm-gap-1',
+];
+
+export const episodeMenuButtonTitleStyles = [
+	'playlist-card-title',
+	'nm-font-bold',
+	'nm-line-clamp-1',
+	'',
+];
+export const episodeMenuButtonOverviewStyles = [
+	'playlist-card-overview',
+	'nm-text-[0.7rem]',
+	'nm-leading-[1rem]',
+	'nm-line-clamp-4',
+	'',
+];
+
 export const tooltipStyles = [
 	'tooltip',
 	'nm-hidden',
@@ -598,3 +672,607 @@ export const tooltipStyles = [
 	'nm-font-medium',
 	'nm-bg-neutral-900/95',
 ];
+
+export const pauseScreenStyles = [
+	'pause-screen',
+	'nm-absolute',
+	'nm-bg-black/80',
+	'nm-inset-0',
+	'nm-flex',
+	'nm-p-6',
+	'nm-text-white',
+	'nm-w-full',
+	'nm-h-full',
+	'nm-z-50',
+	'nm-hidden',
+];
+export const episodeScreenStyles = [
+	'episode-screen',
+	'nm-absolute',
+	'nm-bg-black/80',
+	'nm-inset-0',
+	'nm-flex',
+	'nm-gap-4',
+	'nm-p-6',
+	'nm-text-white',
+	'nm-w-full',
+	'nm-h-full',
+	'nm-z-50',
+	'nm-hidden',
+];
+
+export const languageScreenStyles = [
+	'language-screen',
+	'nm-absolute',
+	'nm-bg-black/80',
+	'nm-inset-0',
+	'nm-flex',
+	'nm-p-6',
+	'nm-text-white',
+	'nm-w-full',
+	'nm-h-full',
+	'nm-z-50',
+	'nm-hidden',
+];
+
+export const languageButtonStyles = [
+	'language-button',
+	'nm-w-full',
+	'nm-mr-auto',
+	'nm-h-8',
+	'nm-px-1',
+	'nm-py-2',
+	'nm-flex',
+	'nm-items-center',
+	'nm-rounded',
+	'nm-snap-center',
+	'nm-outline-transparent',
+	'nm-outline',
+	'nm-outline-1',
+	'nm-outline-solid',
+	'focus:nm-outline-2',
+	'focus:nm-outline-purple-500',
+	'active:nm-outline-purple-500',
+];
+
+export const tvButtonStyles = [
+	'nm-w-7/12',
+	'nm-mr-auto',
+	'nm-h-8',
+	'nm-px-1',
+	'nm-py-2',
+	'nm-flex',
+	'nm-items-center',
+	'nm-rounded',
+	'nm-snap-center',
+	'nm-outline-transparent',
+	'nm-outline',
+	'nm-outline-1',
+	'nm-outline-solid',
+	'focus:nm-outline-2',
+	'focus:nm-outline-purple-500',
+	'active:nm-outline-purple-500',
+];
+
+export const tvButtonTextStyles = [
+	'nm-text-white',
+	'nm-text-sm',
+	'nm-font-bold',
+	'nm-mx-2',
+	'nm-flex',
+	'nm-justify-between',
+];
+
+export const tvSeasonButtonStyles = [
+	'nm-w-full',
+	'nm-mr-auto',
+	'nm-h-8',
+	'nm-px-1',
+	'nm-py-2',
+	'nm-flex',
+	'nm-flex-nowrap',
+	'nm-items-center',
+	'nm-snap-center',
+	'nm-rounded',
+	'nm-outline-transparent',
+	'nm-outline',
+	'nm-outline-1',
+	'nm-outline-solid',
+	'focus:nm-outline-2',
+	'focus:nm-outline-purple-500',
+	'active:nm-outline-purple-500',
+];
+
+export const tvSeasonButtonTextStyles = [
+	'nm-w-full',
+	'nm-text-white',
+	'nm-text-sm',
+	'nm-font-bold',
+	'nm-mx-2',
+	'nm-flex',
+	'nm-justify-between',
+	'nm-flex-nowrap',
+];
+
+
+export const tvEpisodeMenuButtonLeftStyles = [
+	'playlist-card-left',
+	'nm-relative',
+	'nm-rounded-md',
+	'nm-w-[50%]',
+	'nm-overflow-clip',
+	'nm-self-center',
+];
+
+export const tvEpisodeMenuButtonRightSideStyles = [
+	'playlist-card-right',
+	'nm-w-3/4',
+	'nm-flex',
+	'nm-flex-col',
+	'nm-text-left',
+	'nm-gap-1',
+	'nm-outline-transparent',
+	'nm-outline',
+	'nm-outline-1',
+	'nm-outline-solid',
+	'focus:nm-outline-2',
+	'focus:nm-outline-purple-500',
+	'active:nm-outline-purple-500',
+];
+
+export const tvEpisodeMenuButtonTitleStyles = [
+	'playlist-card-title',
+	'nm-font-bold',
+	'nm-text-lg',
+	'',
+];
+export const tvEpisodeMenuButtonOverviewStyles = [
+	'playlist-card-overview',
+	'nm-font-bold',
+	'nm-text-xs',
+	'nm-leading-5',
+	'nm-line-clamp-4',
+	'',
+];
+
+
+export const leftSideStyles = [
+	'nm-flex',
+	'nm-flex-col',
+	'nm-justify-between',
+	'nm-items-center',
+	'nm-w-2/3',
+	'nm-h-full',
+];
+export const leftSideTopStyles = [
+	'nm-flex',
+	'nm-flex-col',
+	'nm-justify-center',
+	'nm-items-center',
+	'nm-w-full',
+	'nm-gap-2',
+	'nm-h-auto',
+];
+export const logoContainerStyles = [
+	'nm-flex',
+	'nm-flex-col',
+	'nm-justify-center',
+	'nm-items-center',
+	'nm-w-full',
+	'nm-h-[85px]',
+	'nm-min-h-[85px]',
+];
+export const logoStyles = [
+	'nm-w-auto',
+	'nm-h-full',
+	'nm-px-2',
+	'nm-py-2',
+	'nm-mr-auto',
+	'nm-object-fit',
+];
+export const fallbackTextStyles = [
+	'nm-w-auto',
+	'nm-h-full',
+	'nm-items-center',
+	'nm-py-0',
+	'nm-max-w-[38vw]',
+	'nm-mr-auto',
+	'nm-leading-[1.2]',
+	'nm-font-bold',
+	'nm-object-fit',
+];
+export const logoFooterStyles = [
+	'nm-flex',
+	'nm-flex-col',
+	'nm-w-full',
+	'nm-h-[40px]',
+];
+export const yearStyles = [
+	'nm-flex',
+	'nm-text-white',
+	'nm-text-sm',
+	'nm-font-bold',
+	'nm-mx-2',
+];
+export const ratingContainerStyles = [
+	'nm-flex',
+	'nm-gap-2',
+	'nm-items-center',
+	'nm-w-full',
+	'nm-text-white',
+];
+export const ratingImageStyles = [
+	'nm-w-8',
+	'nm-h-full',
+	'nm-object-fit',
+	'nm-invert',
+];
+export const episodesCountStyles = [
+	'nm-flex',
+	'nm-text-white',
+	'nm-text-sm',
+	'nm-font-bold',
+	'nm-mx-2',
+];
+
+export const overviewContainerStyles = [
+	'nm-flex',
+	'nm-flex-col',
+	'nm-w-full',
+	'nm-h-full',
+];
+export const titleStyles = [
+	'nm-flex',
+	'nm-text-white',
+	'nm-text-lg',
+	'nm-font-bold',
+	'nm-mx-2',
+];
+export const descriptionStyles = [
+	'nm-flex',
+	'nm-text-white',
+	'nm-text-sm',
+	'nm-line-clamp-4',
+	'nm-font-bold',
+	'nm-leading-5',
+	'nm-mx-2',
+];
+
+export const buttonContainerStyles = [
+	'nm-flex',
+	'nm-flex-col',
+	'nm-gap-3',
+	'nm-w-full',
+	'nm-h-1/2',
+	'nm-mt-7',
+	'nm-mb-3',
+	'nm-overflow-auto',
+	'nm-px-2',
+	'nm-py-0.5',
+	'[*::-webkit-scrollbar]:nm-hidden'
+];
+export const subtitleButtonContainerStyles = [
+	'nm-flex',
+	'nm-flex-col',
+	'nm-gap-3',
+	'nm-w-full',
+	'nm-h-full',
+	'nm-mt-7',
+	'nm-mb-3',
+	'nm-overflow-auto',
+	'nm-px-2',
+	'nm-py-0.5',
+	'[*::-webkit-scrollbar]:nm-hidden'
+];
+
+export const rightSideStyles = [
+	'nm-flex',
+	'nm-flex-col',
+	'nm-justify-center',
+	'nm-w-1/3',
+	'nm-h-full',
+];
+
+export const languageRightSideStyles = [
+	'nm-flex',
+	'nm-flex-col',
+	'nm-justify-start',
+	'nm-mt-28',
+	'nm-w-1/3',
+	'nm-h-full',
+];
+
+
+export const episodeLeftSideStyles = [
+	'nm-flex',
+	'nm-flex-col',
+	'nm-justify-between',
+	'nm-items-center',
+	'nm-w-2/5',
+	'nm-h-full',
+];
+export const episodeRightSideStyles = [
+	'nm-flex',
+	'nm-flex-col',
+	'nm-justify-center',
+	'nm-w-3/5',
+	'nm-h-full',
+];
+
+export const episodeScrollContainerStyles = [
+	'nm-flex',
+	'nm-flex-col',
+	'nm-overflow-auto',
+	'nm-h-full',
+	'nm-pt-6',
+	'nm-p-1',
+	'nm-min-h-[50%]',
+];
+
+export const spinnerContainerStyles = [
+	'nm-absolute',
+	'nm-inset-0',
+	'nm-w-screen',
+	'nm-h-screen',
+	'nm-z-50',
+	'nm-grid',
+	'nm-place-content-center'
+];
+
+export const roleStyles = [
+	'nm-flex',
+	'nm-flex-col',
+	'nm-items-center',
+	'nm-gap-4',
+	'nm-mt-11',
+];
+
+export const spinnerStyles = [
+	'nm-inline',
+	'nm-w-12',
+	'nm-h-12',
+	'nm-mr-2',
+	'nm-animate-spin',
+	'nm-text-gray-700',
+	'nm-fill-purple-600',
+];
+
+export const statusTextStyles = [
+	'nm-text-white',
+	'nm-text-lg',
+	'nm-font-bold',
+];
+
+export const nextTipStyles = [
+	'nm-episode-tip',
+	'nm-hidden',
+	'nm-absolute',
+	'nm-left-0',
+	'-nm-bottom-10',
+	'nm-z-50',
+	'!nm-w-96',
+	'nm-h-24',
+	'nm-px-2',
+	'nm-gap-2',
+	'nm-py-2',
+	'nm-text-xs',
+	'nm-text-white',
+	'nm-rounded-lg',
+	'nm-font-medium',
+	'nm-bg-neutral-900/95',
+];
+
+export const nextTipTextStyles = [
+	'nm-playlist-card-left',
+	'nm-relative',
+	'nm-rounded-sm',
+	'nm-w-[40%]',
+	'nm-overflow-clip',
+	'nm-self-center',
+	'',
+];
+export const nextTipImageStyles = [
+	'nm-playlist-card-image',
+	'nm-w-full',
+	'nm-h-auto',
+	'nm-aspect-video',
+	'nm-object-cover',
+	'nm-rounded-md',
+	'',
+];
+export const nextTipLeftSideStyles = [
+	'nm-playlist-card-left',
+	'nm-relative',
+	'nm-rounded-sm',
+	'nm-w-[40%]',
+	'nm-overflow-clip',
+	'nm-self-center',
+	'',
+]
+export const nextTipRightSideStyles = [
+	'nm-playlist-card-right',
+	'nm-w-[60%]',
+	'nm-flex',
+	'nm-flex-col',
+	'nm-text-left',
+	'nm-gap-1',
+];
+export const nextTipHeaderStyles = [
+	'nm-playlist-card-header',
+	'nm-font-bold',
+	'',
+];
+export const nextTipTitleStyles = [
+	'nm-playlist-card-title',
+	'nm-font-bold',
+	'',
+];
+export const nextUpStyles = [
+	'nm-episode-tip',
+	'nm-flex',
+	'nm-gap-2',
+	'nm-absolute',
+	'nm-right-4',
+	'nm-bottom-8',
+	'!nm-w-80',
+	'nm-h-24',
+	'nm-px-2',
+	'nm-py-2',
+	'nm-z-50',
+];
+
+export const nextUpCreditsButtonStyles = [
+	'nextup-button',
+	'nm-bg-neutral-900/95',
+	'nm-block',
+	'!nm-text-[0.9rem]',
+	'nm-font-bold',
+	'!nm-color-neutral-100',
+	'!nm-py-1.5',
+	'nm-w-[45%]',
+	'nm-outline',
+	'nm-outline-transparent',
+	'focus:nm-outline-2',
+	'focus:nm-outline-white',
+	'active:nm-outline-white',
+	'',
+];
+export const nextUpNextButtonStyles = [
+	'nextup-button',
+	'animated',
+	'nm-bg-neutral-100',
+	'nm-w-[55%]',
+	'nm-outline',
+	'nm-outline-transparent',
+	'focus:nm-outline-2',
+	'focus:nm-outline-white',
+	'active:nm-outline-white',
+	'',
+];
+
+export const tvOverlayStyles = [
+	'nm-absolute',
+	'nm-flex',
+	'nm-flex-col',
+	'nm-justify-end',
+	'nm-gap-4',
+	'nm-w-full',
+	'nm-h-full',
+	'nm-z-0',
+];
+
+export const backgroundStyles = [
+	'nm-absolute',
+	'nm-inset-0',
+	'nm-bg-black',
+	'nm-pointer-events-none',
+	'nm-bg-opacity-80',
+	'nm-opacity-0',
+	'nm-z-20',
+	'nm-duration-300',
+];
+
+export const tvBottomRowStyles = [
+	'nm-relative',
+	'nm-flex',
+	'nm-flex-row',
+	'nm-items-center',
+	'nm-gap-4',
+	'nm-mt-auto',
+	'nm-w-full',
+	'nm-px-20',
+	'nm-pb-10',
+	'nm-z-0',
+];
+
+export const tvSeekBarStyles = [];
+export const tvSeekBarInnerStyles = [];
+export const tvSeekBarInnerProgressStyles = [];
+export const tvSeekBarInnerBufferStyles = [];
+
+export const tvCurrentItemContainerStyles = [
+	'nm-flex',
+	'nm-flex-col',
+	'nm-justify-end',
+	'nm-items-end',
+	'nm-gap-2',
+];
+export const tvCurrentItemShowStyles = [
+	'nm-text-white',
+	'nm-text-sm',
+	'nm-whitespace-pre',
+	'nm-font-bold',
+];
+export const tvCurrentItemTitleContainerStyles = [
+	'nm-flex',
+	'nm-flex-row',
+	'nm-gap-2',
+];
+export const tvCurrentItemEpisodeStyles = [];
+export const tvCurrentItemTitleStyles = [];
+
+export const seekContainerStyles = [
+	'nm-relative',
+	'nm-h-auto',
+	'nm-mb-28',
+	'nm-w-full',
+	'nm-translate-y-[80vh]',
+	'nm-z-50',
+	'nm-w-full',
+];
+
+export const seekScrollContainerStyles = [
+	'nm-relative',
+	'nm-flex',
+	'nm-h-full',
+	'nm-w-full',
+	'nm-overflow-auto',
+	'nm-px-[calc(100%/2.73)]',
+	'nm-gap-1.5',
+	'scrollbar-none',
+];
+
+export const seekContainerChildStyles = [
+	'nm-w-full',
+	'nm-flex',
+	'nm-gap-1.5',
+	'nm-scroll-smooth',
+	'nm-snap-x',
+	// 'nm-overflow-hidden',
+];
+
+export const thumbnailStyles = [
+	'nm-w-1/5',
+	'nm-h-auto',
+	// 'nm-max-h-[calc(((100vw/5)/16)*9)]',
+	'nm-object-cover',
+	'nm-aspect-video',
+	'nm-snap-center',
+	'nm-duration-300',
+	'',
+	'',
+];
+
+export const seekScrollCloneStyles = [
+	'[--gap:1.5rem]',
+	'nm-absolute',
+	'nm-flex',
+	'nm-h-full',
+	'nm-w-full',
+	'nm-gap-[var(--gap)]',
+	'z-10',
+	'nm-pointer-events-none',
+];
+export const thumbnailCloneStyles = [
+	'nm-w-[calc(26%+(var(--gap)/2))]',
+	'nm-h-auto',
+	'nm-object-cover',
+	'nm-aspect-video',
+	'nm-border-4',
+	'nm-mx-auto',
+	'',
+];
+
+// export const nextTipTextStyles = [];
+// export const nextTipTextStyles = [];
+// export const nextTipTextStyles = [];

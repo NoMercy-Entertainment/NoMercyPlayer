@@ -196,16 +196,17 @@
 .vjs-loading-spinner,
 .vjs-big-play-button,
 .vjs-control-bar,
+.jw-stats-panel,
 .vjs-hidden {
     display: none !important;
 }
 
-canvas {
+/* canvas {
     transition: all 420ms ease-in-out;
 }
 .nomercyplayer[active="true"]  canvas {
     padding-bottom: 4rem
-}
+} */
 
 
 .seek-ripple {
@@ -313,6 +314,11 @@ canvas {
     border-radius: 10px;
 }
 
+.nomercyplayer *::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    scrollbar-color: transparent transparent;
+}
+
 @media (max-width: 900px) {
     .tooltip {
         display: none !important;
@@ -324,15 +330,15 @@ canvas {
 }
 
 .jw-text-track-display {
-    translate: 0 2rem;
+    translate: 0 1rem;
     transition: translate 420ms ease-in-out;
 }
 .nomercyplayer[active="true"] .jw-text-track-display {
     translate: 0 0rem;
 }
 
-/* 
-.next-button {
+
+.nextup-button {
     --duration: 5;
     position: relative;
     display: flex;
@@ -354,25 +360,25 @@ canvas {
     -webkit-animation: next-text calc(var(--duration) * 1s) linear infinite forwards;
             animation: next-text calc(var(--duration) * 1s) linear infinite forwards;
 }
-.next-button.animated:hover {
+.nextup-button.animated:hover {
     background-color: rgb(20 20 23);
 }
-.next-button.animated:active {
+.nextup-button.animated:active {
     color: rgb(24 24 27);
 }
-.next-button.animated:active, .next-button.animated:active:after, .next-button.animated:active:before {
+.nextup-button.animated:active, .nextup-button.animated:active:after, .nextup-button.animated:active:before {
     -webkit-animation: none;
             animation: none;
 }
-.next-button.animated:active:before {
+.nextup-button.animated:active:before {
     background-color: rgb(180 180 180);
     width: calc(100% + 1em);
     counter-reset: next-counter 0;
 }
-.next-button.animated:before, .next-button.animated:after {
+.nextup-button.animated:before, .nextup-button.animated:after {
     pointer-events: none;
 }
-.next-button.animated:before {
+.nextup-button.animated:before {
     content: attr(data-icon);
     font-size: 2em;
     line-height: 1.1;
@@ -388,7 +394,7 @@ canvas {
     -webkit-animation: next calc(var(--duration) * 1s) linear infinite forwards;
             animation: next calc(var(--duration) * 1s) linear infinite forwards;
 }
-.next-button.animated:after {
+.nextup-button.animated:after {
     content: attr(data-label) " " counter(next-counter);
     font-weight: 700;
     display: block;
@@ -400,7 +406,7 @@ canvas {
     -webkit-animation: next-countdown calc(var(--duration) * 1s) linear infinite forwards;
             animation: next-countdown calc(var(--duration) * 1s) linear infinite forwards;
 }
-.next-button[data-icon]:not([data-icon=""]):after {
+.nextup-button[data-icon]:not([data-icon=""]):after {
     padding-left: 2.5em;
 }
 
@@ -488,4 +494,4 @@ canvas {
     89.5%, 100% {
         color: rgb(24 24 27);
     }
-} */
+}

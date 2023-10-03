@@ -3,7 +3,7 @@ import { defineConfig } from 'vite';
 
 // noinspection JSUnusedGlobalSymbols
 export default defineConfig({
-	base: './src/',
+	base: '/',
 	publicDir: resolve(__dirname, 'public'),
 	build: {
 		sourcemap: false,
@@ -13,6 +13,8 @@ export default defineConfig({
 				chunkFileNames: 'assets/[name].js',
 				assetFileNames: 'assets/[name].[ext]',
 				manualChunks: {
+					index: ['./src/index.ts'],
+					setup: ['./index.js'],
 					base: ['./src/base.ts'],
 					ui: ['./src/ui.ts'],
 					buttons: ['./src/buttons.ts'],

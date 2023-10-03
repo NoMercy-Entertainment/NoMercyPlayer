@@ -6,7 +6,7 @@ const config = {
     controls: false,
     // chapters: false,
     preload: 'auto',
-    playlist: 'https://api-dev.nomercy.tv/playlist-js?v=1',
+    playlist: 'https://api-dev.nomercy.tv/playlist-js?v=2',
     controlsTimeout: 3000,
     doubleClickDelay: 500,
     playbackRates: [

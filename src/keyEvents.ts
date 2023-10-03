@@ -1,6 +1,12 @@
-// import type { VideoPlayer } from './index.d';
+import type { Player } from './index.d';
 
-export const keyBindings = (player: any) => [
+/**
+ * Returns an array of key bindings for a player instance.
+ * @template T - The type of the player instance.
+ * @param {T} player - The player instance to bind keys to.
+ * @returns {Array<{name: string, key: string, control: boolean, function: () => void, id: number}>} - An array of key bindings.
+ */
+export const keyBindings = <T extends Player>(player: T): Array<{ name: string; key: string; control: boolean; function: () => void; id: number; }> => [
 	{
 		name: 'Play',
 		key: 'MediaPlay',
@@ -35,7 +41,7 @@ export const keyBindings = (player: any) => [
 		name: 'Rewind',
 		key: 'ArrowLeft',
 		control: false,
-		function: () => player.rewindVideo(),
+		function: () => !player.isTv() ?? player.rewindVideo(),
 	},
 	{
 		name: 'Rewind',
@@ -47,7 +53,7 @@ export const keyBindings = (player: any) => [
 		name: 'Fast forward',
 		key: 'ArrowRight',
 		control: false,
-		function: () => player.forwardVideo(),
+		function: () => !player.isTv() ?? player.forwardVideo(),
 	},
 	{
 		name: 'Fast forward',
@@ -161,19 +167,33 @@ export const keyBindings = (player: any) => [
 		name: 'Volume up',
 		key: 'ArrowUp',
 		control: false,
-		function: () => player.volumeUp(),
+		function: () => !player.isTv() && player.volumeUp(),
 	},
 	{
 		name: 'Volume down',
 		key: 'ArrowDown',
 		control: false,
-		function: () => player.volumeDown(),
+		function: () => !player.isTv() && player.volumeDown(),
 	},
 	{
 		name: 'Mute',
 		key: 'm',
 		control: false,
 		function: () => player.toggleMute(),
+	},
+	{
+		name: 'Cycle aspect ratio',
+		key: 'BrowserFavorites',
+		control: false,
+		function: () => player.cycleAspectRatio(),
+	},	
+	{
+		name: 'Show info',
+		key: 'Info',
+		control: false,
+		function: () => {
+			// player.showInfo();
+		},
 	},
 ].map((control, i) => ({
 	...control,

@@ -77,22 +77,24 @@ export interface PlaybackState {
     viewable: boolean;
 };
 
-export interface Player {
+export interface OriginalPlayer extends Player {
+	dispose(): void;
+	remove(): void;
+	setConfig(arg0: { stretching: string; }): void;
+	aspectRatio(arg: string): void;
+	aspectRatio(): string;
+	getStretching(): void;
+	getCurrentTime(): any;
+	localize(arg0: string): string | null;
     audioTracks: () => AudioTrack[] & {
         addEventListener: (event: 'change', callback: (event: AudioEvent) => void) => void;
         tracks_: AudioEventTrack[];
     };
     buffered: () => TimeRanges;
     bufferedEnd: () => number;
-    captionsList: () => CaptionsEventTrack[];
-    currentTime: (() => number) & ((position: number) => void);
-    cycleAudioTracks: () => void;
-    cycleSubtitles: () => void;
-    duration: () => number;
     el_: HTMLElement;
     ended: () => boolean;
     exitFullscreen: () => void;
-    forwardVideo: (arg?: number) => void,
     getAudioTrack: () => AudioTrack;
     getAudioTrackIndex: () => number;
     getAudioTracks: () => AudioTrack[];
@@ -125,15 +127,6 @@ export interface Player {
     }) => void;
     load: (playlist: PlaylistItem[]) => void;
     loadItem: (index: number) => void;
-    muted: (value?: boolean) => boolean;
-    next: () => void;
-    off: (event: string, callback: (event: any) => void) => void;
-    on: (event: string, callback: (event: any) => void) => void;
-    once: (event: string, callback: (event: any) => void) => void;
-    one: (event: string, callback: (event: any) => void) => void;
-    pause: () => void;
-    paused: () => boolean;
-    play: () => void;
     playbackRate: ((speed: number) => void) & (() => number);
     playbackRates: () => number[];
     played: () => TimeRanges;
@@ -147,19 +140,14 @@ export interface Player {
             lastIndex: () => number;
             currentIndex: () => number;
         };
-    playlistItem: (index?: number) => PlaylistItem;
     playlistNext: () => void;
     playlistPrev: () => void;
-    previous: () => void;
     qualityLevels: () => QualityTrack[] & {
         addEventListener: (event: 'change', callback: (event: QualityEvent) => void) => void;
         tracks_: QualityTrack[];
         selectedIndex: number;
     };
     readyState: () => number;
-    requestFullscreen: () => void;
-    rewindVideo: () => void;
-    seek: (position: number) => void;
     seekable: () => TimeRanges;
     setCurrentAudioTrack: (index: number) => void;
     setCurrentCaptions: (index: number) => void;
@@ -170,16 +158,49 @@ export interface Player {
     setPlaylist: (playlist: PlaylistItem[]) => void;
     setPlaylistItem: (index: number) => void;
     setup: (options: VideoPlayerOptions) => void;
-    setVolume: (volume: number) => void;
-    stop: () => void;
     textTracks: () => TextTrack[] & {
         addEventListener: (event: 'change', callback: (event: TextTrack) => void) => void;
         tracks_: TextTrackTrack[];
     };
+    trigger: (event: string, callback: (event: any) => void) => void;
+}
+
+export interface Player {
+	isPlaying(): boolean;
+	cycleAspectRatio(): void;
+	isTv(): boolean;
+    captionsList: () => CaptionsEventTrack[];
+    currentTime: (() => number) & ((position: number) => void);
+    cycleAudioTracks: () => void;
+    cycleSubtitles: () => void;
+    duration: () => number;
+    forwardVideo: (arg?: number) => void,
+    muted: (value?: boolean) => boolean;
+    off: (event: string, callback: (event: any) => void) => void;
+    on: (event: string, callback: (event: any) => void) => void;
+    once: (event: string, callback: (event: any) => void) => void;
+    one: (event: string, callback: (event: any) => void) => void;
+    next: () => void;
+    off: (event: string, callback: (event: any) => void) => void;
+    on: (event: string, callback: (event: any) => void) => void;
+    once: (event: string, callback: (event: any) => void) => void;
+    one: (event: string, callback: (event: any) => void) => void;
+    pause: () => void;
+    paused: () => boolean;
+    play: () => void;
+    playbackRate: ((speed: number) => void) & (() => number);
+    playbackRates: () => number[];
+    played: () => TimeRanges;
+    playlistItem: (index?: number) => PlaylistItem;
+    previous: () => void;
+    requestFullscreen: () => void;
+    rewindVideo: () => void;
+    seek: (position: number) => void;
+    setVolume: (volume: number) => void;
+    stop: () => void;
     toggleFullscreen: () => void;
     toggleMute: () => void;
     togglePlayback: () => void;
-    trigger: (event: string, callback: (event: any) => void) => void;
     volume: (value?: number) => number;
     volumeDown: () => void;
     volumeUp: () => void;
@@ -198,7 +219,10 @@ export interface PlaylistItem {
     logo: string;
     metadata: Track[];
     poster?: string;
-    progress?: number;
+    progress?: {
+        percentage: number;
+        date: string;
+    };
     rating: RatingClass;
     season: number;
     show: string;
@@ -207,7 +231,6 @@ export interface PlaylistItem {
     title: string;
     tracks?: Track[];
     year: string;
-    progress?: number;
     video_type?: string;
     uuid?: string;
 }
@@ -250,17 +273,25 @@ export interface Track {
     label?: string;
 }
 
-export interface VideoPlayer {
+export interface VideoPlayer extends OriginalPlayer {
     events: string[];
     options: VideoPlayerOptions;
-    player: Player;
+    player: OriginalPlayer;
     playerId: string;
     playerType: 'jwplayer' | 'videojs' | undefined;
 }
 
+type StretchOptions = 'uniform'|'exactfit'|'fill'|'none';
+
 export interface VideoPlayerOptions {
-	fullscreen: any;
-	basePath: string;
+	skippers: boolean;
+	stretching?: StretchOptions;
+	disableControls?: boolean;
+	language?: string;
+	forceTvMode?: boolean;
+	disableTouchControls?: boolean;
+	fullscreen?: boolean;
+	basePath?: string;
     autoplay?: boolean;
     buttons?: any;
     buttonStyles?: any;
@@ -268,7 +299,7 @@ export interface VideoPlayerOptions {
     controlsTimeout?: number;
     debug?: boolean;
     doubleClickDelay?: number;
-    playbackRates: number[];
+    playbackRates?: number[];
     playerVersion?: string;
     playlist: string | PlaylistItem[];
     playlistVersion?: string;
@@ -276,7 +307,7 @@ export interface VideoPlayerOptions {
     scriptFiles?: string[];
     seekInterval?: number;
     styles?: Style;
-    token?: string;
+    accessToken?: string;
     chapters?: boolean;
     nipple?: boolean;
     icons?: any;
@@ -328,4 +359,24 @@ interface QualityLevel {
     height: number;
     bitrate: number;
     selectedIndex: number;
+}
+
+export interface Position {
+	x: {
+		start: number;
+		end: number;
+	};
+	y: {
+		start: number;
+		end: number;
+	};
+}
+
+export interface PreviewTime {
+    start: number;
+    end: number;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
 }
