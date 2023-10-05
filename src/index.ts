@@ -11,7 +11,10 @@ export default class VideoPlayer extends UI {
 			XMLHttpRequest.prototype.open = function () {
 				// @ts-ignore
 				origOpen.apply(this, arguments);
-				this.setRequestHeader('Authorization', `Bearer ${options.accessToken}`);
+				
+				if(arguments[1].includes(options.basePath) || arguments[1].includes(location.hostname)){
+					this.setRequestHeader('Authorization', `Bearer ${options.accessToken?.split('Bearer')[0]}`);
+				}
 			};
 		}
 	}

@@ -41,7 +41,7 @@ export const keyBindings = <T extends Player>(player: T): Array<{ name: string; 
 		name: 'Rewind',
 		key: 'ArrowLeft',
 		control: false,
-		function: () => !player.isTv() ?? player.rewindVideo(),
+		function: () => !player.isTv() && player.rewindVideo(),
 	},
 	{
 		name: 'Rewind',
@@ -53,7 +53,7 @@ export const keyBindings = <T extends Player>(player: T): Array<{ name: string; 
 		name: 'Fast forward',
 		key: 'ArrowRight',
 		control: false,
-		function: () => !player.isTv() ?? player.forwardVideo(),
+		function: () => !player.isTv() && player.forwardVideo(),
 	},
 	{
 		name: 'Fast forward',

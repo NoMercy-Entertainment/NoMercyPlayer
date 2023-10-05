@@ -24,7 +24,7 @@ export default class UI extends Functions {
 
 	previewTime: PreviewTime[] = [];
 
-	sliderPopImage: any;
+	sliderPopImage: HTMLDivElement = <HTMLDivElement>{};
 	chapterBar: HTMLDivElement = <HTMLDivElement>{};
 	bottomBar: HTMLDivElement = <HTMLDivElement>{};
 	topRow: HTMLDivElement = <HTMLDivElement>{};
@@ -38,9 +38,9 @@ export default class UI extends Functions {
 	currentTimeFile = '';
 	fluentIcons: Icon = <Icon>{};
 	buttons: Icon = <Icon>{};
-	tooltip: any;
+	tooltip: HTMLDivElement = <HTMLDivElement>{};;
 	hasNextTip = false;
-	sliderBar: any;
+	sliderBar: HTMLDivElement = <HTMLDivElement>{};;
 	
 	currentScrubTime = 0;
 
@@ -89,13 +89,13 @@ export default class UI extends Functions {
 			// this.cancelNextUp();
 		});
 		this.on('volume', (data) => {
-			this.displayMessage(`Volume: ${Math.floor(data.volume)}%`);
+			this.displayMessage(`${this.localize('Volume')}: ${Math.floor(data.volume)}%`);
 		});
 		this.on('mute', (data) => {
 			if (data.mute) {
-				this.displayMessage('Muted');
+				this.displayMessage(this.localize('Muted'));
 			} else {
-				this.displayMessage(`Volume: ${data.volume}%`);
+				this.displayMessage(`${this.localize('Volume')}: ${data.volume}%`);
 			}
 		});
 
@@ -136,6 +136,16 @@ export default class UI extends Functions {
 					break;
 			}
 		});
+
+		// let inactivityTimeout: NodeJS.Timeout = <NodeJS.Timeout>{};
+		// ['touchstart', 'mousemove', 'touchmove', 'mousein'].forEach((event) => {
+		// 	this.getElement()?.addEventListener(event, (e) => {
+		// 		clearTimeout(inactivityTimeout);
+		// 		inactivityTimeout = setTimeout(() => {
+		// 			this.getElement().focus();
+		// 		}, 50);
+		// 	});
+		// });
 	}
 
 	#unlockControls() {
@@ -542,25 +552,6 @@ export default class UI extends Functions {
 		return bottomBar;
 	}
 	
-	// #getTvImage(scrubTime: any, index: number) {
-	// 	if(!this.thumbs[index]) return;
-		
-	// 	if (scrubTime < 0 || scrubTime > this.duration()) {
-	// 		this.thumbs[index].style.opacity = '0';
-	// 		return;
-	// 	} else {
-	// 		this.thumbs[index].style.opacity = '1';
-	// 	}
-
-	// 	const img = this.#loadSliderPopImage({scrubTimePlayer: scrubTime});
-
-	// 	if (img) {
-	// 		this.thumbs[index].style.backgroundPosition = `-${img.x}px -${img.y}px`;
-	// 		this.thumbs[index].style.width = `${img.w}px`;
-	// 		this.thumbs[index].style.height = `${img.h}px`;
-	// 	}
-	// }
-
 	getClosestSeekableInterval() {
 		const scrubTime = this.currentTime();
 		const intervals = this.previewTime;
@@ -1521,11 +1512,18 @@ export default class UI extends Functions {
 				if (!this.isMobile()) return;
 
 				e.stopPropagation();
-				this.#dynamicControls();
+				if(this.controlsVisible && this.isPlaying()) {
+					this.#unlockControls();
+					this.#hideControls();
+				} else {
+					this.#dynamicControls();
+				}
 			});
 		});
 
 		this.#createOverlayCenterMessage(center);
+		
+		this.#createSpinnerContainer(center);
 
 		if (this.isMobile()) {
 			this.#createTouchSeekBack(center, { x: { start: 1, end: 1 }, y: { start: 2, end: 6 } });
@@ -1534,7 +1532,9 @@ export default class UI extends Functions {
 			this.#createTouchVolUp(center, { x: { start: 2, end: 2 }, y: { start: 1, end: 3 } });
 			this.#createTouchVolDown(center, { x: { start: 2, end: 2 }, y: { start: 5, end: 7 } });
 		} else {
-			this.#createTouchPlayback(center, { x: { start: 1, end: 4 }, y: { start: 2, end: 6 } });
+			this.#createTouchSeekBack(center, { x: { start: 1, end: 2 }, y: { start: 2, end: 6 } });
+			this.#createTouchPlayback(center, { x: { start: 2, end: 3 }, y: { start: 2, end: 6 } });
+			this.#createTouchSeekForward(center, { x: { start: 3, end: 4 }, y: { start: 2, end: 6 } });
 		}
 
 		return center;
@@ -1542,7 +1542,7 @@ export default class UI extends Functions {
 	}
 
 	#createTouchSeekBack(parent: HTMLElement, position: Position) {
-		if (!this.isMobile()) return;
+		// if (!this.isMobile()) return;
 		const touchSeekBack = this.#createTouchBox(parent, 'touchSeekBack', position);
 		['click'].forEach((event) => {
 			touchSeekBack.addEventListener(event, this.doubleTap(() => {
@@ -1557,7 +1557,7 @@ export default class UI extends Functions {
 	}
 
 	#createTouchSeekForward(parent: HTMLElement, position: Position) {
-		if (!this.isMobile()) return;
+		// if (!this.isMobile()) return;
 		const touchSeekForward = this.#createTouchBox(parent, 'touchSeekForward', position);
 		['mouseup', 'touchend'].forEach((event) => {
 			touchSeekForward.addEventListener(event, this.doubleTap(() => {
@@ -1624,7 +1624,7 @@ export default class UI extends Functions {
 
 	#createTouchBox(parent: HTMLElement, id: string, position: Position) {
 		const touch = this.createElement('div', `touch-box-${id}`)
-			.addClasses([`touch-box-${id}`])
+			.addClasses([`touch-box-${id}`, 'nm-z-40'])
 			.appendTo(parent);
 
 		touch.style.gridColumnStart = position.x.start.toString();
@@ -3182,7 +3182,7 @@ export default class UI extends Functions {
 				if (data.styled) {
 					languageButtonText.textContent = `${this.localize(data.language ?? '')} ${this.localize(data.label)} ${this.localize('styled')}`;
 				} else {
-					languageButtonText.textContent = `${this.localize(data.language ?? '')} ${this.localize(data.label)}`;
+					languageButtonText.textContent = `${data.language == 'off' ? '' : this.localize(data.language ?? '')} ${this.localize(data.label)}`;
 				}
 			}
 		} else if (data.type == 'audio') {
@@ -3448,7 +3448,7 @@ export default class UI extends Functions {
 		});
 
 		this.on('item', () => {
-			this.sliderBar.classList.add('nm-bg-white/40');
+			this.sliderBar.classList.add('nm-bg-white/20');
 			this.previewTime = [];
 			this.chapters = [];
 			sliderBuffer.style.width = '0';
@@ -3458,9 +3458,9 @@ export default class UI extends Functions {
 
 		this.on('chapters', () => {
 			if (this.getChapters()?.length > 0 && !this.isTv()) {
-				this.sliderBar.classList.remove('nm-bg-white/40');
+				this.sliderBar.classList.remove('nm-bg-white/20');
 			} else {
-				this.sliderBar.classList.add('nm-bg-white/40');
+				this.sliderBar.classList.add('nm-bg-white/20');
 			}
 		});
 
@@ -3510,7 +3510,7 @@ export default class UI extends Functions {
 			.appendTo(this.sliderBar);
 
 		this.on('item', () => {
-			this.sliderBar.classList.add('nm-bg-white/40');
+			this.sliderBar.classList.add('nm-bg-white/20');
 			this.previewTime = [];
 			this.chapters = [];
 			sliderBuffer.style.width = '0';
@@ -3520,9 +3520,9 @@ export default class UI extends Functions {
 
 		this.on('chapters', () => {
 			if (this.getChapters()?.length > 0 && !this.isTv()) {
-				this.sliderBar.classList.remove('nm-bg-white/40');
+				this.sliderBar.classList.remove('nm-bg-white/20');
 			} else {
-				this.sliderBar.classList.add('nm-bg-white/40');
+				this.sliderBar.classList.add('nm-bg-white/20');
 			}
 		});
 
@@ -3626,7 +3626,7 @@ export default class UI extends Functions {
 		});
 
 		this.chapterBar.querySelectorAll('.chapter-marker').forEach((element) => {
-			this.chapterBar.classList.add('nm-bg-white/40');
+			this.chapterBar.classList.add('nm-bg-white/20');
 			element.remove();
 		});
 		this.getChapters()?.forEach((chapter: Chapter) => {
@@ -3669,6 +3669,17 @@ export default class UI extends Functions {
 		this.thumbnail.style.height = `${time.h}px`;
 
 		return this.thumbnail;
+	}
+
+	#getSliderPopImage(scrubTime: any) {
+
+		const img = this.#loadSliderPopImage(scrubTime);
+
+		if (img) {
+			this.sliderPopImage.style.backgroundPosition = `-${img.x}px -${img.y}px`;
+			this.sliderPopImage.style.width = `${img.w}px`;
+			this.sliderPopImage.style.height = `${img.h}px`;
+		}
 	}
 
 	#fetchPreviewTime() {
@@ -3746,7 +3757,7 @@ export default class UI extends Functions {
 
 								const data = m[5].split('=')[1].split(',');
 								
-								const scalingX = data[2] / this.thumbnailWidth;
+								const scalingX = data[2] % this.thumbnailWidth;
 								if (scalingX % 1 !== 0) {
 									data[0] =
 										data[0] / (scalingX / Math.round(scalingX));
@@ -3757,7 +3768,7 @@ export default class UI extends Functions {
 									data[0] *= scalingX;
 								}
 								
-								const scalingY = data[3] / this.thumbnailHeight;
+								const scalingY = data[3] % this.thumbnailHeight;
 								if (scalingY % 1 !== 0) {
 									data[1] =
 										data[1] / (scalingY / Math.round(scalingY));
@@ -3800,17 +3811,6 @@ export default class UI extends Functions {
 			img = this.previewTime.at(-1);
 		}
 		return img;
-	}
-
-	#getSliderPopImage(scrubTime: any) {
-
-		const img = this.#loadSliderPopImage(scrubTime);
-
-		if (img) {
-			this.sliderPopImage.style.backgroundPosition = `-${img.x}px -${img.y}px`;
-			this.sliderPopImage.style.width = `${img.w}px`;
-			this.sliderPopImage.style.height = `${img.h}px`;
-		}
 	}
 
 	#getScrubTime(e: any, parent = this.sliderBar) {
@@ -4263,89 +4263,89 @@ export default class UI extends Functions {
 
 	#modifySpinner(parent: HTMLDivElement) {
 
-		const h2 = this.createElement('h2', 'loader')
-			.addClasses(['loader'])
-			.appendTo(parent);
-		h2.textContent = `${this.localize('Loading playlist')}...`;
+		// const h2 = this.createElement('h2', 'loader')
+		// 	.addClasses(['loader'])
+		// 	.appendTo(parent);
+		// h2.textContent = `${this.localize('Loading playlist')}...`;
 
-		const loader = document.createElement('div');
-		loader.id = 'loading';
-		loader.classList.add('loading');
-		loader.innerHTML = `
-			<div style="display:flex">
-				<span></span>
-				<span></span>
-				<span></span>
-				<span></span>
-				<span></span>
-				<span></span>
-				<span></span>
-			</div>
-		`;
-		loader.prepend(h2);
+		// const loader = document.createElement('div');
+		// loader.id = 'loading';
+		// loader.classList.add('loading');
+		// loader.innerHTML = `
+		// 	<div style="display:flex">
+		// 		<span></span>
+		// 		<span></span>
+		// 		<span></span>
+		// 		<span></span>
+		// 		<span></span>
+		// 		<span></span>
+		// 		<span></span>
+		// 	</div>
+		// `;
+		// loader.prepend(h2);
 
 		const loadingSpinner = document.createElement('div');
 
-		loadingSpinner.id = 'spinner';
-		loadingSpinner.innerHTML = '';
-		loadingSpinner.classList.add('spinner');
-		this.addClasses(loadingSpinner, [
-			'nm-flex',
-			'nm-justify-center',
-			'nm-items-center',
-			'nm-absolute',
-			'nm-left-0',
-			'nm-right-0',
-			'nm-top-0',
-			'nm-bottom-0',
+		// loadingSpinner.id = 'spinner';
+		// loadingSpinner.innerHTML = '';
+		// loadingSpinner.classList.add('spinner');
+		// this.addClasses(loadingSpinner, [
+		// 	'nm-flex',
+		// 	'nm-justify-center',
+		// 	'nm-items-center',
+		// 	'nm-absolute',
+		// 	'nm-left-0',
+		// 	'nm-right-0',
+		// 	'nm-top-0',
+		// 	'nm-bottom-0',
 
-		]);
+		// ]);
 
-		loadingSpinner.append(loader);
+		// loadingSpinner.append(loader);
 
-		this.on('duringplaylistchange', () => {
-			h2.textContent = `${this.localize('Loading playlist')}...`;
-			loadingSpinner.style.display = 'flex';
-			loadingSpinner.style.visibility = 'visible';
-		});
-		this.on('beforeplaylistitem', () => {
-			h2.textContent = `${this.localize('Loading playlist item')}...`;
-			loadingSpinner.style.display = 'flex';
-			loadingSpinner.style.visibility = 'visible';
-		});
+		// this.on('duringplaylistchange', () => {
+		// 	h2.textContent = `${this.localize('Loading playlist')}...`;
+		// 	loadingSpinner.style.display = 'flex';
+		// 	loadingSpinner.style.visibility = 'visible';
+		// });
+		// this.on('beforeplaylistitem', () => {
+		// 	h2.textContent = `${this.localize('Loading playlist item')}...`;
+		// 	loadingSpinner.style.display = 'flex';
+		// 	loadingSpinner.style.visibility = 'visible';
+		// });
 
-		this.on('item', () => {
-			loadingSpinner.style.display = 'none';
-			loadingSpinner.style.visibility = 'nm-hidden';
-		});
+		// this.on('item', () => {
+		// 	loadingSpinner.style.display = 'none';
+		// 	loadingSpinner.style.visibility = 'nm-hidden';
+		// });
 
-		this.on('time', () => {
-			loadingSpinner.style.display = 'none';
-			loadingSpinner.style.visibility = 'nm-hidden';
-		});
+		// this.on('time', () => {
+		// 	loadingSpinner.style.display = 'none';
+		// 	loadingSpinner.style.visibility = 'nm-hidden';
+		// });
 
-		this.on('bufferedEnd', () => {
-			loadingSpinner.style.display = 'none';
-			loadingSpinner.style.visibility = 'nm-hidden';
-		});
+		// this.on('bufferedEnd', () => {
+		// 	loadingSpinner.style.display = 'none';
+		// 	loadingSpinner.style.visibility = 'nm-hidden';
+		// });
 
-		this.on('waiting', () => {
-			h2.textContent = `${this.localize('Buffering')}...`;
-			loadingSpinner.style.display = 'flex';
-			loadingSpinner.style.visibility = 'visible';
-		});
+		// this.on('waiting', () => {
+		// 	h2.textContent = `${this.localize('Buffering')}...`;
+		// 	loadingSpinner.style.display = 'flex';
+		// 	loadingSpinner.style.visibility = 'visible';
+		// });
 
-		this.on('error', () => {
-			h2.style.display = 'flex';
-			h2.textContent = this.localize('Something went wrong trying to play this item');
-			loadingSpinner.style.display = 'flex';
-			loadingSpinner.style.visibility = 'visible';
-			// setTimeout(() => {
-			//     window.location.reload();
-			// }, 2500);
-		});
+		// this.on('error', () => {
+		// 	h2.style.display = 'flex';
+		// 	h2.textContent = this.localize('Something went wrong trying to play this item');
+		// 	loadingSpinner.style.display = 'flex';
+		// 	loadingSpinner.style.visibility = 'visible';
+		// 	// setTimeout(() => {
+		// 	//     window.location.reload();
+		// 	// }, 2500);
+		// });
 
-		parent.appendChild(loadingSpinner);
+		// parent.appendChild(loadingSpinner);
 		return loadingSpinner;
 	};
 
@@ -4375,10 +4375,12 @@ export default class UI extends Functions {
 
 		this.on('waiting', () => {
 			spinnerContainer.style.display = 'grid';
+			status.innerText = `${this.localize('Buffering')}...`;
 		});
 
 		this.on('error', () => {
 			spinnerContainer.style.display = 'none';
+			status.innerText = this.localize('Something went wrong trying to play this item');
 		});
 
 		this.on('ended', () => {
@@ -4395,6 +4397,7 @@ export default class UI extends Functions {
 
 		this.on('stalled', () => {
 			spinnerContainer.style.display = 'grid';
+			status.innerText = `${this.localize('Buffering')}...`;
 		});
 
 		this.on('item', () => {

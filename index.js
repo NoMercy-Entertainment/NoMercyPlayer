@@ -9,6 +9,7 @@ const config = {
     playlist: 'https://api-dev.nomercy.tv/playlist-js?v=2',
     controlsTimeout: 3000,
     doubleClickDelay: 500,
+    basePath: '',
     playbackRates: [
         0.25,
         0.5,

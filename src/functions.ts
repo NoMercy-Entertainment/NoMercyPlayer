@@ -401,6 +401,7 @@ export default class Functions extends Base {
 	volumeUp() {
 		if (this.getVolume() === 100) {
 			this.setVolume(100);
+			this.displayMessage(`${this.localize('Volume')}: 100%`);
 		} else {
 			this.setVolume(this.getVolume() + 10);
 		}
@@ -1209,7 +1210,7 @@ export default class Functions extends Base {
 	 * @returns The file associated with the thumbnail of the current playlist item, or undefined if no thumbnail is found.
 	 */
 	getTimeFile() {
-		return this.getPlaylistItem().metadata.find((t: { kind: string }) => t.kind === 'thumbnails')?.file;
+		return this.getPlaylistItem()?.metadata.find((t: { kind: string }) => t.kind === 'thumbnails')?.file;
 	}
 
 	/**
@@ -1217,7 +1218,7 @@ export default class Functions extends Base {
 	 * @returns The sprite file, or undefined if no sprite metadata is found.
 	 */
 	getSpriteFile() {
-		return this.getPlaylistItem().metadata?.find((t: { kind: string }) => t.kind === 'sprite')?.file;
+		return this.getPlaylistItem()?.metadata?.find((t: { kind: string }) => t.kind === 'sprite')?.file;
 	}
 
 	/**
@@ -1225,7 +1226,7 @@ export default class Functions extends Base {
 	 * @returns The chapter file, or undefined if no chapter metadata is found.
 	 */
 	#getChapterFile() {
-		return this.getPlaylistItem().metadata.find((t: { kind: string }) => t.kind === 'chapters')?.file;
+		return this.getPlaylistItem()?.metadata.find((t: { kind: string }) => t.kind === 'chapters')?.file;
 	}
 
 	/**
@@ -1233,7 +1234,7 @@ export default class Functions extends Base {
 	 * @returns The chapter file, or undefined if no chapter metadata is found.
 	 */
 	#getSkipFile() {
-		return this.getPlaylistItem().metadata.find((t: { kind: string }) => t.kind === 'skippers')?.file;
+		return this.getPlaylistItem()?.metadata.find((t: { kind: string }) => t.kind === 'skippers')?.file;
 	}
 
 	/**
@@ -1242,7 +1243,7 @@ export default class Functions extends Base {
 	 * of the current playlist item, or undefined if it does not exist.
 	 */
 	#getFontsFile(): string | undefined {
-		return this.getPlaylistItem().metadata
+		return this.getPlaylistItem()?.metadata
 		.find((t: { kind: string }) => t.kind === 'fonts')?.file;
 	}
 
@@ -1564,6 +1565,14 @@ export default class Functions extends Base {
 		}
 
 		return str;
+	}
+
+	/**
+	 * Sets the access token to be used for API requests.
+	 * @param token - The access token to set.
+	 */
+	setToken(token: string): void {
+		this.options.accessToken = token;
 	}
 
 }

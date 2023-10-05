@@ -185,7 +185,7 @@ export default class Base {
 			<div role="status"
 				class="nm-flex nm-flex-col nm-items-center nm-gap-4">
 				<svg aria-hidden="true"
-					class="nm-inline nm-w-12 nm-h-12 nm-mr-2 nm-text- nm-animate-spin nm-text-gray-700 nm-fill-purple-600"
+					class="nm-inline nm-w-12 nm-h-12 nm-mr-2 nm-text- nm-animate-spin nm-text-white/20 nm-fill-white"
 					viewBox="0 0 100 101"
 					fill="none"
 					xmlns="http://www.w3.org/2000/svg">

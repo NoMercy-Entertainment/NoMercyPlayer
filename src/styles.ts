@@ -7,7 +7,6 @@ export const bottomBarStyles = [
 	'nm-flex',
 	'nm-flex-col',
 	'nm-gap-1',
-	// 'nm-transition-transform',
 	'nm-translate-y-full',
 	'nm-w-full',
 	'nm-z-40',
@@ -18,7 +17,7 @@ export const bottomBarShadowStyles = [
 	'nm-pointer-events-none',
 	'nm-bottom-0',
 	'nm-bg-gradient-to-t',
-	'nm-via-black/40',
+	'nm-via-black/20',
 	'nm-from-black/90',
 	'nm-pt-[20%]',
 	'nm-w-full',
@@ -33,7 +32,6 @@ export const bottomRowStyles = [
 	'nm-items-center',
 	'nm-relative',
 	'nm-w-full',
-	// 'gap-1',
 ];
 
 export const buttonBaseStyles = [
@@ -49,8 +47,10 @@ export const buttonStyles = [
 	'nm-cursor-pointer',
 	'nm-fill-white',
 	'nm-flex',
-	'focus:nm-bg-white/20',
-	'focus:nm-outline-none',
+	'focus-visibile:nm-bg-white/20',
+	'focus-visibile:nm-outline-none',
+	'tv:focus:nm-bg-white/20',
+	'tv:focus:nm-outline-none',
 	'nm-group/button',
 	'nm-h-10',
 	'nm-items-center',
@@ -96,7 +96,7 @@ export const chapterMarkersStyles = [
 
 export const chapterMarkerBGStyles = [
 	'chapter-marker-bg',
-	'nm-bg-gray-400/70',
+	'nm-bg-white/20',
 	'nm-absolute',
 	'nm-h-full',
 	'nm-left-0',
@@ -122,7 +122,6 @@ export const chapterMarkerHoverStyles = [
 	'chapter-marker-hover',
 	'nm-absolute',
 	'nm-bg-gray-200',
-	// 'nm-transition-opacity',
 	'nm-h-full',
 	'nm-left-0',
 	'nm-origin-left',
@@ -135,7 +134,7 @@ export const chapterMarkerHoverStyles = [
 export const chapterMarkerProgressStyles = [
 	'chapter-marker-progress',
 	'nm-absolute',
-	'nm-bg-purple-500',
+	'nm-bg-white',
 	'nm-h-full',
 	'nm-left-0',
 	'nm-origin-left',
@@ -173,7 +172,6 @@ export const mainMenuStyles = [
 	'nm-gap-1',
 	'nm-p-2',
 	'nm-overflow-clip',
-	// 'nm-transition-all',
 	'nm-w-1/2',
 ];
 
@@ -207,7 +205,6 @@ export const menuContentStyles = [
 	'nm-flex',
 	'nm-flex-row',
 	'nm-overflow-clip',
-	// 'nm-transition-all',
 	'nm-w-[200%]',
 ];
 
@@ -224,8 +221,7 @@ export const menuFrameStyles = [
 	'nm-overflow-clip',
 	'nm-right-[2%]',
 	'nm-rounded-lg',
-	// 'nm-transition-all',
-	'nm-w-56',
+	'nm-w-64',
 	'nm-z-50',
 ];
 
@@ -298,7 +294,6 @@ export const sliderBarStyles = [
 	'slider-bar',
 	'nm-group/slider',
 	'nm-flex',
-	// 'nm-bg-white/40',
 	'nm-rounded-full',
 	'nm-h-2',
 	'nm-relative',
@@ -311,8 +306,8 @@ export const sliderBufferStyles = [
 	'nm-flex',
 	'nm-h-full',
 	'nm-pointer-events-none',
-	'nm-rounded-full',
-	'nm-bg-gray-300/50',
+	'nm-rounded-r-full',
+	'nm-bg-white/20',
 	'nm-z-0',
 	'nm-overflow-hidden',
 	'nm-overflow-clip',
@@ -322,12 +317,11 @@ export const sliderHoverStyles = [
 	'slider-hover',
 	'nm-absolute',
 	'nm-opacity-1',
-	// 'nm-transition-[opacity,transform]',
 	'nm-flex',
 	'nm-h-full',
 	'nm-pointer-events-none',
-	'nm-rounded-full',
-	'nm-bg-gray-400/70',
+	'nm-rounded-r-full',
+	'nm-bg-white/30',
 	'nm-z-0',
 	'nm-overflow-hidden',
 	'nm-overflow-clip',
@@ -339,9 +333,8 @@ export const sliderProgressStyles = [
 	'nm-flex',
 	'nm-h-full',
 	'nm-pointer-events-none',
-	'nm-rounded',
-	'nm-bg-purple-500',
-	'nm-rounded-full',
+	'nm-rounded-r-full',
+	'nm-bg-white',
 	'nm-z-10',
 	'nm-overflow-hidden',
 	'nm-overflow-clip',
@@ -355,7 +348,7 @@ export const sliderNippleStyles = [
 	'nm-absolute',
 	'nm-hidden',
 	'group-hover/slider:nm-flex',
-	'nm-bg-purple-600',
+	'nm-bg-white',
 	'nm-h-4',
 	'nm-left-0',
 	'nm-rounded-full',
@@ -383,7 +376,6 @@ export const sliderPopStyles = [
 	'nm-pointer-events-none',
 	'nm-rounded-md',
 	'nm-text-center',
-	// 'nm-transition-[opacity,transform]',
 	'nm-z-20',
 ];
 
@@ -417,7 +409,6 @@ export const subMenuStyles = [
 	'nm-flex',
 	'nm-flex-col',
 	'nm-gap-1',
-	// 'nm-transition-all',
 	'nm-w-1/2',
 ];
 
@@ -428,7 +419,6 @@ export const svgSizeStyles = [
 	'nm-pointer-events-none',
 	'group-hover/button:nm-scale-110',
 	'nm-duration-700',
-	// 'nm-transition-transform',
 ];
 
 export const timeStyles = [
@@ -455,7 +445,6 @@ export const topBarStyles = [
 	'nm-p-1',
 	'nm-pb-[10%]',
 	'nm-top-0',
-	// 'nm-transition-transform',
 	'nm-w-full',
 ];
 
@@ -496,16 +485,15 @@ export const volumeSliderStyles = [
 	'nm-w-0',
 	'nm-rounded-full',
 	'nm-opacity-0',
-	// 'nm-transition-[width,opacity]',
 	'nm-duration-300',
 	'group-hover/volume:nm-w-20',
 	'group-hover/volume:nm-opacity-100',
 	'nm-appearance-none',
 	'nm-volume-slider',
-	'nm-bg-gray-400/70',
+	'nm-bg-white/70',
 	'nm-bg-gradient-to-r',
-	'nm-from-purple-600',
-	'nm-to-purple-600',
+	'nm-from-white',
+	'nm-to-white',
 	'nm-self-center',
 	'nm-h-1',
 	'nm-bg-no-repeat',
@@ -522,7 +510,6 @@ export const volumeSliderStyles = [
 	'range-thumb:nm-bg-white',
 	'range-thumb:nm-shadow-sm',
 	'range-thumb:nm-border-none',
-	// 'range-thumb:nm-transition-all',
 ];
 
 export const playerMessageStyles = [
@@ -551,7 +538,7 @@ export const playlistMenuButtonStyles = [
 	'nm-relative',
 	'nm-flex',
 	'nm-w-full',
-	'nm-p-1',
+	'nm-p-2',
 	'nm-gap-2',
 	'nm-rounded-lg',
 	'nm-snap-center',
@@ -560,7 +547,7 @@ export const playlistMenuButtonStyles = [
 	'nm-outline-1',
 	'nm-outline-solid',
 	'focus:nm-outline-2',
-	'focus:nm-outline-purple-500',
+	'focus:nm-outline-white',
 ];
 
 export const episodeMenuButtonLeftStyles = [
@@ -610,15 +597,18 @@ export const episodeMenuProgressBoxStyles = [
 	'nm-mb-1',
 	'nm-px-1',
 ];
+
 export const progressContainerItemTextStyles = [
 	'progress-item',
 	'nm-text-[0.7rem]',
 	'',
 ];
+
 export const progressContainerDurationTextStyles = [
 	'progress-duration',
 	'nm-text-[0.7rem]',
 ];
+
 export const sliderContainerStyles = [
 	'slider-container',
 	'nm-rounded-md',
@@ -629,11 +619,13 @@ export const sliderContainerStyles = [
 	'nm-mx-1',
 	'nm-sm:mx-2',
 ];
+
 export const progressBarStyles = [
 	'progress-bar',
-	'nm-bg-purple-500',
+	'nm-bg-white',
 	'nm-w-1/2',
 ];
+
 export const episodeMenuButtonRightSideStyles = [
 	'playlist-card-right',
 	'nm-w-3/4',
@@ -649,6 +641,7 @@ export const episodeMenuButtonTitleStyles = [
 	'nm-line-clamp-1',
 	'',
 ];
+
 export const episodeMenuButtonOverviewStyles = [
 	'playlist-card-overview',
 	'nm-text-[0.7rem]',
@@ -683,9 +676,10 @@ export const pauseScreenStyles = [
 	'nm-text-white',
 	'nm-w-full',
 	'nm-h-full',
-	'nm-z-50',
+	'nm-z-40',
 	'nm-hidden',
 ];
+
 export const episodeScreenStyles = [
 	'episode-screen',
 	'nm-absolute',
@@ -697,7 +691,7 @@ export const episodeScreenStyles = [
 	'nm-text-white',
 	'nm-w-full',
 	'nm-h-full',
-	'nm-z-50',
+	'nm-z-40',
 	'nm-hidden',
 ];
 
@@ -711,7 +705,7 @@ export const languageScreenStyles = [
 	'nm-text-white',
 	'nm-w-full',
 	'nm-h-full',
-	'nm-z-50',
+	'nm-z-40',
 	'nm-hidden',
 ];
 
@@ -728,11 +722,12 @@ export const languageButtonStyles = [
 	'nm-snap-center',
 	'nm-outline-transparent',
 	'nm-outline',
+	'nm-whitespace-nowrap',
 	'nm-outline-1',
 	'nm-outline-solid',
 	'focus:nm-outline-2',
-	'focus:nm-outline-purple-500',
-	'active:nm-outline-purple-500',
+	'focus:nm-outline-white',
+	'active:nm-outline-white',
 ];
 
 export const tvButtonStyles = [
@@ -750,8 +745,8 @@ export const tvButtonStyles = [
 	'nm-outline-1',
 	'nm-outline-solid',
 	'focus:nm-outline-2',
-	'focus:nm-outline-purple-500',
-	'active:nm-outline-purple-500',
+	'focus:nm-outline-white',
+	'active:nm-outline-white',
 ];
 
 export const tvButtonTextStyles = [
@@ -779,8 +774,8 @@ export const tvSeasonButtonStyles = [
 	'nm-outline-1',
 	'nm-outline-solid',
 	'focus:nm-outline-2',
-	'focus:nm-outline-purple-500',
-	'active:nm-outline-purple-500',
+	'focus:nm-outline-white',
+	'active:nm-outline-white',
 ];
 
 export const tvSeasonButtonTextStyles = [
@@ -811,30 +806,32 @@ export const tvEpisodeMenuButtonRightSideStyles = [
 	'nm-flex-col',
 	'nm-text-left',
 	'nm-gap-1',
+	'nm-px-1',
 	'nm-outline-transparent',
 	'nm-outline',
 	'nm-outline-1',
 	'nm-outline-solid',
 	'focus:nm-outline-2',
-	'focus:nm-outline-purple-500',
-	'active:nm-outline-purple-500',
+	'focus:nm-outline-white',
+	'active:nm-outline-white',
 ];
 
 export const tvEpisodeMenuButtonTitleStyles = [
 	'playlist-card-title',
 	'nm-font-bold',
 	'nm-text-lg',
-	'',
-];
-export const tvEpisodeMenuButtonOverviewStyles = [
-	'playlist-card-overview',
-	'nm-font-bold',
-	'nm-text-xs',
-	'nm-leading-5',
-	'nm-line-clamp-4',
+	'nm-line-clamp-1',
 	'',
 ];
 
+export const tvEpisodeMenuButtonOverviewStyles = [
+	'playlist-card-overview',
+	'nm-font-bold',
+	'nm-text-[0.7rem]',
+	'nm-leading-4',
+	'nm-line-clamp-4',
+	'',
+];
 
 export const leftSideStyles = [
 	'nm-flex',
@@ -844,6 +841,7 @@ export const leftSideStyles = [
 	'nm-w-2/3',
 	'nm-h-full',
 ];
+
 export const leftSideTopStyles = [
 	'nm-flex',
 	'nm-flex-col',
@@ -853,6 +851,7 @@ export const leftSideTopStyles = [
 	'nm-gap-2',
 	'nm-h-auto',
 ];
+
 export const logoContainerStyles = [
 	'nm-flex',
 	'nm-flex-col',
@@ -862,6 +861,7 @@ export const logoContainerStyles = [
 	'nm-h-[85px]',
 	'nm-min-h-[85px]',
 ];
+
 export const logoStyles = [
 	'nm-w-auto',
 	'nm-h-full',
@@ -870,6 +870,7 @@ export const logoStyles = [
 	'nm-mr-auto',
 	'nm-object-fit',
 ];
+
 export const fallbackTextStyles = [
 	'nm-w-auto',
 	'nm-h-full',
@@ -881,12 +882,14 @@ export const fallbackTextStyles = [
 	'nm-font-bold',
 	'nm-object-fit',
 ];
+
 export const logoFooterStyles = [
 	'nm-flex',
 	'nm-flex-col',
 	'nm-w-full',
 	'nm-h-[40px]',
 ];
+
 export const yearStyles = [
 	'nm-flex',
 	'nm-text-white',
@@ -894,6 +897,7 @@ export const yearStyles = [
 	'nm-font-bold',
 	'nm-mx-2',
 ];
+
 export const ratingContainerStyles = [
 	'nm-flex',
 	'nm-gap-2',
@@ -901,12 +905,14 @@ export const ratingContainerStyles = [
 	'nm-w-full',
 	'nm-text-white',
 ];
+
 export const ratingImageStyles = [
 	'nm-w-8',
 	'nm-h-full',
 	'nm-object-fit',
 	'nm-invert',
 ];
+
 export const episodesCountStyles = [
 	'nm-flex',
 	'nm-text-white',
@@ -921,6 +927,7 @@ export const overviewContainerStyles = [
 	'nm-w-full',
 	'nm-h-full',
 ];
+
 export const titleStyles = [
 	'nm-flex',
 	'nm-text-white',
@@ -928,6 +935,7 @@ export const titleStyles = [
 	'nm-font-bold',
 	'nm-mx-2',
 ];
+
 export const descriptionStyles = [
 	'nm-flex',
 	'nm-text-white',
@@ -949,8 +957,9 @@ export const buttonContainerStyles = [
 	'nm-overflow-auto',
 	'nm-px-2',
 	'nm-py-0.5',
-	'[*::-webkit-scrollbar]:nm-hidden'
+	'[*::-webkit-scrollbar]:nm-hidden',
 ];
+
 export const subtitleButtonContainerStyles = [
 	'nm-flex',
 	'nm-flex-col',
@@ -982,7 +991,6 @@ export const languageRightSideStyles = [
 	'nm-h-full',
 ];
 
-
 export const episodeLeftSideStyles = [
 	'nm-flex',
 	'nm-flex-col',
@@ -991,6 +999,7 @@ export const episodeLeftSideStyles = [
 	'nm-w-2/5',
 	'nm-h-full',
 ];
+
 export const episodeRightSideStyles = [
 	'nm-flex',
 	'nm-flex-col',
@@ -1005,6 +1014,7 @@ export const episodeScrollContainerStyles = [
 	'nm-overflow-auto',
 	'nm-h-full',
 	'nm-pt-6',
+	'nm-gap-2',
 	'nm-p-1',
 	'nm-min-h-[50%]',
 ];
@@ -1016,6 +1026,7 @@ export const spinnerContainerStyles = [
 	'nm-h-screen',
 	'nm-z-50',
 	'nm-grid',
+	'nm-pointer-events-none',
 	'nm-place-content-center'
 ];
 
@@ -1033,8 +1044,8 @@ export const spinnerStyles = [
 	'nm-h-12',
 	'nm-mr-2',
 	'nm-animate-spin',
-	'nm-text-gray-700',
-	'nm-fill-purple-600',
+	'nm-text-white/20',
+	'nm-fill-white',
 ];
 
 export const statusTextStyles = [
@@ -1071,6 +1082,7 @@ export const nextTipTextStyles = [
 	'nm-self-center',
 	'',
 ];
+
 export const nextTipImageStyles = [
 	'nm-playlist-card-image',
 	'nm-w-full',
@@ -1080,6 +1092,7 @@ export const nextTipImageStyles = [
 	'nm-rounded-md',
 	'',
 ];
+
 export const nextTipLeftSideStyles = [
 	'nm-playlist-card-left',
 	'nm-relative',
@@ -1088,7 +1101,8 @@ export const nextTipLeftSideStyles = [
 	'nm-overflow-clip',
 	'nm-self-center',
 	'',
-]
+];
+
 export const nextTipRightSideStyles = [
 	'nm-playlist-card-right',
 	'nm-w-[60%]',
@@ -1097,16 +1111,19 @@ export const nextTipRightSideStyles = [
 	'nm-text-left',
 	'nm-gap-1',
 ];
+
 export const nextTipHeaderStyles = [
 	'nm-playlist-card-header',
 	'nm-font-bold',
 	'',
 ];
+
 export const nextTipTitleStyles = [
 	'nm-playlist-card-title',
 	'nm-font-bold',
 	'',
 ];
+
 export const nextUpStyles = [
 	'nm-episode-tip',
 	'nm-flex',
@@ -1137,6 +1154,7 @@ export const nextUpCreditsButtonStyles = [
 	'active:nm-outline-white',
 	'',
 ];
+
 export const nextUpNextButtonStyles = [
 	'nextup-button',
 	'animated',
@@ -1186,8 +1204,11 @@ export const tvBottomRowStyles = [
 ];
 
 export const tvSeekBarStyles = [];
+
 export const tvSeekBarInnerStyles = [];
+
 export const tvSeekBarInnerProgressStyles = [];
+
 export const tvSeekBarInnerBufferStyles = [];
 
 export const tvCurrentItemContainerStyles = [
@@ -1197,18 +1218,22 @@ export const tvCurrentItemContainerStyles = [
 	'nm-items-end',
 	'nm-gap-2',
 ];
+
 export const tvCurrentItemShowStyles = [
 	'nm-text-white',
 	'nm-text-sm',
 	'nm-whitespace-pre',
 	'nm-font-bold',
 ];
+
 export const tvCurrentItemTitleContainerStyles = [
 	'nm-flex',
 	'nm-flex-row',
 	'nm-gap-2',
 ];
+
 export const tvCurrentItemEpisodeStyles = [];
+
 export const tvCurrentItemTitleStyles = [];
 
 export const seekContainerStyles = [
@@ -1217,7 +1242,7 @@ export const seekContainerStyles = [
 	'nm-mb-28',
 	'nm-w-full',
 	'nm-translate-y-[80vh]',
-	'nm-z-50',
+	'nm-z-40',
 	'nm-w-full',
 ];
 
@@ -1227,7 +1252,7 @@ export const seekScrollContainerStyles = [
 	'nm-h-full',
 	'nm-w-full',
 	'nm-overflow-auto',
-	'nm-px-[calc(100%/2.73)]',
+	'nm-px-[calc(100%/2.14)]',
 	'nm-gap-1.5',
 	'scrollbar-none',
 ];
@@ -1238,13 +1263,11 @@ export const seekContainerChildStyles = [
 	'nm-gap-1.5',
 	'nm-scroll-smooth',
 	'nm-snap-x',
-	// 'nm-overflow-hidden',
 ];
 
 export const thumbnailStyles = [
 	'nm-w-1/5',
 	'nm-h-auto',
-	// 'nm-max-h-[calc(((100vw/5)/16)*9)]',
 	'nm-object-cover',
 	'nm-aspect-video',
 	'nm-snap-center',
@@ -1263,6 +1286,7 @@ export const seekScrollCloneStyles = [
 	'z-10',
 	'nm-pointer-events-none',
 ];
+
 export const thumbnailCloneStyles = [
 	'nm-w-[calc(26%+(var(--gap)/2))]',
 	'nm-h-auto',

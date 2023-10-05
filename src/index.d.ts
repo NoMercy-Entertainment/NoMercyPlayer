@@ -284,7 +284,7 @@ export interface VideoPlayer extends OriginalPlayer {
 type StretchOptions = 'uniform'|'exactfit'|'fill'|'none';
 
 export interface VideoPlayerOptions {
-	skippers: boolean;
+	skippers?: boolean;
 	stretching?: StretchOptions;
 	disableControls?: boolean;
 	language?: string;

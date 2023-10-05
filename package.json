@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
+    "preview": "vite preview",
     "build": "tsc && vite build",
     "serve": "vite preview",
     "static": "npx webpack",
