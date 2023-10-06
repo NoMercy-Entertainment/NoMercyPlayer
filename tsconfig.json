@@ -15,6 +15,7 @@
 		"rootDir": ".",
 		"downlevelIteration": true,
 		"moduleResolution": "Node",
+		"declaration": true,
 		"types": ["node", "jest"]
 	},
 	"include": ["./src/**/*.ts", "./src/**/*.d.ts", "./src/*.d.ts", "src/app.js", "./vite.config.ts"]

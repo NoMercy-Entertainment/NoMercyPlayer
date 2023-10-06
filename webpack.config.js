@@ -1,10 +1,14 @@
 const path = require('path');
 
+/**
+ * @type {import('webpack').Configuration}
+ */
 module.exports = {
     context: path.resolve(__dirname, 'src'),
-    devtool: 'inline-source-map',
+    // devtool: 'inline-source-map',
     entry: './index.ts',
-    mode: 'development',
+    mode: 'production',
+    devtool: false,
     module: {
         rules: [
             {
@@ -19,11 +23,17 @@ module.exports = {
             },
         ]
     },
+    entry: {
+        nomercyplayer: './index.ts',
+        base: './base.ts',
+        ui: './ui.ts',
+        functions: './functions.ts',
+    },
     output: {
-        filename: 'nomercyplayer.js',
-        path: path.resolve(__dirname, 'static')
+        filename: '[name].js',
+        path: path.resolve(__dirname, 'static'),
     },
     resolve: {
-        extensions: ['.ts']
+        extensions: ['.ts', '.css']
     },
 };

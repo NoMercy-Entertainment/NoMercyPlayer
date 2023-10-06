@@ -1871,6 +1871,10 @@ export default class UI extends Functions {
 			parent,
 			'back'
 		);
+
+		this.addClasses(backButton, [
+			'nm-mt-4',
+		]);
 		parent.appendChild(backButton);
 
 		this.#createSVGElement(backButton, 'back', this.buttons.back, false, hovered);
