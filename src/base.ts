@@ -46,11 +46,13 @@ export default class Base {
 
 	constructor(playerType: Types['playerType'], options: VideoPlayerOptions, playerId: Types['playerId'] = '') {
 
-		if (document.querySelector<HTMLDivElement>(`#${playerId}-events`)) {
-			this.emit('dispose');
-		}
-		if(document.querySelector<HTMLDivElement>(`#${playerId}-events`)) {
-			document.querySelector<HTMLDivElement>(`#${playerId}-events`)?.remove();
+		// console.log('trying to remove element: ', `#${playerId}-events`);
+		// if(document.querySelector<HTMLDivElement>(`#${playerId}-events`)) {
+		// 	document.querySelector<HTMLDivElement>(`#${playerId}-events`)?.remove();
+		// 	this.dispose();
+		// }
+		if(document.querySelectorAll<HTMLDivElement>(`#${playerId}`).length > 1) {
+			document.querySelectorAll<HTMLDivElement>(`#${playerId}`)[1]?.parentElement?.remove();
 		}
 
 		this.setupTime = Date.now();
@@ -58,7 +60,7 @@ export default class Base {
 		this.eventElement = document.createElement('div');
 		this.eventElement.id = `${playerId}-events`;
 		this.eventElement.style.display = 'none';
-		document.body.appendChild(this.eventElement);
+		this.getElement()?.appendChild(this.eventElement);
 
 		if (playerId) {
 			this.playerId = playerId;
@@ -175,7 +177,7 @@ export default class Base {
 	 * The splash screen is removed once the 'item' event is triggered.
 	 */
 	createSplashScreen() {
-		if (this.options.disableControls) return;
+		if (this.options.disableControls || document.querySelector('#splashscreen')) return;
 
 		const splashscreen = document.createElement('div');
 		splashscreen.id = 'splashscreen';
@@ -217,7 +219,7 @@ export default class Base {
 			.then(() => {
 				// @ts-ignore
 				this.player = window.jwplayer(this.playerId);
-				this.player.setup(this.options);
+				this.player.setup?.(this.options);
 				this.events = [
 					'adBlock',
 					'adClick',
@@ -423,6 +425,7 @@ export default class Base {
 	 * @returns void
 	 */
 	#createStyles() {
+		if(!this.getElement()) return;
 
 		this.addClasses(this.getElement(), ['nomercyplayer']);
 		// reset jwplayer styles
@@ -558,6 +561,12 @@ export default class Base {
 					break;
 				case 'ratechange':
 					this.emit('speed', data);
+					break;
+				case 'remove':
+					this.emit('remove');
+				case 'dispose':
+					this.emit('dispose');
+					break;
 					break;
 				case 'resize':
 					break;
@@ -1294,9 +1303,17 @@ export default class Base {
 	 */
 	dispose() {
 		if (this.isJwplayer) {
-			this.player.remove();
+			this.player?.remove?.();
 		} else {
-			this.player.dispose();
+			this.player?.dispose?.();
+		}
+		
+		if(document.querySelector<HTMLDivElement>(`#${this.playerId}-events`)) {
+			document.querySelectorAll<HTMLDivElement>(`#${this.playerId}-events`).forEach(el => el.remove());
+
+			this.dispose();
+
+			this.getElement()?.remove();
 		}
 	}
 	
@@ -1372,6 +1389,7 @@ export default class Base {
 	emit(eventType: 'finished'): void;
 	emit(eventType: 'volume', data: VolumeState): void;
 	emit(eventType: 'dispose'): void;
+	emit(eventType: 'remove'): void;
 	emit(eventType: 'showPauseScreen'): void;
 	emit(eventType: 'hidePauseScreen'): void;
 	emit(eventType: 'showEpisodeScreen'): void;
@@ -1463,7 +1481,8 @@ export default class Base {
 	on(event: 'ended', callback: (data: any) => void): void;
 	on(event: 'finished', callback: () => void): void;
 	on(event: 'volume', callback: (data: VolumeState) => void): void;
-	on(event: 'dispose', callback: (data: any) => void): void;
+	on(event: 'dispose', callback: () => void): void;
+	on(event: 'remove', callback: () => void): void;
 	on(event: 'showPauseScreen', callback: () => void): void;
 	on(event: 'hidePauseScreen', callback: () => void): void;
 	on(event: 'showEpisodeScreen', callback: () => void): void;
@@ -1550,6 +1569,7 @@ export default class Base {
 	off(event: 'finished', callback: () => any): void;
 	off(event: 'volume', callback: () => void): void;
 	off(event: 'dispose', callback: () => void): void;
+	off(event: 'remove', callback: () => void): void;
 	off(event: 'showPauseScreen', callback: () => void): void;
 	off(event: 'hidePauseScreen', callback: () => void): void;
 	off(event: 'showEpisodeScreen', callback: () => void): void;
@@ -1634,7 +1654,8 @@ export default class Base {
 	once(event: 'ended', callback: (data: any) => void): void;
 	once(event: 'finished', callback: () => void): void;
 	once(event: 'volume', callback: (data: VolumeState) => void): void;
-	once(event: 'dispose', callback: (data: any) => void): void;
+	once(event: 'dispose', callback: () => void): void;
+	once(event: 'remove', callback: () => void): void;
 	once(event: 'showPauseScreen', callback: () => void): void;
 	once(event: 'hidePauseScreen', callback: () => void): void;
 	once(event: 'showEpisodeScreen', callback: () => void): void;

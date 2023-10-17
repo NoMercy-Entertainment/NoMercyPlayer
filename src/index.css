@@ -329,6 +329,11 @@
     outline: none !important;
 }
 
+.jwplayer {
+    width: 100% !important;
+    height: 100% !important;
+}
+
 .jw-text-track-display {
     translate: 0 1rem;
     transition: translate 420ms ease-in-out;

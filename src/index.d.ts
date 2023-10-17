@@ -166,6 +166,7 @@ export interface OriginalPlayer extends Player {
 }
 
 export interface Player {
+	options: VideoPlayerOptions;
 	isPlaying(): boolean;
 	cycleAspectRatio(): void;
 	isTv(): boolean;
@@ -207,6 +208,7 @@ export interface Player {
 }
 
 export interface PlaylistItem {
+	production: boolean;
     description: string;
     duration: string;
     episode: number;
@@ -284,6 +286,7 @@ export interface VideoPlayer extends OriginalPlayer {
 type StretchOptions = 'uniform'|'exactfit'|'fill'|'none';
 
 export interface VideoPlayerOptions {
+	disableMediaControls?: boolean;
 	skippers?: boolean;
 	stretching?: StretchOptions;
 	disableControls?: boolean;

@@ -303,6 +303,13 @@ export default class Functions extends Base {
 	}
 
 	/**
+	 * Stops the player.
+	 */
+	stop() {
+		this.player.stop();
+	}
+
+	/**
 	 * Toggles the playback state of the player.
 	 * If the player is currently playing, it will pause it.
 	 * If the player is currently paused, it will play it.
@@ -738,6 +745,7 @@ export default class Functions extends Base {
 			this.player.load(playlist);
 		} else {
 			this.player.playlist(playlist);
+			this.play();
 		}
 	}
 
@@ -762,7 +770,7 @@ export default class Functions extends Base {
 	 * @returns {boolean} True if the player has more than one playlist, false otherwise.
 	 */
 	hasPlaylists(): boolean {
-		return this.getPlaylist().length > 1;
+		return this.getPlaylist().length > 0;
 	}
 
 	/**
@@ -1210,7 +1218,7 @@ export default class Functions extends Base {
 	 * @returns The file associated with the thumbnail of the current playlist item, or undefined if no thumbnail is found.
 	 */
 	getTimeFile() {
-		return this.getPlaylistItem()?.metadata.find((t: { kind: string }) => t.kind === 'thumbnails')?.file;
+		return this.getPlaylistItem()?.metadata?.find((t: { kind: string }) => t.kind === 'thumbnails')?.file;
 	}
 
 	/**
@@ -1226,7 +1234,7 @@ export default class Functions extends Base {
 	 * @returns The chapter file, or undefined if no chapter metadata is found.
 	 */
 	#getChapterFile() {
-		return this.getPlaylistItem()?.metadata.find((t: { kind: string }) => t.kind === 'chapters')?.file;
+		return this.getPlaylistItem()?.metadata?.find((t: { kind: string }) => t.kind === 'chapters')?.file;
 	}
 
 	/**
@@ -1234,7 +1242,7 @@ export default class Functions extends Base {
 	 * @returns The chapter file, or undefined if no chapter metadata is found.
 	 */
 	#getSkipFile() {
-		return this.getPlaylistItem()?.metadata.find((t: { kind: string }) => t.kind === 'skippers')?.file;
+		return this.getPlaylistItem()?.metadata?.find((t: { kind: string }) => t.kind === 'skippers')?.file;
 	}
 
 	/**
@@ -1573,6 +1581,24 @@ export default class Functions extends Base {
 	 */
 	setToken(token: string): void {
 		this.options.accessToken = token;
+	}
+
+	videoEnding(): boolean {
+		return this.duration() - this.currentTime() < 10;
+	}
+
+	lastPlaylistItem(): boolean{
+		return this.getPlaylist().length - 1 == this.getPlaylistIndex();
+	}
+
+	clearProgress(): boolean {
+		return this.duration() - this.currentTime() <= 60 * (this.getPlaylistItem().video_type === 'tv'
+		? 5
+		: 15);
+	}
+
+	showInProduction(): boolean{
+		return this.getPlaylistItem().production!;
 	}
 
 }

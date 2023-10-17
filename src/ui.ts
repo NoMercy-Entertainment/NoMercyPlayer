@@ -233,6 +233,10 @@ export default class UI extends Functions {
 
 		this.topRow = this.#createTopRow(this.bottomBar);
 
+		this.addClasses(this.topRow, [
+			'nm-mt-4',
+		]);
+
 		const bottomRow = this.#createBottomRow(this.bottomBar);
 
 		['mouseover', 'touchstart'].forEach((event) => {
@@ -600,7 +604,7 @@ export default class UI extends Functions {
 			.addClasses(this.makeStyles('seekScrollContainerStyles'))
 			.appendTo(seekContainer);
 		
-		// this.on('item', () => {
+		this.once('item', () => {
 			this.on('preview-time', () => {
 				this.thumbs = [];
 				for (const time of this.previewTime) {
@@ -623,7 +627,7 @@ export default class UI extends Functions {
 					});
 				});
 			});
-		// });
+		});
 		
 		this.on('lastTimeTrigger', () => {
 			this.currentScrubTime = this.getClosestSeekableInterval();
@@ -1871,10 +1875,6 @@ export default class UI extends Functions {
 			parent,
 			'back'
 		);
-
-		this.addClasses(backButton, [
-			'nm-mt-4',
-		]);
 		parent.appendChild(backButton);
 
 		this.#createSVGElement(backButton, 'back', this.buttons.back, false, hovered);
@@ -2833,10 +2833,11 @@ export default class UI extends Functions {
 	}
 
 	#createCalcMenu(menuContent: HTMLElement) {
-		setTimeout(() => {
-			menuContent.style.maxHeight = `${this.getElement().getBoundingClientRect().height - 80}px`;
+		if(!this.getElement()) return;
+		// setTimeout(() => {
+			menuContent.style.maxHeight = `${this.getElement()?.getBoundingClientRect().height - 80}px`;
 			this.emit('hide-tooltip');
-		}, 0);
+		// }, 0);
 	}
 
 	#createMainMenu(parent: HTMLDivElement) {

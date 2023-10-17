@@ -11,13 +11,13 @@ export const keyBindings = <T extends Player>(player: T): Array<{ name: string; 
 		name: 'Play',
 		key: 'MediaPlay',
 		control: false,
-		function: () => player.play(),
+		function: () => !player.options.disableMediaControls && player.play(),
 	},
 	{
 		name: 'Pause',
 		key: 'MediaPause',
 		control: false,
-		function: () => player.pause(),
+		function: () => !player.options.disableMediaControls && player.pause(),
 	},
 	{
 		name: 'Toggle playback',
@@ -29,13 +29,13 @@ export const keyBindings = <T extends Player>(player: T): Array<{ name: string; 
 		name: 'Toggle playback',
 		key: 'MediaPlayPause',
 		control: false,
-		function: () => player.togglePlayback(),
+		function: () => !player.options.disableMediaControls && player.togglePlayback(),
 	},
 	{
 		name: 'Stop',
 		key: 'MediaStop',
 		control: false,
-		function: () => player.stop(),
+		function: () => !player.options.disableMediaControls && player.stop(),
 	},
 	{
 		name: 'Rewind',
@@ -47,7 +47,7 @@ export const keyBindings = <T extends Player>(player: T): Array<{ name: string; 
 		name: 'Rewind',
 		key: 'MediaRewind',
 		control: false,
-		function: () => player.rewindVideo(),
+		function: () => !player.options.disableMediaControls && player.rewindVideo(),
 	},
 	{
 		name: 'Fast forward',
@@ -59,13 +59,13 @@ export const keyBindings = <T extends Player>(player: T): Array<{ name: string; 
 		name: 'Fast forward',
 		key: 'MediaFastForward',
 		control: false,
-		function: () => player.forwardVideo(),
+		function: () => !player.options.disableMediaControls && player.forwardVideo(),
 	},
 	{
 		name: 'Previous item',
 		key: 'MediaTrackPrevious',
 		control: false,
-		function: () => player.previous(),
+		function: () => !player.options.disableMediaControls && player.previous(),
 	},
 	{
 		name: 'Previous item',
@@ -77,7 +77,7 @@ export const keyBindings = <T extends Player>(player: T): Array<{ name: string; 
 		name: 'Next item',
 		key: 'MediaTrackNext',
 		control: false,
-		function: () => player.next(),
+		function: () => !player.options.disableMediaControls && player.next(),
 	},
 	{
 		name: 'Next item',
