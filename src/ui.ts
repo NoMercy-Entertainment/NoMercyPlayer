@@ -1,9 +1,10 @@
+/* eslint-disable max-len */
 import './index.css';
 
 import { buttons, fluentIcons, Icon } from './buttons';
 import Functions from './functions';
 
-import type { VideoPlayerOptions, VideoPlayer as Types, Chapter, PlaybackState, PreviewTime, PlaylistItem, Position, VolumeState } from './index.d';
+import type { Chapter, PlaybackState, PlaylistItem, Position, PreviewTime, VideoPlayer as Types, VideoPlayerOptions, VolumeState } from './index.d';
 
 export default class UI extends Functions {
 
@@ -35,13 +36,14 @@ export default class UI extends Functions {
 		firstChild: HTMLButtonElement,
 		lastChild: HTMLButtonElement
 	}>{};
+
 	currentTimeFile = '';
 	fluentIcons: Icon = <Icon>{};
 	buttons: Icon = <Icon>{};
-	tooltip: HTMLDivElement = <HTMLDivElement>{};;
+	tooltip: HTMLDivElement = <HTMLDivElement>{};
 	hasNextTip = false;
-	sliderBar: HTMLDivElement = <HTMLDivElement>{};;
-	
+	sliderBar: HTMLDivElement = <HTMLDivElement>{};
+
 	currentScrubTime = 0;
 
 	imageBaseUrl = this.options.basePath ? '' : 'https://image.tmdb.org/t/p/w185';
@@ -55,14 +57,15 @@ export default class UI extends Functions {
 		time: PreviewTime,
 		el: HTMLDivElement
 	}[] = [];
-	image: string = '';
-	disablePauseScreen: boolean = false;
-	disableOverlay: boolean = false;
+
+	image = '';
+	disablePauseScreen = false;
+	disableOverlay = false;
 	seekContainer: HTMLDivElement = <HTMLDivElement>{};
 	shouldSlide = false;
 	thumbnail: HTMLDivElement = <HTMLDivElement>{};
-	thumbnailWidth: number = 256;
-	thumbnailHeight: number  = 144;
+	thumbnailWidth = 256;
+	thumbnailHeight = 144;
 
 	constructor(playerType: Types['playerType'], options: VideoPlayerOptions, playerId: Types['playerId'] = '') {
 		super(playerType, options, playerId);
@@ -100,7 +103,7 @@ export default class UI extends Functions {
 		});
 
 		this.on('controls', (showing) => {
-			if (this.getElement()){
+			if (this.getElement()) {
 				if (showing) {
 					this.getElement().style.cursor = 'default';
 					this.getElement()?.setAttribute('active', 'true');
@@ -117,23 +120,23 @@ export default class UI extends Functions {
 
 		this.on('back-button-hyjack', () => {
 			switch (this.currentMenu) {
-				case 'episode':
-				case 'language':
-				case 'quality':
-					this.emit('showPauseScreen');
-					break;			
-				case 'seek':
-				case 'pause':
-					this.seekContainer.style.transform = '';
-					this.play();
-					break;			
-				default:
-					if(this.hasBackEventHandler) {
-						this.emit('back');
-					} else {
-						history.back();
-					}
-					break;
+			case 'episode':
+			case 'language':
+			case 'quality':
+				this.emit('showPauseScreen');
+				break;
+			case 'seek':
+			case 'pause':
+				this.seekContainer.style.transform = '';
+				this.play();
+				break;
+			default:
+				if (this.hasBackEventHandler) {
+					this.emit('back');
+				} else {
+					history.back();
+				}
+				break;
 			}
 		});
 
@@ -185,7 +188,7 @@ export default class UI extends Functions {
 
 	#buildUI() {
 		if (this.options.disableControls) return;
-		
+
 		const overlay = this.createElement('div', 'overlay')
 			.addClasses(this.makeStyles('overlayStyles'))
 			.get();
@@ -217,6 +220,22 @@ export default class UI extends Functions {
 		};
 
 		const topBar = this.#createTopBar(overlay);
+		// this.addClasses(topBar, [
+		// 	'nm-px-2',
+		// 	'nm-pt-4',
+		// 	'nm-pl-6',
+		// 	'nm-pr-8',
+		// ]);
+
+		this.#createBackButton(topBar);
+		this.#createCloseButton(topBar);
+		this.#createDivider(topBar);
+		const currentItem = this.#createTvCurrentItem(topBar);
+		this.addClasses(currentItem, [
+			'nm-px-2',
+			'nm-pt-2',
+			'nm-z-0',
+		]);
 
 		if (!this.options.disableTouchControls) {
 			this.#createCenter(overlay);
@@ -225,17 +244,15 @@ export default class UI extends Functions {
 		this.bottomBar = this.#createBottomBar(overlay);
 
 		this.bottomBar.onmouseleave = (e) => {
-			const playerRect = this.getVideoElement().getBoundingClientRect();
-			if (e.x > playerRect.left && e.x < playerRect.right && e.y > playerRect.top && e.y < playerRect.bottom) return;
+			const playerRect = this.getVideoElement()?.getBoundingClientRect();
+			if (!playerRect || (e.x > playerRect.left && e.x < playerRect.right && e.y > playerRect.top && e.y < playerRect.bottom)) return;
 
 			this.#hideControls();
 		};
 
 		this.topRow = this.#createTopRow(this.bottomBar);
 
-		this.addClasses(this.topRow, [
-			'nm-mt-4',
-		]);
+		this.addClasses(this.topRow, ['nm-mt-4']);
 
 		const bottomRow = this.#createBottomRow(this.bottomBar);
 
@@ -252,21 +269,24 @@ export default class UI extends Functions {
 			});
 		});
 
-		this.#createBackButton(topBar);
-
 		this.#createProgressBar(this.topRow);
 
 		this.#createPlaybackButton(bottomRow);
 
+		const join = this.getParameterByName('join');
+
+		if (!join) {
+			this.#createPreviousButton(bottomRow);
+
+			this.#createSeekBackButton(bottomRow);
+
+			this.#createSeekForwardButton(bottomRow);
+
+			this.#createNextButton(bottomRow);
+
+		}
+
 		this.#createVolumeButton(bottomRow);
-
-		this.#createPreviousButton(bottomRow);
-
-		this.#createSeekBackButton(bottomRow);
-
-		this.#createSeekForwardButton(bottomRow);
-
-		this.#createNextButton(bottomRow);
 
 		this.#createTime(bottomRow, 'current', ['nm-ml-2']);
 		this.#createDivider(bottomRow);
@@ -275,7 +295,9 @@ export default class UI extends Functions {
 		this.#createTheaterButton(bottomRow);
 		this.#createPIPButton(bottomRow);
 
-		this.#createPlaylistsButton(bottomRow);
+		if (!join) {
+			this.#createPlaylistsButton(bottomRow);
+		}
 		this.#createSpeedButton(bottomRow);
 		this.#createCaptionsButton(bottomRow);
 		this.#createAudioButton(bottomRow);
@@ -299,7 +321,7 @@ export default class UI extends Functions {
 
 	#buildTvUI() {
 		if (this.options.disableControls) return;
-		
+
 		const overlay = this.createElement('div', 'overlay')
 			.addClasses(this.makeStyles('overlayStyles'))
 			.get();
@@ -309,25 +331,28 @@ export default class UI extends Functions {
 		this.#createSpinnerContainer(overlay);
 
 		this.overlay = overlay;
-		
+
 		(document.activeElement as HTMLElement).addEventListener('keydown', (e) => {
-			if(this.isPlaying() && e.key == 'Enter') {
+			if (this.isPlaying() && e.key == 'Enter') {
 				this.pause();
-			} else  {
+			} else {
 				this.#dynamicControls();
 			}
 		});
-				
+
 		overlay.addEventListener('keydown', (e) => {
-			if(!this.options.disableTouchControls) {
+			if (!this.options.disableTouchControls) {
+				//
 			}
 			if (e.key == 'ArrowLeft') {
+				//
 			} else if (e.key == 'ArrowRight') {
+				//
 			} else if (e.key == 'ArrowUp' && !this.options.disableTouchControls) {
 				e.preventDefault();
 			} else if (e.key == 'ArrowDown' && !this.options.disableTouchControls) {
 				e.preventDefault();
-			} 
+			}
 		});
 
 		if (!this.getElement().querySelector('#overlay')) {
@@ -342,7 +367,7 @@ export default class UI extends Functions {
 
 		this.on('pause', () => {
 			if (this.disablePauseScreen) return;
-			
+
 			this.emit('showPauseScreen');
 		});
 		this.on('play', () => {
@@ -374,8 +399,8 @@ export default class UI extends Functions {
 		const background = this.createElement('div', 'background')
 			.addClasses(this.makeStyles('backgroundStyles'))
 			.appendTo(tvOverlay);
-			
-			
+
+
 		const topBar = this.#createTopBar(tvOverlay);
 		this.addClasses(topBar, [
 			'nm-px-10',
@@ -385,18 +410,12 @@ export default class UI extends Functions {
 
 		const backButton = this.#createBackButton(topBar, true);
 		if (backButton) {
-			this.addClasses(backButton, [
-				'children:nm-stroke-2'
-			]);
+			this.addClasses(backButton, ['children:nm-stroke-2']);
 		}
 		const restartButton = this.#createRestartButton(topBar, true);
-		this.addClasses(restartButton, [
-			'children:nm-stroke-2'
-		]);
+		this.addClasses(restartButton, ['children:nm-stroke-2']);
 		const nextButton = this.#createNextButton(topBar, true);
-		this.addClasses(nextButton, [
-			'children:nm-stroke-2'
-		]);
+		this.addClasses(nextButton, ['children:nm-stroke-2']);
 		this.#createDivider(topBar);
 		this.#createTvCurrentItem(topBar);
 
@@ -410,27 +429,27 @@ export default class UI extends Functions {
 			.appendTo(bottomBar);
 
 		const playbackButton = this.#createPlaybackButton(bottomRow, true);
-		
+
 		this.#createTime(bottomRow, 'current', []);
 		this.#createTvProgressBar(bottomRow);
 		this.#createTime(bottomRow, 'remaining', ['nm-mr-14']);
 
 		this.#createNextUp(tvOverlay);
-				
+
 		this.on('show-seek-container', (value) => {
-			if(value){
+			if (value) {
 				background.style.opacity = '1';
-			} else {		
+			} else {
 				background.style.opacity = '0';
 			}
 		});
 
 		this.on('controls', (value) => {
-			if(value && this.currentMenu !== 'seek' && !this.controlsVisible) {
+			if (value && this.currentMenu !== 'seek' && !this.controlsVisible) {
 				playbackButton.focus();
 			}
 		});
-		
+
 		this.on('pause', () => {
 			background.style.opacity = '1';
 		});
@@ -442,13 +461,13 @@ export default class UI extends Functions {
 			this.hideSeekMenu();
 		});
 
-		
+
 		let activeButton = backButton ?? restartButton ?? nextButton;
 
 		[backButton, restartButton, nextButton].forEach((button) => {
 			button?.addEventListener('keydown', (e) => {
 				if (e.key == 'ArrowDown') {
-					if(this.nextUp.style.display == 'none') {
+					if (this.nextUp.style.display == 'none') {
 						playbackButton?.focus();
 					} else {
 						this.nextUp.lastChild?.focus();
@@ -470,9 +489,9 @@ export default class UI extends Functions {
 					(activeButton || restartButton)?.focus();
 				} else if (e.key == 'ArrowDown') {
 					playbackButton.focus();
-				} else if(e.key == 'ArrowLeft'){
+				} else if (e.key == 'ArrowLeft') {
 					this.nextUp.firstChild?.focus();
-				} else if(e.key == 'ArrowRight'){
+				} else if (e.key == 'ArrowRight') {
 					this.nextUp.lastChild?.focus();
 				}
 			});
@@ -482,7 +501,7 @@ export default class UI extends Functions {
 			button?.addEventListener('keydown', (e) => {
 				if (e.key == 'ArrowUp') {
 					e.preventDefault();
-					if(this.nextUp.style.display == 'none') {
+					if (this.nextUp.style.display == 'none') {
 						activeButton?.focus();
 					} else {
 						this.nextUp.lastChild?.focus();
@@ -490,52 +509,54 @@ export default class UI extends Functions {
 				}
 			});
 		});
-		
+
 		[this.getVideoElement(), tvOverlay].forEach((button) => {
 			(button as unknown as HTMLButtonElement)?.addEventListener('keydown', (e: KeyboardEvent) => {
 				if (e.key == 'ArrowLeft') {
+					// eslint-disable-next-line max-len
 					if ([backButton, restartButton, nextButton, this.nextUp.firstChild, this.nextUp.lastChild].includes(e.target as HTMLButtonElement)) {
 						return;
-					} else {
-						e.preventDefault();
 					}
+					e.preventDefault();
+
 					this.showSeekMenu();
-			
-					if (!this.shouldSlide){
+
+					if (this.shouldSlide) {
+						this.currentScrubTime = this.getClosestSeekableInterval();
+						this.shouldSlide = false;
+					} else {
 						const newScrubbTime = this.currentScrubTime - 10;
 
 						this.emit('currentScrubTime', {
 							...this.getTimeState(),
 							position: newScrubbTime,
 						});
-					} else {
-						this.currentScrubTime = this.getClosestSeekableInterval();
-						this.shouldSlide = false;
 					};
-					
+
 				} else if (e.key == 'ArrowRight') {
+					// eslint-disable-next-line max-len
 					if ([backButton, restartButton, nextButton, this.nextUp.firstChild, this.nextUp.lastChild].includes(e.target as HTMLButtonElement)) {
 						return;
-					} else {
-						e.preventDefault();
 					}
+					e.preventDefault();
+
 					this.showSeekMenu();
-			
-					if (!this.shouldSlide){
+
+					if (this.shouldSlide) {
+						this.currentScrubTime = this.getClosestSeekableInterval();
+						this.shouldSlide = false;
+					} else {
 						const newScrubbTime = this.currentScrubTime + 10;
 						this.emit('currentScrubTime', {
 							...this.getTimeState(),
 							position: newScrubbTime,
 						});
-					} else {
-						this.currentScrubTime = this.getClosestSeekableInterval();
-						this.shouldSlide = false;
 					};
 				}
 			});
 		});
 
-		
+
 		[this.getVideoElement(), playbackButton, backButton, restartButton, nextButton].forEach((button) => {
 			(button as unknown as HTMLButtonElement)?.addEventListener('keydown', (e: KeyboardEvent) => {
 				if (e.key == 'ArrowUp') {
@@ -555,7 +576,7 @@ export default class UI extends Functions {
 
 		return bottomBar;
 	}
-	
+
 	getClosestSeekableInterval() {
 		const scrubTime = this.currentTime();
 		const intervals = this.previewTime;
@@ -568,19 +589,19 @@ export default class UI extends Functions {
 	showSeekMenu() {
 		this.currentMenu = 'seek';
 		this.disablePauseScreen = true;
-		
+
 		this.emit('show-seek-container', true);
 	}
-	
+
 	hideSeekMenu() {
 		this.currentMenu = null;
 		this.disablePauseScreen = false;
-		
+
 		this.disableOverlay = false;
 		this.currentMenu = null;
 		this.disablePauseScreen = false;
 		this.shouldSlide = true;
-		
+
 		this.emit('show-seek-container', false);
 	}
 
@@ -593,24 +614,24 @@ export default class UI extends Functions {
 		const seekScrollCloneContainer = this.createElement('div', 'seek-scroll-clone-container')
 			.addClasses(this.makeStyles('seekScrollCloneStyles'))
 			.appendTo(seekContainer);
-			
+
 		// for (let index = 0; index <= 4; index += 1) {
-			this.createElement('div', `thumbnail-clone-${1}`)
-				.addClasses(this.makeStyles('thumbnailCloneStyles'))
-				.appendTo(seekScrollCloneContainer);
+		this.createElement('div', `thumbnail-clone-${1}`)
+			.addClasses(this.makeStyles('thumbnailCloneStyles'))
+			.appendTo(seekScrollCloneContainer);
 		// }
-		
+
 		const seekScrollContainer = this.createElement('div', 'seek-scroll-container')
 			.addClasses(this.makeStyles('seekScrollContainerStyles'))
 			.appendTo(seekContainer);
-		
+
 		this.once('item', () => {
 			this.on('preview-time', () => {
 				this.thumbs = [];
 				for (const time of this.previewTime) {
 					this.thumbs.push({
 						time,
-						el: this.#createThumbnail(time, seekScrollContainer)
+						el: this.#createThumbnail(time),
 					});
 				}
 
@@ -628,7 +649,7 @@ export default class UI extends Functions {
 				});
 			});
 		});
-		
+
 		this.on('lastTimeTrigger', () => {
 			this.currentScrubTime = this.getClosestSeekableInterval();
 			this.emit('currentScrubTime', {
@@ -643,29 +664,29 @@ export default class UI extends Functions {
 			} else if (data.position >= this.duration()) {
 				data.position = this.duration() - 10;
 			};
-			
+
 			const thumb = this.thumbs.find((thumb) => {
 				return data.position >= thumb.time.start && data.position <= thumb.time.end;
 			});
-			
+
 			this.currentScrubTime = data.position;
 
-			if(!thumb) return;
+			if (!thumb) return;
 
 
 			this.#scrollIntoView(thumb.el);
-			
+
 			const thumbIndex = this.thumbs.findIndex(e => e.el == thumb.el);
 
-			if(!thumbIndex) return;
-			
+			if (!thumbIndex) return;
+
 			const max = 3;
 
 			const minThumbIndex = thumbIndex - max;
 			const maxThumbIndex = thumbIndex + max;
-		
+
 			for (const [index, key] of this.thumbs.entries()) {
-				if(index > minThumbIndex && index < maxThumbIndex) {
+				if (index > minThumbIndex && index < maxThumbIndex) {
 					key.el.style.opacity = '1';
 				} else {
 					key.el.style.opacity = '0';
@@ -675,20 +696,20 @@ export default class UI extends Functions {
 		});
 
 		this.on('show-seek-container', (value) => {
-			if(value){
+			if (value) {
 				seekContainer.style.transform = 'none';
-					
+
 				this.player.pause();
-			} else {		
+			} else {
 				this.seekContainer.style.transform = '';
 			}
 		});
-		
+
 		return seekContainer;
 	}
 
-	#scrollIntoView(element: HTMLElement){
-		
+	#scrollIntoView(element: HTMLElement) {
+
 		const scrollDuration = 200;
 		const parentElement = element.parentElement as HTMLElement;
 		const elementLeft = element.getBoundingClientRect().left + (element.offsetWidth / 2) - (parentElement.offsetWidth / 2);
@@ -721,7 +742,7 @@ export default class UI extends Functions {
 		const currentItemTitleContainer = this.createElement('div', 'current-item-title-container')
 			.addClasses(this.makeStyles('tvCurrentItemTitleContainerStyles'))
 			.appendTo(currentItemContainer);
-			
+
 		const currentItemEpisode = this.createElement('div', 'current-item-episode')
 			.addClasses(this.makeStyles('tvCurrentItemEpisodeStyles'))
 			.appendTo(currentItemTitleContainer);
@@ -734,14 +755,17 @@ export default class UI extends Functions {
 			const item = this.getPlaylistItem();
 			currentItemShow.innerHTML = this.breakLogoTitle(item.show);
 			currentItemEpisode.innerHTML = '';
-			if(item.season){
+			if (item.season) {
 				currentItemEpisode.innerHTML += `${this.localize('S')}${item.season}`;
 			}
-			if(item.episode){
+			if (item.season && item.episode) {
 				currentItemEpisode.innerHTML += `: ${this.localize('E')}${item.episode}`;
-				currentItemTitle.innerHTML = `"${item.title}"`;
 			}
+			currentItemTitle.innerHTML = item.title.replace(item.show, '').length > 0 ? `"${item.title.replace(item.show, '').replace('%S', this.localize('S'))
+				.replace('%E', this.localize('E'))}"` : '';
 		});
+
+		return currentItemContainer;
 
 	}
 
@@ -779,7 +803,7 @@ export default class UI extends Functions {
 		const ratingImage = this.createElement('img', 'rating-image')
 			.addClasses(this.makeStyles('ratingImageStyles'))
 			.appendTo(ratingContainer);
-			
+
 
 		const episodesCount = this.createElement('span', 'episodes-count-text')
 			.addClasses(this.makeStyles('episodesCountStyles'))
@@ -790,38 +814,36 @@ export default class UI extends Functions {
 
 			if (!image || image == '' || image.includes('null') || image.includes('undefined')) {
 				fallbackText.textContent = this.breakLogoTitle(this.getPlaylistItem().show);
-				let size = `calc(110px / ${fallbackText.textContent.length} + 3ch)`;
-
-				fallbackText.style.fontSize = size;
+				fallbackText.style.fontSize = `calc(110px / ${fallbackText.textContent.length} + 3ch)`;
 
 				fallbackText.style.display = 'flex';
 				logo.style.display = 'none';
-				
+
 			} else {
 
 				logo.style.display = 'block';
 				fallbackText.style.display = 'none';
 
-				if(image?.startsWith('http')) {
+				if (image?.startsWith('http')) {
 					logo.src = image;
 				} else {
 					logo.src = image && image != '' ? `${this.imageBaseUrl}${image}` : '';
 				}
 			}
-			
-			year.innerHTML = this.getPlaylistItem().year;
-			
+
+			year.innerHTML = this.getPlaylistItem().year.toString();
+
 			ratingImage.removeAttribute('src');
 			ratingImage.removeAttribute('alt');
 			ratingImage.style.opacity = '0';
-			
-			if(this.getPlaylist().length > 1) {
-				episodesCount.innerHTML = this.getPlaylist().length + ' ' + this.localize('episodes');
+
+			if (this.getPlaylist().length > 1) {
+				episodesCount.innerHTML = `${this.getPlaylist().length} ${this.localize('episodes')}`;
 			}
 
 			const rating = this.getPlaylistItem().rating;
 			if (!rating) return;
-			
+
 			ratingImage.src = `https://storage.nomercy.tv/laravel/kijkwijzer/${rating.image}`;
 			ratingImage.alt = rating.rating;
 			ratingImage.style.opacity = '1';
@@ -855,7 +877,8 @@ export default class UI extends Functions {
 			.appendTo(overviewContainer);
 
 		this.on('item', () => {
-			title.innerHTML = this.getPlaylistItem().title;
+			title.innerHTML = this.getPlaylistItem().title.replace(this.getPlaylistItem().show, '').replace('%S', this.localize('S'))
+				.replace('%E', this.localize('E'));
 			description.innerHTML = this.getPlaylistItem().description;
 		});
 
@@ -865,11 +888,9 @@ export default class UI extends Functions {
 
 		const resumeButton = this.#createTvButton(buttonContainer, 'play', 'Resume playback', this.play, this.buttons.play);
 
-		this.#createTvButton(buttonContainer, 'restart', 'Play from beginning', this.restart,
-			this.buttons.restart);
+		this.#createTvButton(buttonContainer, 'restart', 'Play from beginning', this.restart, this.buttons.restart);
 
-		const episodeMenuButton = this.#createTvButton(buttonContainer, 'showEpisodeMenu', 'Episodes', () => this.emit('showEpisodeScreen'),
-			this.buttons.playlist);
+		const episodeMenuButton = this.#createTvButton(buttonContainer, 'showEpisodeMenu', 'Episodes', () => this.emit('showEpisodeScreen'), this.buttons.playlist);
 
 		episodeMenuButton.style.display = 'none';
 
@@ -877,35 +898,38 @@ export default class UI extends Functions {
 			this.emit('switch-season', this.getPlaylistItem().season);
 		});
 
-		const languageMenuButton = this.#createTvButton(buttonContainer, 'showLanguageMenu', 'Audio and subtitles', () => this.emit('showLanguageScreen'),
-			this.buttons.language);
-			
+		const languageMenuButton = this.#createTvButton(buttonContainer, 'showLanguageMenu', 'Audio and subtitles', () => this.emit('showLanguageScreen'), this.buttons.language);
+
 		languageMenuButton.style.display = 'none';
 
-		// this.#createTvButton(buttonContainer, 'showQualityMenu', 'Qualities', () => this.emit('showQualityScreen'), 
+		// this.#createTvButton(buttonContainer, 'showQualityMenu', 'Qualities', () => this.emit('showQualityScreen'),
 		// 	this.buttons.quality);
 
-		const backButton = this.#createTvButton(leftSide, 'back', 'Stop', () => this.emit('back'),
-			this.buttons.back);
+		const backButton = this.#createTvButton(leftSide, 'back', 'Stop', () => this.emit('back'), this.buttons.back);
 
-		backButton.addEventListener('click', (e) => {
+		backButton.addEventListener('click', () => {
 			this.currentMenu = null;
 		});
-			
+
 		backButton.addEventListener('keyup', (e) => {
 			if (e.key == 'ArrowLeft') {
+				//
 			} else if (e.key == 'ArrowRight') {
+				//
 			} else if (e.key == 'ArrowUp' && !this.options.disableTouchControls) {
 				const el = (backButton.previousElementSibling as HTMLButtonElement);
-				if(el?.nodeName == 'BUTTON') {
+				if (el?.nodeName == 'BUTTON') {
 					el?.focus();
 				} else {
-					// @ts-ignore
-					[...(backButton.previousElementSibling as HTMLButtonElement).querySelectorAll<HTMLButtonElement>('button')].at(-1)?.focus();
+
+					[...(backButton.previousElementSibling as HTMLButtonElement).querySelectorAll<HTMLButtonElement>('button')]
+						.filter(el => el.style.display !== 'none')
+						.at(-1)
+						?.focus();
 				}
 			} else if (e.key == 'ArrowDown' && !this.options.disableTouchControls) {
 				(backButton.nextElementSibling as HTMLButtonElement)?.focus();
-			} 
+			}
 		});
 
 		this.addClasses(backButton, [
@@ -975,23 +999,26 @@ export default class UI extends Functions {
 				seasonButtonContainer,
 				`season-${season.season}`,
 				season,
-				() => this.emit('switch-season', season.season),
+				() => this.emit('switch-season', season.season)
 			);
 		}
 
-		lastSeasonButton.addEventListener('keyup', (e) => {
+		lastSeasonButton.addEventListener?.('keyup', (e) => {
 			if (e.key == 'ArrowLeft') {
+				//
 			} else if (e.key == 'ArrowRight') {
+				//
 			} else if (e.key == 'ArrowUp' && !this.options.disableTouchControls) {
+				//
 			} else if (e.key == 'ArrowDown' && !this.options.disableTouchControls) {
 				(lastSeasonButton.nextElementSibling as HTMLButtonElement)?.focus();
 				const el = (lastSeasonButton.nextElementSibling as HTMLButtonElement);
-				if(el?.nodeName == 'BUTTON') {
+				if (el?.nodeName == 'BUTTON') {
 					el?.focus();
 				} else {
 					((lastSeasonButton.parentElement as HTMLButtonElement).nextElementSibling as HTMLButtonElement)?.focus();
 				}
-			} 
+			}
 		});
 
 		const backButton = this.#createTvButton(leftSide, 'episode-back', 'Back', () => this.emit('showPauseScreen'), this.buttons.back);
@@ -1004,31 +1031,38 @@ export default class UI extends Functions {
 			'!nm-w-[95%]',
 		]);
 
-		backButton.addEventListener('click', (e) => {
+		backButton.addEventListener('click', () => {
 			this.currentMenu = null;
 		});
 
 		backButton.addEventListener('keyup', (e) => {
 			if (e.key == 'ArrowLeft') {
+				//
 			} else if (e.key == 'ArrowRight') {
-				// @ts-ignore
-				[...document.querySelectorAll<HTMLButtonElement>('[id^=playlist-]')].filter(el => getComputedStyle(el).display == 'flex').at(this.getPlaylistItem().episode -1).focus();
+				[...document.querySelectorAll<HTMLButtonElement>('[id^=playlist-]')]
+					.filter(el => getComputedStyle(el).display == 'flex')
+					.at(this.getPlaylistItem().episode - 1)
+					?.focus();
 			} else if (e.key == 'ArrowUp' && !this.options.disableTouchControls) {
-				// @ts-ignore
-				[...(backButton.previousElementSibling as HTMLButtonElement).querySelectorAll<HTMLButtonElement>('button')].at(-1)?.focus();
+				[
+					...(backButton.previousElementSibling as HTMLButtonElement)
+						.querySelectorAll<HTMLButtonElement>('button'),
+				]
+					.at(-1)?.focus();
 			} else if (e.key == 'ArrowDown' && !this.options.disableTouchControls) {
-			} 
+				//
+			}
 		});
 
 		const rightSide = this.createElement('div', 'episode-screen-right-side')
 			.addClasses(this.makeStyles('episodeRightSideStyles'))
 			.appendTo(episodeScreen);
-			
-			
+
+
 		this.episodeScrollContainer = this.createElement('div', 'episode-scroll-container')
 			.addClasses(this.makeStyles('episodeScrollContainerStyles'))
 			.appendTo(rightSide);
-	
+
 
 		for (const [index, item] of this.getPlaylist().entries() ?? []) {
 			this.#createTvEpisodeMenuButton(this.episodeScrollContainer, item, index);
@@ -1054,7 +1088,7 @@ export default class UI extends Functions {
 		return episodeScreen;
 	}
 
-	#createTvEpisodeMenuButton(parent: HTMLDivElement, item: PlaylistItem, index: number, hovered = false) {
+	#createTvEpisodeMenuButton(parent: HTMLDivElement, item: PlaylistItem, index: number) {
 
 		const button = this.createElement('button', `playlist-${item.id}`)
 			.addClasses(this.makeStyles('playlistMenuButtonStyles'))
@@ -1081,7 +1115,7 @@ export default class UI extends Functions {
 			.appendTo(leftSide);
 		image.setAttribute('loading', 'lazy');
 
-		if(item.image?.startsWith('http')) {
+		if (item.image?.startsWith('http')) {
 			image.src = item.image ?? '';
 		} else {
 			image.src = item.image && item.image != '' ? `${this.imageBaseUrl}${item.image}` : '';
@@ -1127,7 +1161,8 @@ export default class UI extends Functions {
 		const episodeMenuButtonTitle = this.createElement('span', `episode-${item.id}-title`)
 			.addClasses(this.makeStyles('tvEpisodeMenuButtonTitleStyles'))
 			.appendTo(episodeMenuButtonRightSide);
-		episodeMenuButtonTitle.textContent = this.lineBreakShowTitle(item.title.replace('%S', this.localize('S')).replace('%E', this.localize('E')));
+		episodeMenuButtonTitle.textContent = this.lineBreakShowTitle(item.title.replace(item.show, '').replace('%S', this.localize('S'))
+			.replace('%E', this.localize('E')));
 
 		const episodeMenuButtonOverview = this.createElement('span', `episode-${item.id}-overview`)
 			.addClasses(this.makeStyles('tvEpisodeMenuButtonOverviewStyles'))
@@ -1151,8 +1186,8 @@ export default class UI extends Functions {
 
 		this.on('switch-season', (season) => {
 			this.selectedSeason = season;
-			
-			if(this.getPlaylistItem().id == item.id){
+
+			if (this.getPlaylistItem().id == item.id) {
 				setTimeout(() => {
 					button.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
 				}, 50);
@@ -1181,11 +1216,12 @@ export default class UI extends Functions {
 			if (e.key == 'ArrowLeft') {
 				document.querySelector<HTMLButtonElement>(`#season-${this.getPlaylistItem().season}`)?.focus();
 			} else if (e.key == 'ArrowRight') {
+				//
 			} else if (e.key == 'ArrowUp' && !this.options.disableTouchControls) {
 				(button.previousElementSibling as HTMLButtonElement)?.focus();
 			} else if (e.key == 'ArrowDown' && !this.options.disableTouchControls) {
 				(button.nextElementSibling as HTMLButtonElement)?.focus();
-			} 
+			}
 		});
 
 		button.addEventListener('focus', () => {
@@ -1211,14 +1247,14 @@ export default class UI extends Functions {
 	}
 
 	#getClosestElement(element: HTMLButtonElement, selector: string) {
-		// @ts-ignore
+
 		const arr = [...document.querySelectorAll<HTMLButtonElement>(selector)].filter(el => getComputedStyle(el).display == 'flex');
 		const originEl = element!.getBoundingClientRect();
 
 		const el = arr.find(el => (el.getBoundingClientRect().top + (el.getBoundingClientRect().height / 2)) == this.#nearestValue(arr.map(el => (el.getBoundingClientRect().top + (el.getBoundingClientRect().height / 2))), originEl.top + (originEl.height / 2)));
-		
+
 		// if(arr.findIndex(e => e.id == el.id) == 1) {
-			// return el?.previousSibling ?? el;
+		// return el?.previousSibling ?? el;
 		// }
 		return el;
 	}
@@ -1246,24 +1282,27 @@ export default class UI extends Functions {
 
 		button.addEventListener('keyup', (e) => {
 			if (e.key == 'ArrowLeft') {
+				//
 			} else if (e.key == 'ArrowRight') {
-				if(this.selectedSeason == this.getPlaylistItem().season){
-					// @ts-ignore
-					[...document.querySelectorAll<HTMLButtonElement>('[id^=playlist-]')].filter(el => getComputedStyle(el).display == 'flex').at(this.getPlaylistItem().episode -1).focus();
+				if (this.selectedSeason == this.getPlaylistItem().season) {
+					[...document.querySelectorAll<HTMLButtonElement>('[id^=playlist-]')]
+						.filter(el => getComputedStyle(el).display == 'flex')
+						.at(this.getPlaylistItem().episode - 1)
+						?.focus();
 				} else {
-					this.#getClosestElement(button, '[id^=playlist-]').focus();
+					this.#getClosestElement(button, '[id^=playlist-]')?.focus();
 				}
 			} else if (e.key == 'ArrowUp' && !this.options.disableTouchControls) {
 				(button.previousElementSibling as HTMLButtonElement)?.focus();
 			} else if (e.key == 'ArrowDown' && !this.options.disableTouchControls) {
 				(button.nextElementSibling as HTMLButtonElement)?.focus();
-			} 
+			}
 		});
 
 		button.addEventListener('click', () => {
 			action?.bind(this)();
 		});
-		
+
 		this.on('switch-season', (season) => {
 			if (season === data.season) {
 				button.classList.add('nm-outline-white');
@@ -1293,16 +1332,14 @@ export default class UI extends Functions {
 			.addClasses(this.makeStyles('tvSeasonButtonTextStyles'))
 			.appendTo(button);
 
-		buttonText.innerHTML = data.seasonName 
-			? `
+		buttonText.innerHTML = data.seasonName ? `
 				<span>
 					${data.seasonName}  
 				</span>
 				<span>
 					${data.episodes} ${this.localize('episodes')}
 				</span>
-			`
-			: `<span>
+			` : `<span>
 					${this.localize('Season')} ${data.season}
 				</span>
 				<span>
@@ -1312,6 +1349,45 @@ export default class UI extends Functions {
 
 		return button;
 
+	}
+
+	#getVisibleButtons(element: HTMLButtonElement) {
+		const container = element.parentElement;
+		const buttons = container?.querySelectorAll<HTMLButtonElement>('button');
+		if (!buttons || buttons?.length == 0) return;
+
+		const visibleButtons = [...buttons].filter(el => el.style.display != 'none');
+
+		const currentButtonIndex = visibleButtons.findIndex(el => el == element);
+
+		return {
+			visibleButtons,
+			currentButtonIndex,
+		};
+	}
+
+	#findPreviousVisibleButton(element: HTMLButtonElement) {
+		const buttons = this.#getVisibleButtons(element);
+		if (!buttons) return;
+
+		const { visibleButtons, currentButtonIndex } = buttons;
+
+		// eslint-disable-next-line no-unreachable-loop
+		for (let i = currentButtonIndex; i >= 0; i--) {
+			return visibleButtons[i - 1];
+		}
+	}
+
+	#findNextVisibleButton(element: HTMLButtonElement) {
+		const buttons = this.#getVisibleButtons(element);
+		if (!buttons) return;
+
+		const { visibleButtons, currentButtonIndex } = buttons;
+
+		// eslint-disable-next-line no-unreachable-loop
+		for (let i = currentButtonIndex; i < visibleButtons.length; i++) {
+			return visibleButtons[i + 1];
+		}
 	}
 
 	#createTvButton(parent: HTMLElement, id: string, text: string, action: () => void, icon?: Icon['path']) {
@@ -1326,18 +1402,16 @@ export default class UI extends Functions {
 		});
 
 		button.addEventListener('keyup', (e) => {
-			if (e.key == 'ArrowLeft') {
-			} else if (e.key == 'ArrowRight') {
-			} else if (e.key == 'ArrowUp' && !this.options.disableTouchControls) {
-				(button.previousElementSibling as HTMLButtonElement)?.focus();
+			if (e.key == 'ArrowUp' && !this.options.disableTouchControls) {
+				this.#findPreviousVisibleButton(button)?.focus();
 			} else if (e.key == 'ArrowDown' && !this.options.disableTouchControls) {
-				const el = (button.nextElementSibling as HTMLButtonElement);
-				if(el) {
+				const el = this.#findNextVisibleButton(button);
+				if (el) {
 					el?.focus();
 				} else {
 					(button.parentElement?.nextElementSibling as HTMLButtonElement)?.focus();
 				}
-			} 
+			}
 		});
 
 		button.addEventListener('click', () => action?.bind(this)());
@@ -1384,24 +1458,26 @@ export default class UI extends Functions {
 			.appendTo(leftSide);
 
 		languageButtonContainer.style.paddingRight = '5rem';
-			
+
 		let lastSeasonButton: HTMLButtonElement = <HTMLButtonElement>{};
 
 		const eventHandler = (e: KeyboardEvent) => {
 			if (e.key == 'ArrowLeft') {
+				//
 			} else if (e.key == 'ArrowRight') {
+				//
 			} else if (e.key == 'ArrowUp' && !this.options.disableTouchControls) {
 				((e.target as HTMLButtonElement).previousElementSibling as HTMLButtonElement)?.focus();
 			} else if (e.key == 'ArrowDown' && !this.options.disableTouchControls) {
 				const el = ((e.target as HTMLButtonElement).nextElementSibling as HTMLButtonElement);
-				if(el?.nodeName == 'BUTTON') {
+				if (el?.nodeName == 'BUTTON') {
 					el?.focus();
 				} else {
 					((lastSeasonButton.parentElement as HTMLButtonElement).nextElementSibling as HTMLButtonElement)?.focus();
 				}
-			} 
-		}
-		
+			}
+		};
+
 		this.on('audio', (event) => {
 			lastSeasonButton.removeEventListener?.('keyup', eventHandler);
 
@@ -1414,7 +1490,7 @@ export default class UI extends Functions {
 					index: track.hlsjsIndex ?? index,
 				});
 			}
-			lastSeasonButton.addEventListener('keyup', eventHandler);
+			lastSeasonButton.addEventListener?.('keyup', eventHandler);
 		});
 
 		const backButton = this.#createTvButton(leftSide, 'episode-back', 'Back', () => this.emit('showPauseScreen'), this.buttons.back);
@@ -1426,21 +1502,25 @@ export default class UI extends Functions {
 			'nm-mr-2',
 			'!nm-w-[95%]',
 		]);
-		
-		backButton.addEventListener('click', (e) => {
+
+		backButton.addEventListener('click', () => {
 			this.currentMenu = null;
 		});
 
 		backButton.addEventListener('keyup', (e) => {
 			if (e.key == 'ArrowLeft') {
+				//
 			} else if (e.key == 'ArrowRight') {
-				// @ts-ignore
-				[...document.querySelectorAll<HTMLButtonElement>('[id^="subtitle-button-"]')].filter(el => getComputedStyle(el).display == 'flex').at(1).focus();
+				[...document.querySelectorAll<HTMLButtonElement>('[id^="subtitle-button-"]')]
+					.filter(el => getComputedStyle(el).display == 'flex')
+					.at(1)
+					?.focus();
 			} else if (e.key == 'ArrowUp' && !this.options.disableTouchControls) {
-				// @ts-ignore
+
 				[...(backButton.previousElementSibling as HTMLButtonElement).querySelectorAll<HTMLButtonElement>('button')].at(-1)?.focus();
 			} else if (e.key == 'ArrowDown' && !this.options.disableTouchControls) {
-			} 
+				//
+			}
 		});
 
 		const rightSide = this.createElement('div', 'language-screen-right-side')
@@ -1450,10 +1530,10 @@ export default class UI extends Functions {
 		const subtitleButtonContainer = this.createElement('div', 'subtitle-button-container')
 			.addClasses(this.makeStyles('subtitleButtonContainerStyles'))
 			.appendTo(rightSide);
-			
+
 		subtitleButtonContainer.style.paddingRight = '5rem';
 		subtitleButtonContainer.style.marginTop = '0';
-			
+
 		this.on('captions', (event) => {
 
 			subtitleButtonContainer.innerHTML = '';
@@ -1516,7 +1596,7 @@ export default class UI extends Functions {
 				if (!this.isMobile()) return;
 
 				e.stopPropagation();
-				if(this.controlsVisible && this.isPlaying()) {
+				if (this.controlsVisible && this.isPlaying()) {
 					this.#unlockControls();
 					this.#hideControls();
 				} else {
@@ -1526,7 +1606,7 @@ export default class UI extends Functions {
 		});
 
 		this.#createOverlayCenterMessage(center);
-		
+
 		this.#createSpinnerContainer(center);
 
 		if (this.isMobile()) {
@@ -1588,7 +1668,7 @@ export default class UI extends Functions {
 		});
 
 		if (this.isMobile()) {
-			const playButton = this.#createSVGElement(touchPlayback, 'bigPlay', this.buttons.bigPlay, hovered);
+			const playButton = this.createSVGElement(touchPlayback, 'bigPlay', this.buttons.bigPlay, hovered);
 			this.addClasses(playButton, this.makeStyles('touchPlaybackButtonStyles'));
 
 			this.on('pause', () => {
@@ -1693,7 +1773,7 @@ export default class UI extends Functions {
 		return divider;
 	}
 
-	#createSVGElement(parent: HTMLElement, id: string, icon: Icon['path'], hidden = false, hovered = false) {
+	createSVGElement(parent: HTMLElement, id: string, icon: Icon['path'], hidden = false, hovered = false) {
 
 		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 		svg.setAttribute('viewBox', '0 0 24 24');
@@ -1707,7 +1787,7 @@ export default class UI extends Functions {
 		]);
 
 		const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-		path.setAttribute('d', hovered ? icon.hover: icon.normal);
+		path.setAttribute('d', hovered ? icon.hover : icon.normal);
 		this.addClasses(path, [
 			'group-hover/button:nm-hidden',
 			'group-hover/volume:nm-hidden',
@@ -1741,7 +1821,7 @@ export default class UI extends Functions {
 					return;
 				}
 
-				const text = `${this.localize(icon.title)} ${this.#getButtonKeyCode(id)}`;
+				const text = `${this.localize(icon.title)} ${this.getButtonKeyCode(id)}`;
 
 				const playerRect = this.getElement().getBoundingClientRect();
 				const tipRect = parent.getBoundingClientRect();
@@ -1776,53 +1856,53 @@ export default class UI extends Functions {
 
 	}
 
-	#getButtonKeyCode(id: string) {
+	getButtonKeyCode(id: string) {
 
 		switch (id) {
-			case 'play':
-			case 'pause':
-				return `(${this.localize('SPACE')})`;
-			case 'volumeMuted':
-			case 'volumeLow':
-			case 'volumeMedium':
-			case 'volumeHigh':
-				return '(m)';
-			case 'seekBack':
-				return '(<)';
-			case 'seekForward':
-				return '(>)';
-			case 'next':
-				return '(n)';
-			case 'theater':
-				return '(t)';
-			case 'theater-enabled':
-				return '(t)';
-			case 'pip-enter':
-			case 'pip-exit':
-				return '(i)';
-			case 'playlist':
-				return '';
-			case 'previous':
-				return '(p)';
-			case 'speed':
-				return '';
-			case 'subtitle':
-			case 'subtitled':
-				return '(v)';
-			case 'audio':
-				return '(b)';
-			case 'settings':
-				return '';
-			case 'fullscreen-enable':
-			case 'fullscreen':
-				return '(f)';
-			default:
-				return '';
+		case 'play':
+		case 'pause':
+			return `(${this.localize('SPACE')})`;
+		case 'volumeMuted':
+		case 'volumeLow':
+		case 'volumeMedium':
+		case 'volumeHigh':
+			return '(m)';
+		case 'seekBack':
+			return '(<)';
+		case 'seekForward':
+			return '(>)';
+		case 'next':
+			return '(n)';
+		case 'theater':
+			return '(t)';
+		case 'theater-enabled':
+			return '(t)';
+		case 'pip-enter':
+		case 'pip-exit':
+			return '(i)';
+		case 'playlist':
+			return '';
+		case 'previous':
+			return '(p)';
+		case 'speed':
+			return '';
+		case 'subtitle':
+		case 'subtitled':
+			return '(v)';
+		case 'audio':
+			return '(b)';
+		case 'settings':
+			return '';
+		case 'fullscreen-enable':
+		case 'fullscreen':
+			return '(f)';
+		default:
+			return '';
 		}
 
 	};
 
-	#createButton(parent: HTMLElement, icon: string) {
+	createUiButton(parent: HTMLElement, icon: string) {
 
 		const button = this.createElement('button', icon)
 			.addClasses(this.makeStyles('buttonStyles'))
@@ -1834,12 +1914,14 @@ export default class UI extends Functions {
 	}
 
 	#createSettingsButton(parent: HTMLDivElement, hovered = false) {
-		const settingsButton = this.#createButton(
+		if (!this.hasSpeeds() && !this.hasAudioTracks() && !this.hasTextTracks()) return;
+
+		const settingsButton = this.createUiButton(
 			parent,
 			'settings'
 		);
 
-		this.#createSVGElement(settingsButton, 'settings', this.buttons.settings, hovered);
+		this.createSVGElement(settingsButton, 'settings', this.buttons.settings, hovered);
 
 		settingsButton.addEventListener('click', () => {
 			this.emit('hide-tooltip');
@@ -1869,15 +1951,15 @@ export default class UI extends Functions {
 	}
 
 	#createBackButton(parent: HTMLDivElement, hovered = false) {
-		if(!this.hasBackEventHandler) return;
+		if (!this.hasBackEventHandler) return;
 
-		const backButton = this.#createButton(
+		const backButton = this.createUiButton(
 			parent,
 			'back'
 		);
 		parent.appendChild(backButton);
 
-		this.#createSVGElement(backButton, 'back', this.buttons.back, false, hovered);
+		this.createSVGElement(backButton, 'back', this.buttons.back, false, hovered);
 
 		backButton.addEventListener('click', () => {
 			this.emit('hide-tooltip');
@@ -1895,8 +1977,35 @@ export default class UI extends Functions {
 		return backButton;
 	}
 
+	#createCloseButton(parent: HTMLDivElement, hovered = false) {
+		if (!this.hasCloseEventHandler) return;
+
+		const closeButton = this.createUiButton(
+			parent,
+			'close'
+		);
+		parent.appendChild(closeButton);
+
+		this.createSVGElement(closeButton, 'close', this.buttons.close, false, hovered);
+
+		closeButton.addEventListener('click', () => {
+			this.emit('hide-tooltip');
+			this.emit('close');
+		});
+
+		this.on('pip-internal', (data) => {
+			if (data) {
+				closeButton.style.display = 'none';
+			} else {
+				closeButton.style.display = 'flex';
+			}
+		});
+
+		return closeButton;
+	}
+
 	#createPlaybackButton(parent: HTMLElement, hovered = false) {
-		const playbackButton = this.#createButton(
+		const playbackButton = this.createUiButton(
 			parent,
 			'playback'
 		);
@@ -1904,8 +2013,8 @@ export default class UI extends Functions {
 
 		playbackButton.ariaLabel = this.buttons.play?.title;
 
-		const pausedButton = this.#createSVGElement(playbackButton, 'paused', this.buttons.play, false, hovered);
-		const playButton = this.#createSVGElement(playbackButton, 'playing', this.buttons.pause, true, hovered);
+		const pausedButton = this.createSVGElement(playbackButton, 'paused', this.buttons.play, false, hovered);
+		const playButton = this.createSVGElement(playbackButton, 'playing', this.buttons.pause, true, hovered);
 
 		playbackButton.addEventListener('click', (event) => {
 			event.stopPropagation();
@@ -1922,19 +2031,19 @@ export default class UI extends Functions {
 		});
 		this.on('item', () => {
 			playButton.focus();
-		})
+		});
 
 		return playbackButton;
 	}
 
 	#createSeekBackButton(parent: HTMLDivElement, hovered = false) {
-		if (this.isMobile() || !this.hasBackEventHandler) return;
-		const seekBack = this.#createButton(
+		if (this.isMobile()) return;
+		const seekBack = this.createUiButton(
 			parent,
 			'seekBack'
 		);
 
-		this.#createSVGElement(seekBack, 'seekBack', this.buttons.seekBack, hovered);
+		this.createSVGElement(seekBack, 'seekBack', this.buttons.seekBack, hovered);
 
 		seekBack.addEventListener('click', () => {
 			this.emit('hide-tooltip');
@@ -1955,12 +2064,12 @@ export default class UI extends Functions {
 
 	#createSeekForwardButton(parent: HTMLDivElement, hovered = false) {
 		if (this.isMobile()) return;
-		const seekForward = this.#createButton(
+		const seekForward = this.createUiButton(
 			parent,
 			'seekForward'
 		);
 
-		this.#createSVGElement(seekForward, 'seekForward', this.buttons.seekForward, hovered);
+		this.createSVGElement(seekForward, 'seekForward', this.buttons.seekForward, hovered);
 
 		seekForward.addEventListener('click', () => {
 			this.emit('hide-tooltip');
@@ -1991,51 +2100,49 @@ export default class UI extends Functions {
 		time.textContent = '00:00';
 
 		switch (type) {
-			case 'current':
+		case 'current':
 
-				this.on('time', (data) => {
-					time.textContent = this.humanTime(data.position);
-				});
-				
-				this.on('currentScrubTime', (data: PlaybackState) => {
-					time.textContent = this.humanTime(data.position);
-				});
-				break;
+			this.on('time', (data) => {
+				time.textContent = this.humanTime(data.position);
+			});
 
-			case 'remaining':
+			this.on('currentScrubTime', (data: PlaybackState) => {
+				time.textContent = this.humanTime(data.position);
+			});
+			break;
 
-				this.on('duration', (data) => {
-					if (data.remaining === Infinity) {
-						time.textContent = 'Live';
-					} else {
-						time.textContent = this.humanTime(data.remaining);
-					}
-				});
+		case 'remaining':
 
-				this.on('time', (data) => {
-					if (data.remaining === Infinity) {
-						time.textContent = 'Live';
-					} else {
-						time.textContent = this.humanTime(data.remaining);
-					}
-				});
-				
-				this.on('currentScrubTime', (data: PlaybackState) => {
-				});
-				break;
+			this.on('duration', (data) => {
+				if (data.remaining === Infinity) {
+					time.textContent = 'Live';
+				} else {
+					time.textContent = this.humanTime(data.remaining);
+				}
+			});
 
-			case 'duration':
-				this.on('duration', (data) => {
-					if (data.duration === Infinity) {
-						time.textContent = 'Live';
-					} else {
-						time.textContent = this.humanTime(data.duration);
-					}
-				});
-				break;
+			this.on('time', (data) => {
+				if (data.remaining === Infinity) {
+					time.textContent = 'Live';
+				} else {
+					time.textContent = this.humanTime(data.remaining);
+				}
+			});
 
-			default:
-				break;
+			break;
+
+		case 'duration':
+			this.on('duration', (data) => {
+				if (data.duration === Infinity) {
+					time.textContent = 'Live';
+				} else {
+					time.textContent = this.humanTime(data.duration);
+				}
+			});
+			break;
+
+		default:
+			break;
 		}
 
 		this.on('pip-internal', (data) => {
@@ -2056,7 +2163,7 @@ export default class UI extends Functions {
 			.addClasses(this.makeStyles('volumeContainerStyles'))
 			.appendTo(parent);
 
-		const volumeButton = this.#createButton(
+		const volumeButton = this.createUiButton(
 			volumeContainer,
 			'volume'
 		);
@@ -2073,10 +2180,10 @@ export default class UI extends Functions {
 		volumeSlider.value = this.getVolume().toString();
 		volumeSlider.style.backgroundSize = `${this.getVolume()}% 100%`;
 
-		const mutedButton = this.#createSVGElement(volumeButton, 'volumeMuted', this.buttons.volumeMuted, true, hovered);
-		const lowButton = this.#createSVGElement(volumeButton, 'volumeLow', this.buttons.volumeLow, true, hovered);
-		const mediumButton = this.#createSVGElement(volumeButton, 'volumeMedium', this.buttons.volumeMedium, true, hovered);
-		const highButton = this.#createSVGElement(volumeButton, 'volumeHigh', this.buttons.volumeHigh, hovered);
+		const mutedButton = this.createSVGElement(volumeButton, 'volumeMuted', this.buttons.volumeMuted, true, hovered);
+		const lowButton = this.createSVGElement(volumeButton, 'volumeLow', this.buttons.volumeLow, true, hovered);
+		const mediumButton = this.createSVGElement(volumeButton, 'volumeMedium', this.buttons.volumeMedium, true, hovered);
+		const highButton = this.createSVGElement(volumeButton, 'volumeHigh', this.buttons.volumeHigh, hovered);
 
 		volumeButton.addEventListener('click', (event) => {
 			event.stopPropagation();
@@ -2152,37 +2259,16 @@ export default class UI extends Functions {
 		}
 	}
 
-	#mousePosition(element: HTMLElement, parent: HTMLElement, offset = 60) {
-		const playerRect = element.getBoundingClientRect();
-		const tipRect = parent.getBoundingClientRect();
-
-		let x = Math.abs((tipRect.left - playerRect.left) + 100);
-		const y = Math.abs((tipRect.bottom - playerRect.bottom) - 60);
-
-		if (x < 30) {
-			x = 30;
-		}
-
-		if (x > (playerRect.right - playerRect.left) - offset) {
-			x = (playerRect.right - playerRect.left) - offset;
-		}
-
-		return {
-			x,
-			y,
-		};
-	}
-
 	#createPreviousButton(parent: HTMLDivElement, hovered = false) {
 		if (this.isMobile()) return;
 
-		const previousButton = this.#createButton(
+		const previousButton = this.createUiButton(
 			parent,
 			'previous'
 		);
 		previousButton.style.display = 'none';
 
-		this.#createSVGElement(previousButton, 'previous', this.buttons.previous, hovered);
+		this.createSVGElement(previousButton, 'previous', this.buttons.previous, hovered);
 
 		previousButton.addEventListener('click', (event) => {
 			event.stopPropagation();
@@ -2190,7 +2276,7 @@ export default class UI extends Functions {
 			this.emit('hide-tooltip');
 		});
 		this.on('item', () => {
-			if (this.getPlaylistItem().episode -1 > 0) {
+			if (this.getPlaylistItem().episode - 1 > 0) {
 				previousButton.style.display = 'flex';
 			} else {
 				previousButton.style.display = 'none';
@@ -2200,7 +2286,7 @@ export default class UI extends Functions {
 		this.on('pip-internal', (data) => {
 			if (data) {
 				previousButton.style.display = 'none';
-			} else if (this.getPlaylistItem().episode -1 == 0) {
+			} else if (this.getPlaylistItem().episode - 1 == 0) {
 				previousButton.style.display = 'flex';
 			}
 		});
@@ -2239,14 +2325,14 @@ export default class UI extends Functions {
 	}
 
 	#createNextButton(parent: HTMLDivElement, hovered = false) {
-		const nextButton = this.#createButton(
+		const nextButton = this.createUiButton(
 			parent,
 			'next'
 		);
 		nextButton.style.display = 'none';
 		this.hasNextTip = true;
 
-		this.#createSVGElement(nextButton, 'next', this.buttons.next, false, hovered);
+		this.createSVGElement(nextButton, 'next', this.buttons.next, false, hovered);
 
 		nextButton.addEventListener('click', (event) => {
 			event.stopPropagation();
@@ -2304,13 +2390,13 @@ export default class UI extends Functions {
 
 	#createRestartButton(parent: HTMLDivElement, hovered = false) {
 
-		const restartButton = this.#createButton(
+		const restartButton = this.createUiButton(
 			parent,
 			'restart'
 		);
 		parent.appendChild(restartButton);
 
-		this.#createSVGElement(restartButton, 'restart', this.buttons.restart, false, hovered);
+		this.createSVGElement(restartButton, 'restart', this.buttons.restart, false, hovered);
 
 		restartButton.addEventListener('click', (event) => {
 			event.stopPropagation();
@@ -2321,15 +2407,15 @@ export default class UI extends Functions {
 	}
 
 	#createCaptionsButton(parent: HTMLElement, hovered = false) {
-		const captionButton = this.#createButton(
+		const captionButton = this.createUiButton(
 			parent,
 			'subtitles'
 		);
 		captionButton.style.display = 'none';
 		captionButton.ariaLabel = this.buttons.subtitles?.title;
 
-		const offButton = this.#createSVGElement(captionButton, 'subtitle', this.buttons.subtitlesOff, hovered);
-		const onButton = this.#createSVGElement(captionButton, 'subtitled', this.buttons.subtitles, true, hovered);
+		const offButton = this.createSVGElement(captionButton, 'subtitle', this.buttons.subtitlesOff, hovered);
+		const onButton = this.createSVGElement(captionButton, 'subtitled', this.buttons.subtitles, true, hovered);
 
 		captionButton.addEventListener('click', (event) => {
 			event.stopPropagation();
@@ -2342,7 +2428,7 @@ export default class UI extends Functions {
 			}
 		});
 
-		this.on('captions', (data) => {
+		this.on('captions', () => {
 			if (this.getTextTracks().length > 0) {
 				captionButton.style.display = 'flex';
 			} else {
@@ -2372,14 +2458,14 @@ export default class UI extends Functions {
 	}
 
 	#createAudioButton(parent: HTMLElement, hovered = false) {
-		const audioButton = this.#createButton(
+		const audioButton = this.createUiButton(
 			parent,
 			'audio'
 		);
 		audioButton.style.display = 'none';
 		audioButton.ariaLabel = this.buttons.language?.title;
 
-		this.#createSVGElement(audioButton, 'audio', this.buttons.languageOff, hovered);
+		this.createSVGElement(audioButton, 'audio', this.buttons.languageOff, hovered);
 
 		audioButton.addEventListener('click', (event) => {
 			event.stopPropagation();
@@ -2412,14 +2498,14 @@ export default class UI extends Functions {
 	}
 
 	#createQualityButton(parent: HTMLElement, hovered = false) {
-		const qualityButton = this.#createButton(
+		const qualityButton = this.createUiButton(
 			parent,
 			'quality'
 		);
 		qualityButton.style.display = 'none';
 
-		const offButton = this.#createSVGElement(qualityButton, 'low', this.buttons.quality, hovered);
-		const onButton = this.#createSVGElement(qualityButton, 'high', this.buttons.quality, true, hovered);
+		const offButton = this.createSVGElement(qualityButton, 'low', this.buttons.quality, hovered);
+		const onButton = this.createSVGElement(qualityButton, 'high', this.buttons.quality, true, hovered);
 
 		qualityButton.addEventListener('click', (event) => {
 			event.stopPropagation();
@@ -2467,13 +2553,13 @@ export default class UI extends Functions {
 	#createTheaterButton(parent: HTMLDivElement, hovered = false) {
 		if (this.isMobile() || !this.hasTheaterEventHandler) return;
 
-		const theaterButton = this.#createButton(
+		const theaterButton = this.createUiButton(
 			parent,
 			'theater'
 		);
 
-		this.#createSVGElement(theaterButton, 'theater', this.buttons.theater, hovered);
-		this.#createSVGElement(theaterButton, 'theater-enabled', this.buttons.theaterExit, true, hovered);
+		this.createSVGElement(theaterButton, 'theater', this.buttons.theater, hovered);
+		this.createSVGElement(theaterButton, 'theater-enabled', this.buttons.theaterExit, true, hovered);
 
 		theaterButton.addEventListener('click', (event) => {
 			event.stopPropagation();
@@ -2516,13 +2602,13 @@ export default class UI extends Functions {
 	}
 
 	#createFullscreenButton(parent: HTMLElement, hovered = false) {
-		const fullscreenButton = this.#createButton(
+		const fullscreenButton = this.createUiButton(
 			parent,
 			'fullscreen'
 		);
 
-		this.#createSVGElement(fullscreenButton, 'fullscreen-enabled', this.buttons.exitFullscreen, true, hovered);
-		this.#createSVGElement(fullscreenButton, 'fullscreen', this.buttons.fullscreen, hovered);
+		this.createSVGElement(fullscreenButton, 'fullscreen-enabled', this.buttons.exitFullscreen, true, hovered);
+		this.createSVGElement(fullscreenButton, 'fullscreen', this.buttons.fullscreen, hovered);
 
 		fullscreenButton.addEventListener('click', (event) => {
 			event.stopPropagation();
@@ -2553,14 +2639,14 @@ export default class UI extends Functions {
 	}
 
 	#createPlaylistsButton(parent: HTMLDivElement, hovered = false) {
-		const playlistButton = this.#createButton(
+		const playlistButton = this.createUiButton(
 			parent,
 			'playlist'
 		);
 
 		playlistButton.style.display = 'none';
 
-		this.#createSVGElement(playlistButton, 'playlist', this.buttons.playlist, hovered);
+		this.createSVGElement(playlistButton, 'playlist', this.buttons.playlist, hovered);
 
 		playlistButton.addEventListener('click', (event) => {
 			event.stopPropagation();
@@ -2596,7 +2682,7 @@ export default class UI extends Functions {
 
 	#createSpeedButton(parent: HTMLDivElement, hovered = false) {
 		if (this.isMobile()) return;
-		const speedButton = this.#createButton(
+		const speedButton = this.createUiButton(
 			parent,
 			'speed'
 		);
@@ -2607,7 +2693,7 @@ export default class UI extends Functions {
 			speedButton.style.display = 'none';
 		}
 
-		this.#createSVGElement(speedButton, 'speed', this.buttons.speed, hovered);
+		this.createSVGElement(speedButton, 'speed', this.buttons.speed, hovered);
 
 		speedButton.addEventListener('click', (event) => {
 			event.stopPropagation();
@@ -2634,7 +2720,7 @@ export default class UI extends Functions {
 
 	#createPIPButton(parent: HTMLDivElement, hovered = false) {
 		if (this.isMobile() || !this.hasPipEventHandler) return;
-		const pipButton = this.#createButton(
+		const pipButton = this.createUiButton(
 			parent,
 			'pip'
 		);
@@ -2647,19 +2733,17 @@ export default class UI extends Functions {
 
 		pipButton.ariaLabel = this.buttons.pipEnter?.title;
 
-		this.#createSVGElement(pipButton, 'pip-enter', this.buttons.pipEnter, hovered);
-		this.#createSVGElement(pipButton, 'pip-exit', this.buttons.pipExit, true, hovered);
+		this.createSVGElement(pipButton, 'pip-enter', this.buttons.pipEnter, hovered);
+		this.createSVGElement(pipButton, 'pip-exit', this.buttons.pipExit, true, hovered);
 
-		document.addEventListener("visibilitychange", () => {
+		document.addEventListener('visibilitychange', () => {
 			if (this.pipEnabled) {
 				if (document.hidden) {
 					if (document.pictureInPictureEnabled) {
 						this.getVideoElement().requestPictureInPicture();
 					}
-				} else {
-					if (document.pictureInPictureElement) {
-						document.exitPictureInPicture();
-					}
+				} else if (document.pictureInPictureElement) {
+					document.exitPictureInPicture();
 				}
 			}
 		});
@@ -2833,10 +2917,10 @@ export default class UI extends Functions {
 	}
 
 	#createCalcMenu(menuContent: HTMLElement) {
-		if(!this.getElement()) return;
+		if (!this.getElement()) return;
 		// setTimeout(() => {
-			menuContent.style.maxHeight = `${this.getElement()?.getBoundingClientRect().height - 80}px`;
-			this.emit('hide-tooltip');
+		menuContent.style.maxHeight = `${this.getElement()?.getBoundingClientRect().height - 80}px`;
+		this.emit('hide-tooltip');
 		// }, 0);
 	}
 
@@ -2866,7 +2950,7 @@ export default class UI extends Functions {
 		const submenu = this.createElement('div', 'sub-menu')
 			.addClasses(this.makeStyles('subMenuStyles'))
 			.appendTo(parent);
-			
+
 		submenu.style.transform = 'translateX(0)';
 
 		this.#createLanguageMenu(submenu);
@@ -2887,11 +2971,11 @@ export default class UI extends Functions {
 			.appendTo(parent);
 
 		if (title !== 'Episodes') {
-			const back = this.#createButton(
+			const back = this.createUiButton(
 				menuHeader,
 				'back'
 			);
-			this.#createSVGElement(back, 'menu', this.buttons.chevronL, hovered);
+			this.createSVGElement(back, 'menu', this.buttons.chevronL, hovered);
 			this.addClasses(back, ['nm-w-8']);
 			back.classList.remove('nm-w-5');
 
@@ -2910,7 +2994,7 @@ export default class UI extends Functions {
 		const menuButtonText = this.createElement('span', 'menu-button-text')
 			.addClasses(this.makeStyles('menuHeaderButtonTextStyles'))
 			.appendTo(menuHeader);
-			
+
 		menuButtonText.textContent = this.localize(title).toTitleCase();
 
 		// if (title == 'playlist') {
@@ -2918,12 +3002,12 @@ export default class UI extends Functions {
 		// }
 
 		if (title !== 'Seasons') {
-			const close = this.#createButton(
+			const close = this.createUiButton(
 				menuHeader,
 				'close'
 			);
 
-			this.#createSVGElement(close, 'menu', this.buttons.close, hovered);
+			this.createSVGElement(close, 'menu', this.buttons.close, hovered);
 			this.addClasses(close, ['nm-ml-auto', 'nm-w-8']);
 			close.classList.remove('nm-w-5');
 
@@ -2951,15 +3035,15 @@ export default class UI extends Functions {
 			menuButton.style.display = 'none';
 		}
 
-		this.#createSVGElement(menuButton, 'menu', this.buttons[item], hovered);
+		this.createSVGElement(menuButton, 'menu', this.buttons[item], hovered);
 
 		const menuButtonText = this.createElement('span', `menu-button-${item}`)
 			.addClasses(this.makeStyles('menuButtonTextStyles'))
 			.appendTo(menuButton);
-		
+
 		menuButtonText.textContent = this.localize(item).toTitleCase();
 
-		const chevron = this.#createSVGElement(menuButton, 'menu', this.buttons.chevronR, hovered);
+		const chevron = this.createSVGElement(menuButton, 'menu', this.buttons.chevronR, hovered);
 		this.addClasses(chevron, ['nm-ml-auto']);
 
 		menuButton.addEventListener('click', (event) => {
@@ -3015,7 +3099,7 @@ export default class UI extends Functions {
 		const scrollContainer = this.createElement('div', 'language-scroll-container')
 			.addClasses(this.makeStyles('scrollContainerStyles'))
 			.appendTo(languageMenu);
-			
+
 		scrollContainer.style.transform = 'translateX(0)';
 
 		this.on('audio', (event) => {
@@ -3052,7 +3136,7 @@ export default class UI extends Functions {
 		const scrollContainer = this.createElement('div', 'subtitle-scroll-container')
 			.addClasses(this.makeStyles('scrollContainerStyles'))
 			.appendTo(subtitleMenu);
-			
+
 		scrollContainer.style.transform = 'translateX(0)';
 
 		this.on('captions', (event) => {
@@ -3085,7 +3169,7 @@ export default class UI extends Functions {
 		const speedMenu = this.createElement('div', 'speed-menu')
 			.addClasses(this.makeStyles('subMenuContentStyles'))
 			.appendTo(parent);
-			
+
 		this.addClasses(speedMenu, ['nm-max-h-96']);
 
 		this.#createMenuHeader(speedMenu, 'speed');
@@ -3093,7 +3177,7 @@ export default class UI extends Functions {
 		const scrollContainer = this.createElement('div', 'speed-scroll-container')
 			.addClasses(this.makeStyles('scrollContainerStyles'))
 			.appendTo(speedMenu);
-			
+
 		scrollContainer.style.transform = 'translateX(0)';
 
 		for (const speed of this.getSpeeds() ?? []) {
@@ -3112,7 +3196,7 @@ export default class UI extends Functions {
 			speedButtonText.textContent = speed == 1 ? this.localize('Normal') : speed.toString();
 			speedButton.append(speedButtonText);
 
-			const chevron = this.#createSVGElement(speedButton, 'menu', this.buttons.checkmark, hovered);
+			const chevron = this.createSVGElement(speedButton, 'menu', this.buttons.checkmark, hovered);
 			this.addClasses(chevron, [
 				'nm-ml-auto',
 				'nm-hidden',
@@ -3156,7 +3240,7 @@ export default class UI extends Functions {
 		const scrollContainer = this.createElement('div', 'quality-scroll-container')
 			.addClasses(this.makeStyles('scrollContainerStyles'))
 			.appendTo(qualityMenu);
-			
+
 		scrollContainer.style.transform = 'translateX(0)';
 
 		this.on('show-quality-menu', (showing) => {
@@ -3171,7 +3255,7 @@ export default class UI extends Functions {
 	}
 
 	#createLanguageMenuButton(parent: HTMLDivElement, data: { language: string, label: string, type: string, index: number, styled?: boolean; }, hovered = false) {
-		
+
 		const languageButton = this.createElement('button', `${data.type}-button-${data.language}`)
 			.addClasses(this.makeStyles('languageButtonStyles'))
 			.appendTo(parent);
@@ -3183,12 +3267,10 @@ export default class UI extends Functions {
 		if (data.type == 'subtitle') {
 			if (data.label == 'segment-metadata') {
 				languageButtonText.textContent = `${this.localize('Off')}`;
+			} else if (data.styled) {
+				languageButtonText.textContent = `${this.localize(data.language ?? '')} ${this.localize(data.label)} ${this.localize('styled')}`;
 			} else {
-				if (data.styled) {
-					languageButtonText.textContent = `${this.localize(data.language ?? '')} ${this.localize(data.label)} ${this.localize('styled')}`;
-				} else {
-					languageButtonText.textContent = `${data.language == 'off' ? '' : this.localize(data.language ?? '')} ${this.localize(data.label)}`;
-				}
+				languageButtonText.textContent = `${data.language == 'off' ? '' : this.localize(data.language ?? '')} ${this.localize(data.label)}`;
 			}
 		} else if (data.type == 'audio') {
 			languageButtonText.textContent = `${this.localize((data.language ?? data.label)
@@ -3199,11 +3281,11 @@ export default class UI extends Functions {
 		// 	const languageButtonIcon = this.createElement('span', 'menu-button-icon')
 		// 		.addClasses(this.makeStyles('menuButtonTextStyles'))
 		// 		.appendTo(languageButton);
-		// 	const svg = this.#createSVGElement(languageButtonIcon, 'styled', this.buttons.styled, hovered);
+		// 	const svg = this.createSVGElement(languageButtonIcon, 'styled', this.buttons.styled, hovered);
 		// 	svg.setAttribute('tabindex', '-1');
 		// }
 
-		const chevron = this.#createSVGElement(languageButton, 'checkmark', this.buttons.checkmark, hovered);
+		const chevron = this.createSVGElement(languageButton, 'checkmark', this.buttons.checkmark, hovered);
 		this.addClasses(chevron, ['nm-ml-auto']);
 
 		if (data.index > 0) {
@@ -3260,7 +3342,7 @@ export default class UI extends Functions {
 
 			this.emit('show-menu', false);
 		});
-		
+
 		languageButton.addEventListener('keyup', (e) => {
 			if (e.key == 'ArrowLeft') {
 				this.#getClosestElement(languageButton, '[id^="audio-button-"]')?.focus();
@@ -3270,14 +3352,14 @@ export default class UI extends Functions {
 				(languageButton.previousElementSibling as HTMLButtonElement)?.focus();
 			} else if (e.key == 'ArrowDown' && !this.options.disableTouchControls) {
 				(languageButton.nextElementSibling as HTMLButtonElement)?.focus();
-			} 
+			}
 		});
 
 		return languageButton;
 	}
 
 	#createSeekRipple(parent: HTMLDivElement, side: string) {
-		
+
 		const seekRipple = this.createElement('div', 'seek-ripple')
 			.addClasses(['seek-ripple', side])
 			.appendTo(parent);
@@ -3330,7 +3412,7 @@ export default class UI extends Functions {
 		this.sliderBar = this.createElement('div', 'slider-bar')
 			.addClasses(this.makeStyles('sliderBarStyles'))
 			.appendTo(parent);
-			
+
 		const sliderBuffer = this.createElement('div', 'slider-buffer')
 			.addClasses(this.makeStyles('sliderBufferStyles'))
 			.appendTo(this.sliderBar);
@@ -3358,7 +3440,7 @@ export default class UI extends Functions {
 		const sliderPop = this.createElement('div', 'slider-pop')
 			.addClasses(this.makeStyles('sliderPopStyles'))
 			.appendTo(this.sliderBar);
-			
+
 		sliderPop.style.setProperty('--visibility', '0');
 		sliderPop.style.opacity = 'var(--visibility)';
 
@@ -3376,6 +3458,36 @@ export default class UI extends Functions {
 
 		if (this.options.chapters != false && !this.isTv() && this.getChapters()?.length > 0) {
 			this.sliderBar.style.background = 'transparent';
+		}
+
+		const join = this.getParameterByName('join');
+
+		if (!join) {
+			['mousedown', 'touchstart'].forEach((event) => {
+				this.sliderBar.addEventListener(event, () => {
+					if (this.isMouseDown) return;
+
+					this.isMouseDown = true;
+					this.isScrubbing = true;
+				}, {
+					passive: true,
+				});
+			});
+
+
+			this.bottomBar.addEventListener('click', (e: any) => {
+				this.emit('hide-tooltip');
+				if (!this.isMouseDown) return;
+
+				this.isMouseDown = false;
+				this.isScrubbing = false;
+				sliderPop.style.setProperty('--visibility', '0');
+				const scrubTime = this.#getScrubTime(e);
+				sliderNipple.style.left = `${scrubTime.scrubTime}%`;
+				this.seek(scrubTime.scrubTimePlayer);
+			}, {
+				passive: true,
+			});
 		}
 
 		['mousemove', 'touchmove'].forEach((event) => {
@@ -3402,17 +3514,6 @@ export default class UI extends Functions {
 				passive: true,
 			});
 		});
-		['mousedown', 'touchstart'].forEach((event) => {
-			this.sliderBar.addEventListener(event, () => {
-				if (this.isMouseDown) return;
-
-				this.isMouseDown = true;
-				this.isScrubbing = true;
-			}, {
-				passive: true,
-			});
-		});
-
 		this.sliderBar.addEventListener('mouseover', (e: MouseEvent) => {
 			const scrubTime = this.#getScrubTime(e);
 			this.#getSliderPopImage(scrubTime);
@@ -3430,20 +3531,6 @@ export default class UI extends Functions {
 		this.sliderBar.addEventListener('mouseleave', () => {
 			sliderPop.style.setProperty('--visibility', '0');
 			sliderHover.style.width = '0';
-		}, {
-			passive: true,
-		});
-
-		this.bottomBar.addEventListener('click', (e: any) => {
-			this.emit('hide-tooltip');
-			if (!this.isMouseDown) return;
-
-			this.isMouseDown = false;
-			this.isScrubbing = false;
-			sliderPop.style.setProperty('--visibility', '0');
-			const scrubTime = this.#getScrubTime(e);
-			sliderNipple.style.left = `${scrubTime.scrubTime}%`;
-			this.seek(scrubTime.scrubTimePlayer);
 		}, {
 			passive: true,
 		});
@@ -3501,7 +3588,7 @@ export default class UI extends Functions {
 		this.sliderBar = this.createElement('div', 'slider-bar')
 			.addClasses(this.makeStyles('sliderBarStyles'))
 			.appendTo(parent);
-			
+
 		const sliderBuffer = this.createElement('div', 'slider-buffer')
 			.addClasses(this.makeStyles('sliderBufferStyles'))
 			.appendTo(this.sliderBar);
@@ -3535,7 +3622,7 @@ export default class UI extends Functions {
 			sliderBuffer.style.width = `${data.buffered}%`;
 			sliderProgress.style.width = `${data.percentage}%`;
 		});
-		
+
 		this.on('currentScrubTime', (data) => {
 			sliderProgress.style.width = `${(data.position / data.duration) * 100}%`;
 		});
@@ -3562,7 +3649,7 @@ export default class UI extends Functions {
 		chapterMarker.style.left = `${chapter.left}%`;
 		chapterMarker.style.width = `calc(${chapter.width}% - 2px)`;
 
-		const chapterMarkerBG = this.createElement('div', `chapter-marker-bg-${chapter.id.replace(/\s/gu, '-')}`)
+		this.createElement('div', `chapter-marker-bg-${chapter.id.replace(/\s/gu, '-')}`)
 			.addClasses(this.makeStyles('chapterMarkerBGStyles'))
 			.appendTo(chapterMarker);
 
@@ -3654,19 +3741,11 @@ export default class UI extends Functions {
 		return offsetX;
 	}
 
-	#getPngArray(pngString: string) {
-		const pngArray = new Uint8Array(pngString.length);
-		for (let i = 0; i < pngString.length; i++) {
-			pngArray[i] = pngString.charCodeAt(i);
-		}
-		return pngArray;
-	}
-
-	#createThumbnail(time: PreviewTime, parent: HTMLElement) {
+	#createThumbnail(time: PreviewTime) {
 		this.thumbnail = this.createElement('div', `thumbnail-${time.start}`)
 			.addClasses(this.makeStyles('thumbnailStyles'))
 			.get();
-			// .appendTo(parent);
+		// .appendTo(parent);
 
 		this.thumbnail.style.backgroundImage = this.image;
 		this.thumbnail.style.backgroundPosition = `-${time.x}px -${time.y}px`;
@@ -3690,12 +3769,12 @@ export default class UI extends Functions {
 	#fetchPreviewTime() {
 		if (this.previewTime.length === 0) {
 			const imageFile = this.getSpriteFile();
-			
+
 			const img = new Image();
 			this.once('item', () => {
 				img.remove();
 			});
-			
+
 			if (imageFile) {
 				if (this.options.accessToken) {
 					this.getFileContents({
@@ -3705,10 +3784,10 @@ export default class UI extends Functions {
 						},
 						callback: (data) => {
 							const dataURL = URL.createObjectURL(data as Blob);
-							
+
 							img.src = dataURL;
 
-							if(this.isTv()){
+							if (this.isTv()) {
 								this.image = `url('${dataURL}')`;
 							} else {
 								this.sliderPopImage.style.backgroundImage = `url('${dataURL}')`;
@@ -3723,12 +3802,12 @@ export default class UI extends Functions {
 						},
 					}).then();
 				} else {
-					if(this.isTv()){
+					if (this.isTv()) {
 						this.image = `url('${imageFile}')`;
 					} else {
 						this.sliderPopImage.style.backgroundImage = `url('${imageFile}')`;
 					}
-					
+
 					img.src = imageFile;
 					setTimeout(() => {
 						this.emit('preview-time', this.previewTime);
@@ -3753,7 +3832,7 @@ export default class UI extends Functions {
 								= /(\d{2}:\d{2}:\d{2})\.\d{3}\s-->\s(\d{2}:\d{2}:\d{2})\.\d{3}\n([\w\d\.]+)\.(webp|jpg|png)#(xywh=\d+,\d+,\d+,\d+)/gmu;
 
 							this.previewTime = [];
-							
+
 							let m: any;
 							while ((m = regex.exec(data as string)) !== null) {
 								if (m.index === regex.lastIndex) {
@@ -3761,24 +3840,20 @@ export default class UI extends Functions {
 								}
 
 								const data = m[5].split('=')[1].split(',');
-								
+
 								const scalingX = data[2] % this.thumbnailWidth;
 								if (scalingX % 1 !== 0) {
-									data[0] =
-										data[0] / (scalingX / Math.round(scalingX));
-									data[2] =
-										data[2] / (scalingX / Math.round(scalingX));
-								} 
+									data[0] /= (scalingX / Math.round(scalingX));
+									data[2] /= (scalingX / Math.round(scalingX));
+								}
 								if (scalingX > 1) {
 									data[0] *= scalingX;
 								}
-								
+
 								const scalingY = data[3] % this.thumbnailHeight;
 								if (scalingY % 1 !== 0) {
-									data[1] =
-										data[1] / (scalingY / Math.round(scalingY));
-									data[3] =
-										data[3] / (scalingY / Math.round(scalingY));
+									data[1] /= (scalingY / Math.round(scalingY));
+									data[3] /= (scalingY / Math.round(scalingY));
 								}
 								if (scalingY > 1) {
 									data[1] *= scalingY;
@@ -3808,7 +3883,7 @@ export default class UI extends Functions {
 
 	#loadSliderPopImage(scrubTime?: any) {
 		this.#fetchPreviewTime();
-		
+
 		let img = this.previewTime.find(
 			(p: { start: number; end: number; }) => scrubTime.scrubTimePlayer >= p.start && scrubTime.scrubTimePlayer < p.end
 		);
@@ -3860,10 +3935,10 @@ export default class UI extends Functions {
 			])
 			.appendTo(parent);
 
-		playlistMenu.style.minHeight = (parseInt(getComputedStyle(this.getVideoElement()).height.split('px')[0]) * 0.9) + 'px';
+		playlistMenu.style.minHeight = `${parseInt(getComputedStyle(this.getVideoElement()).height.split('px')[0], 10) * 0.8}px`;
 
 		this.getVideoElement().addEventListener('resize', () => {
-			playlistMenu.style.minHeight = (parseInt(getComputedStyle(this.getVideoElement()).height.split('px')[0]) * 0.9) + 'px';
+			playlistMenu.style.minHeight = `${parseInt(getComputedStyle(this.getVideoElement()).height.split('px')[0], 10) * 0.8}px`;
 		});
 
 		const subMenu = this.createElement('div', 'sub-menu')
@@ -3920,7 +3995,7 @@ export default class UI extends Functions {
 	}
 
 	#createSeasonMenuButton(parent: HTMLDivElement, item: PlaylistItem, hovered = false) {
-		
+
 		const seasonButton = this.createElement('button', `season-${item.id}`)
 			.addClasses(this.makeStyles('menuButtonStyles'))
 			.appendTo(parent);
@@ -3960,7 +4035,7 @@ export default class UI extends Functions {
 
 		buttonSpan.innerText = `Season ${item.season}`;
 
-		const chevron = this.#createSVGElement(seasonButton, 'menu', this.buttons.chevronR, hovered);
+		const chevron = this.createSVGElement(seasonButton, 'menu', this.buttons.chevronR, hovered);
 		this.addClasses(chevron, ['nm-ml-auto']);
 
 		seasonButton.addEventListener('click', () => {
@@ -3970,7 +4045,7 @@ export default class UI extends Functions {
 		return seasonButton;
 	}
 
-	#createEpisodeMenuButton(parent: HTMLDivElement, item: PlaylistItem, index: number, hovered = false) {
+	#createEpisodeMenuButton(parent: HTMLDivElement, item: PlaylistItem, index: number) {
 
 		const button = this.createElement('button', `playlist-${item.id}`)
 			.addClasses(this.makeStyles('playlistMenuButtonStyles'))
@@ -3984,13 +4059,9 @@ export default class UI extends Functions {
 			.addClasses(this.makeStyles('episodeMenuButtonLeftStyles'))
 			.appendTo(button);
 
-		const shadow = this.createElement('div', `episode-${item.id}-shadow`)
+		this.createElement('div', `episode-${item.id}-shadow`)
 			.addClasses(this.makeStyles('episodeMenuButtonShadowStyles'))
 			.appendTo(leftSide);
-
-		shadow.style.margin = item.video_type == 'movie' ? '0px 30%' : '0';
-		shadow.style.width = item.video_type == 'movie' ? 'calc(120px / 3 * 2)' : '100%';
-
 
 		const image = this.createElement('img', `episode-${item.id}-image`)
 			.addClasses(this.makeStyles('episodeMenuButtonImageStyles'))
@@ -4012,7 +4083,7 @@ export default class UI extends Functions {
 			.addClasses(this.makeStyles('progressContainerItemTextStyles'))
 			.appendTo(progressContainerItemBox);
 
-		if(item.episode){
+		if (item.episode) {
 			progressContainerItemText.innerText = `${this.localize('E')}${item.episode}`;
 		}
 
@@ -4042,9 +4113,10 @@ export default class UI extends Functions {
 		const episodeMenuButtonTitle = this.createElement('span', `episode-${item.id}-title`)
 			.addClasses(this.makeStyles('episodeMenuButtonTitleStyles'))
 			.appendTo(episodeMenuButtonRightSide);
-			
-		if(item.episode){
-			episodeMenuButtonTitle.textContent = this.lineBreakShowTitle(item.title.replace('%S', this.localize('S')).replace('%E', this.localize('E')));
+
+		if (item.episode) {
+			episodeMenuButtonTitle.textContent = this.lineBreakShowTitle(item.title.replace(item.show, '').replace('%S', this.localize('S'))
+				.replace('%E', this.localize('E')));
 		}
 
 		const episodeMenuButtonOverview = this.createElement('span', `episode-${item.id}-overview`)
@@ -4081,7 +4153,7 @@ export default class UI extends Functions {
 			}
 		});
 
-		if(item.episode){
+		if (item.episode) {
 			progressContainerItemText.innerText
 				= item.season == undefined ? `${item.episode}` : `${this.localize('S')}${item.season}: ${this.localize('E')}${item.episode}`;
 		}
@@ -4173,7 +4245,7 @@ export default class UI extends Functions {
 	#getTipDataIndex(direction: string) {
 		let index: number;
 		if (direction == 'previous') {
-			index = this.getPlaylistItem().episode -1 - 1;
+			index = this.getPlaylistItem().episode - 1 - 1;
 		} else {
 			index = this.getPlaylistIndex() + 1;
 		}
@@ -4188,9 +4260,10 @@ export default class UI extends Functions {
 		if (!item) return;
 
 		image.src = item.image && item.image != '' ? `${this.imageBaseUrl}${item.image}` : '';
-		if(item.episode){
-			header.textContent = `${this.localize(`${direction.toTitleCase()} Episode`)} ${this.#getButtonKeyCode(direction)}`;
-			title.textContent = `${this.localize('S')}${item.season} ${this.localize('E')}${item.episode}: ${this.lineBreakShowTitle(item.title.replace('%S', this.localize('S')).replace('%E', this.localize('E')))}`;
+		if (item.episode) {
+			header.textContent = `${this.localize(`${direction.toTitleCase()} Episode`)} ${this.getButtonKeyCode(direction)}`;
+			title.textContent = `${this.localize('S')}${item.season} ${this.localize('E')}${item.episode}: ${this.lineBreakShowTitle(item.title.replace(item.show, '').replace('%S', this.localize('S'))
+				.replace('%E', this.localize('E')))}`;
 		}
 		this.once('item', () => {
 			this.#getTipData({ direction, header, title, image });
@@ -4231,11 +4304,11 @@ export default class UI extends Functions {
 					this.next();
 				}
 			}, 4200);
-			
+
 			setTimeout(() => {
 				nextButton.focus();
 			}, 100);
-			
+
 		});
 
 		creditsButton.addEventListener('click', () => {
@@ -4253,7 +4326,7 @@ export default class UI extends Functions {
 		this.on('item', () => {
 			enabled = false;
 		});
-		
+
 		this.once('playing', () => {
 			this.on('time', (data) => {
 				if (this.duration() > 0 && data.position > (this.duration() - 5) && !enabled && !this.isLastPlaylistItem()) {
@@ -4267,10 +4340,11 @@ export default class UI extends Functions {
 	}
 
 	#modifySpinner(parent: HTMLDivElement) {
+		// console.log(parent);
 
-		// const h2 = this.createElement('h2', 'loader')
-		// 	.addClasses(['loader'])
-		// 	.appendTo(parent);
+		this.createElement('h2', 'loader')
+			.addClasses(['loader'])
+			.appendTo(parent);
 		// h2.textContent = `${this.localize('Loading playlist')}...`;
 
 		// const loader = document.createElement('div');
@@ -4289,7 +4363,7 @@ export default class UI extends Functions {
 		// `;
 		// loader.prepend(h2);
 
-		const loadingSpinner = document.createElement('div');
+		// const loadingSpinner = document.createElement('div');
 
 		// loadingSpinner.id = 'spinner';
 		// loadingSpinner.innerHTML = '';
@@ -4351,11 +4425,11 @@ export default class UI extends Functions {
 		// });
 
 		// parent.appendChild(loadingSpinner);
-		return loadingSpinner;
+		// return loadingSpinner;
 	};
 
 	#createSpinnerContainer(parent: HTMLDivElement) {
-		
+
 		const spinnerContainer = this.createElement('div', 'spinner-container')
 			.addClasses(this.makeStyles('spinnerContainerStyles'))
 			.appendTo(parent);
@@ -4418,9 +4492,9 @@ export default class UI extends Functions {
 		spinner.setAttribute('viewBox', '0 0 100 101');
 		spinner.id = 'spinner';
 		spinner.setAttribute('fill', 'none');
-		
+
 		this.addClasses(spinner, [
-			`spinner-icon`,
+			'spinner-icon',
 			...this.makeStyles('spinnerStyles'),
 		]);
 
@@ -4435,7 +4509,39 @@ export default class UI extends Functions {
 		path2.setAttribute('d', 'M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z');
 		path2.setAttribute('fill', 'currentFill');
 		spinner.appendChild(path2);
-		
+
 	}
 
+	createButton(match: string, id: string, insert: 'before'| 'after' = 'after', icon: Icon['path'], click?: () => void, rightClick?: () => void) {
+
+		const element = document.querySelector<HTMLButtonElement>(`#${match}`);
+		if (!element) {
+			throw new Error('Element not found');
+		}
+
+		const button = this.createUiButton(element, id.replace(/\s/gu, '_'));
+		button.ariaLabel = id;
+
+		if (insert === 'before') {
+			element?.before(button);
+		} else {
+			element?.after(button);
+		}
+
+		this.createSVGElement(button, `${id.replace(/\s/gu, '_')}-enabled`, icon, true, false);
+		this.createSVGElement(button, id.replace(/\s/gu, '_'), icon, false);
+
+		button.addEventListener('click', (event) => {
+			event.stopPropagation();
+			click?.();
+			this.emit('hide-tooltip');
+		});
+		button.addEventListener('contextmenu', (event) => {
+			event.stopPropagation();
+			rightClick?.();
+			this.emit('hide-tooltip');
+		});
+
+		return button;
+	}
 }

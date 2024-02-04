@@ -1,6 +1,6 @@
 {
   "name": "nomercyplayer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "type": "module",
   "files": [
@@ -19,10 +19,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "serve": "vite preview",
-    "static": "npx webpack",
     "test": "jest",
-    "lint": "eslint 'src/**/*.{js,ts,d.ts}'",
-    "format": "eslint 'src/**/*.{js,ts,d.ts}' --fix"
+    "lint": "eslint ./src --ext .js,.ts,.d.ts --fix"
   },
   "keywords": [],
   "author": "",
@@ -33,12 +31,12 @@
     "@types/jest": "^29.5.5",
     "@types/jwplayer": "^8.2.13",
     "@types/node": "^18.14.2",
-    "@typescript-eslint/eslint-plugin": "^5.54.0",
-    "@typescript-eslint/parser": "^5.54.0",
+    "@typescript-eslint/eslint-plugin": "^6.4.0",
+    "@typescript-eslint/parser": "^6.4.0",
     "autoprefixer": "^10.4.14",
     "copyfiles": "^2.4.1",
     "css-loader": "^6.8.1",
-    "eslint": "^8.47.0",
+    "eslint": "^8.55.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-import-resolver-typescript": "^3.5.3",
     "eslint-plugin-import": "^2.27.5",

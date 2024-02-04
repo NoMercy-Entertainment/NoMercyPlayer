@@ -1,11 +1,13 @@
-const plugin = require('tailwindcss/plugin')
+/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-var-requires */
+const plugin = require('tailwindcss/plugin');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
 	mode: 'jit',
 	prefix: 'nm-',
 	content: [
-		"./src/**/*.{js,ts}",
+		'./src/**/*.{js,ts}',
 		'./index.html',
 		'./index.js',
 	],
@@ -49,14 +51,13 @@ module.exports = {
 		},
 	},
 	plugins: [
-		require('@tailwindcss/forms'),
-		require('@tailwindcss/line-clamp'),
+		// require('@tailwindcss/forms'),
 		require('tailwindcss-children'),
 		plugin(({ addVariant }) => {
 			addVariant('range-track', [
 				'&::-webkit-slider-runnable-track',
 				'&::-moz-range-track',
-				'&::-ms-track'
+				'&::-ms-track',
 			]);
 			addVariant('range-thumb', [
 				'&::-webkit-slider-thumb',

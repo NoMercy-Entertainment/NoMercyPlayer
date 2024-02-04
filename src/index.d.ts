@@ -1,3 +1,7 @@
+import Functions from './functions';
+import Base from './base';
+import videojs from 'video.js';
+import UI from './ui';
 
 export enum MIMEType {
     ApplicationXFontOpentype = 'application/x-font-opentype',
@@ -75,7 +79,7 @@ export interface PlaybackState {
     remaining: number;
     type: any;
     viewable: boolean;
-};
+}
 
 export interface OriginalPlayer extends Player {
 	dispose(): void;
@@ -85,6 +89,9 @@ export interface OriginalPlayer extends Player {
 	aspectRatio(): string;
 	getStretching(): void;
 	getCurrentTime(): any;
+    requestFullscreen(): void;
+    paused: (() => boolean) & ((arg: boolean) => void);
+    muted: (() => boolean) & ((arg: boolean) => void);
 	localize(arg0: string): string | null;
     audioTracks: () => AudioTrack[] & {
         addEventListener: (event: 'change', callback: (event: AudioEvent) => void) => void;
@@ -163,83 +170,13 @@ export interface OriginalPlayer extends Player {
         tracks_: TextTrackTrack[];
     };
     trigger: (event: string, callback: (event: any) => void) => void;
+    volume: ((level: number) => void) & (() => number);
 }
 
-export interface Player {
-	options: VideoPlayerOptions;
-	isPlaying(): boolean;
-	cycleAspectRatio(): void;
-	isTv(): boolean;
-    captionsList: () => CaptionsEventTrack[];
-    currentTime: (() => number) & ((position: number) => void);
-    cycleAudioTracks: () => void;
-    cycleSubtitles: () => void;
-    duration: () => number;
-    forwardVideo: (arg?: number) => void,
-    muted: (value?: boolean) => boolean;
-    off: (event: string, callback: (event: any) => void) => void;
-    on: (event: string, callback: (event: any) => void) => void;
-    once: (event: string, callback: (event: any) => void) => void;
-    one: (event: string, callback: (event: any) => void) => void;
-    next: () => void;
-    off: (event: string, callback: (event: any) => void) => void;
-    on: (event: string, callback: (event: any) => void) => void;
-    once: (event: string, callback: (event: any) => void) => void;
-    one: (event: string, callback: (event: any) => void) => void;
-    pause: () => void;
-    paused: () => boolean;
-    play: () => void;
-    playbackRate: ((speed: number) => void) & (() => number);
-    playbackRates: () => number[];
-    played: () => TimeRanges;
-    playlistItem: (index?: number) => PlaylistItem;
-    previous: () => void;
-    requestFullscreen: () => void;
-    rewindVideo: () => void;
-    seek: (position: number) => void;
-    setVolume: (volume: number) => void;
-    stop: () => void;
-    toggleFullscreen: () => void;
-    toggleMute: () => void;
-    togglePlayback: () => void;
-    volume: (value?: number) => number;
-    volumeDown: () => void;
-    volumeUp: () => void;
-}
-
-export interface PlaylistItem {
-	production: boolean;
-    description: string;
-    duration: string;
-    episode: number;
-    file?: string;
-    fonts: Font[];
-    fonts: Font[];
-    fontsFile?: string;
-    id: number;
-    image?: string;
-    logo: string;
-    metadata: Track[];
-    poster?: string;
-    progress?: {
-        percentage: number;
-        date: string;
-    };
-    rating: RatingClass;
-    season: number;
-    show: string;
-    sources?: Source[];
-    textTracks?: TextTrack[];
-    title: string;
-    tracks?: Track[];
-    year: string;
-    video_type?: string;
-    uuid?: string;
-}
 
 export interface QualityTrack {
     [key: string]: any;
-};
+}
 
 export interface RatingClass {
     country: string;
@@ -255,11 +192,11 @@ export interface Source {
 
 export interface Style {
     [key: string]: string[];
-};
+}
 
 export interface TextTrack {
     [key: string]: any;
-};
+}
 
 export interface TextTrack {
     kind: TrackKind;
@@ -286,6 +223,9 @@ export interface VideoPlayer extends OriginalPlayer {
 type StretchOptions = 'uniform'|'exactfit'|'fill'|'none';
 
 export interface VideoPlayerOptions {
+    muted: false;
+    preload: 'auto'|'metadata'|'none';
+    key?: string;
 	disableMediaControls?: boolean;
 	skippers?: boolean;
 	stretching?: StretchOptions;
@@ -326,14 +266,14 @@ export interface toolTooltip {
     position: 'bottom' | 'top';
     x: string;
     y: string;
-};
+}
 
 export interface EpisodeTooltip {
     direction: 'previous' | 'next';
     position: 'bottom' | 'top';
     x: string;
     y: string;
-};
+}
 
 
 interface AudioTracks extends videojs.AudioTrack {
@@ -382,4 +322,87 @@ export interface PreviewTime {
     y: number;
     w: number;
     h: number;
+}
+
+
+export interface Player {
+    cycleAspectRatio: ReturnType<typeof Functions.cycleAspectRatio>;
+    isPlaying: ReturnType<typeof Functions.isPlaying>;
+    isTv: ReturnType<typeof Functions.isTv>;
+    options: ReturnType<VideoPlayerOptions>;
+    clearProgress: ReturnType<typeof Functions.clearProgress>;
+    currentTime: ReturnType<typeof Functions.currentTime>;
+    cycleAudioTracks: ReturnType<typeof Functions.cycleAudioTracks>;
+    cycleSubtitles: ReturnType<typeof Functions.cycleSubtitles>;
+    createButton: ReturnType<typeof UI.createButton>;
+    dispose: ReturnType<typeof Functions.dispose>;
+    duration: ReturnType<typeof Functions.duration>;
+    enterFullscreen: ReturnType<typeof Functions.enterFullscreen>;
+    forwardVideo: ReturnType<typeof Functions.forwardVideo>;
+    getPlaylistItem: ReturnType<typeof Functions.getPlaylistItem>;
+    getPlaylist: ReturnType<typeof Functions.getPlaylist>;
+    setPlaylistItem: ReturnType<typeof Functions.setPlaylistItem>;
+    setEpisode: ReturnType<typeof Functions.setEpisode>;
+    lastPlaylistItem: ReturnType<typeof Functions.lastPlaylistItem>;
+    isMuted: ReturnType<typeof Functions.isMuted>;
+    next: ReturnType<typeof Functions.next>;
+    emit: ReturnType<typeof Base.emit>;
+    off: ReturnType<typeof Base.off>;
+    on: ReturnType<typeof Base.on>;
+    once: ReturnType<typeof Base.once>;
+    one: ReturnType<typeof Base.one>;
+    pause: ReturnType<typeof Functions.pause>;
+    play: ReturnType<typeof Functions.play>;
+    getSpeed: ReturnType<typeof Functions.getSpeed>;
+    previous: ReturnType<typeof Functions.previous>;
+    rewindVideo: ReturnType<typeof Functions.rewindVideo>;
+    seek: ReturnType<typeof Functions.seek>;
+    setVolume: ReturnType<typeof Functions.setVolume>;
+    showInProduction: ReturnType<typeof Functions.showInProduction>;
+    stop: ReturnType<typeof Functions.stop>;
+    toggleFullscreen: ReturnType<typeof Functions.toggleFullscreen>;
+    toggleMute: ReturnType<typeof Functions.toggleMute>;
+    togglePlayback: ReturnType<typeof Functions.togglePlayback>;
+    volumeDown: ReturnType<typeof Functions.volumeDown>;
+    volumeUp: ReturnType<typeof Functions.volumeUp>;
+    playlistItem: (index?: number) => PlaylistItem;
+    getCaptionsList: () => CaptionsEventTrack[];
+}
+
+export interface PlaylistItem {
+    description: string;
+    duration: string;
+    episode: number;
+    episode_id: number;
+    file?: string;
+    fonts: any[];
+    fontsFile: string;
+    id: number;
+    image: string;
+    logo: string;
+    metadata: Track[];
+    origin: string;
+    playlist_type: string;
+    poster?: string;
+    production: boolean;
+    progress: Progress | null;
+    rating: RatingClass;
+    season: number;
+    seasonName: string;
+    show: string;
+    sources?: Source[];
+    special_id?: string;
+    textTracks?: TextTrack[];
+    title: string;
+    tmdbid: number;
+    tracks?: Track[];
+    uuid: number;
+    video_id: string;
+    video_type: string;
+    year: number;
+}
+
+export interface Progress {
+    percentage: number;
+    date: string;
 }

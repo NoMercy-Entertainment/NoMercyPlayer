@@ -10,7 +10,7 @@ import type {
 	toolTooltip,
 	VideoPlayerOptions,
 	VolumeState,
-	VideoPlayer as Types,
+	VideoPlayer as Types
 } from './index.d';
 
 import * as styles from './styles';
@@ -29,7 +29,7 @@ export default class Base {
 	setupTime = 0;
 	events: string[] = [];
 
-	jwplayerVersion = '8.28.1';
+	jwplayerVersion = '8.30.1';
 	videojsVersion = '8.6.0';
 	videojsPlaylistVersion = '5.1.0';
 
@@ -43,15 +43,11 @@ export default class Base {
 	hasPipEventHandler = false;
 	hasTheaterEventHandler = false;
 	hasBackEventHandler = false;
+	hasCloseEventHandler = false;
 
 	constructor(playerType: Types['playerType'], options: VideoPlayerOptions, playerId: Types['playerId'] = '') {
 
-		// console.log('trying to remove element: ', `#${playerId}-events`);
-		// if(document.querySelector<HTMLDivElement>(`#${playerId}-events`)) {
-		// 	document.querySelector<HTMLDivElement>(`#${playerId}-events`)?.remove();
-		// 	this.dispose();
-		// }
-		if(document.querySelectorAll<HTMLDivElement>(`#${playerId}`).length > 1) {
+		if (document.querySelectorAll<HTMLDivElement>(`#${playerId}`).length > 1) {
 			document.querySelectorAll<HTMLDivElement>(`#${playerId}`)[1]?.parentElement?.remove();
 		}
 
@@ -135,7 +131,7 @@ export default class Base {
 		 * @param  {boolean} withLowers true|false
 		 */
 		// cSpell:disable
-		String.prototype.titleCase = function (lang: string = navigator.language.split('-')[0], withLowers: boolean = true): string {
+		String.prototype.titleCase = function (lang: string = navigator.language.split('-')[0], withLowers = true): string {
 			let string = '';
 			let lowers: string[] = [];
 
@@ -201,7 +197,7 @@ export default class Base {
 		`;
 
 		this.getElement()?.parentElement?.prepend(splashscreen);
-		
+
 		this.once('item', () => {
 			splashscreen.remove();
 		});
@@ -425,7 +421,7 @@ export default class Base {
 	 * @returns void
 	 */
 	#createStyles() {
-		if(!this.getElement()) return;
+		if (!this.getElement()) return;
 
 		this.addClasses(this.getElement(), ['nomercyplayer']);
 		// reset jwplayer styles
@@ -564,9 +560,9 @@ export default class Base {
 					break;
 				case 'remove':
 					this.emit('remove');
+					break;
 				case 'dispose':
 					this.emit('dispose');
-					break;
 					break;
 				case 'resize':
 					break;
@@ -638,14 +634,14 @@ export default class Base {
 			.filter((t: any) => (t.kind == 'captions' || t.kind == 'subtitles') && t.label !== 'segment-metadata');
 
 		tracks.unshift({
-			id: 'off', 
+			id: 'off',
 			label: 'Off',
 			language: 'off',
 			type: 'subtitle',
 			index: -1,
 			styled: false,
 		});
-		
+
 		let index = -1;
 
 		for (const track of tracks) {
@@ -975,7 +971,7 @@ export default class Base {
 			.then(async (body) => {
 				options.type === 'blob' ? callback(await body.blob()) : callback(await body.text());
 			})
-			.catch((error) => {
+			.catch(() => {
 				// console.error(error);
 			});
 	};
@@ -1017,12 +1013,12 @@ export default class Base {
 				return el;
 			},
 			get: () => el,
-		}
+		};
 	}
 
 	/**
 	 * Adds the specified CSS class names to the given element's class list.
-	 * 
+	 *
 	 * @param el - The element to add the classes to.
 	 * @param names - An array of CSS class names to add.
 	 * @returns An object with two methods:
@@ -1061,21 +1057,13 @@ export default class Base {
 
 			const file = basePath + (item.sources?.[0]?.src || item.file);
 
-			const token = this.options.accessToken 
-				? `?token=${this.options.accessToken}` 
-				: '';
-				
-			const image = item.image?.includes('http') 
-				? item.image 
-				: basePath + (item.poster ?? item.image);
+			const token = this.options.accessToken ? `?token=${this.options.accessToken}` : '';
 
-			const poster = item.poster?.includes('http') 
-				? item.poster 
-				: basePath + (item.image ?? item.poster);
+			const image = item.image?.includes('http') ? item.image : basePath + (item.image ?? item.poster);
 
-			const logo = item.logo?.includes('http') 
-				? item.logo 
-				: basePath + (item.logo ?? item.logo);
+			const poster = item.poster?.includes('http') ? item.poster : basePath + (item.poster ?? item.image);
+
+			const logo = item.logo?.includes('http') ? item.logo : basePath + (item.logo ?? item.logo);
 
 			const newItem: PlaylistItem = {
 				...item,
@@ -1083,30 +1071,19 @@ export default class Base {
 				poster,
 				logo,
 
-				sources: item.file 
-					? [
-						{
-							src: item.file?.endsWith('.m3u8') 
-								? basePath + item.file 
-								: `${basePath + item.file}${token}`,
+				sources: item.file ? [
+					{
+						src: item.file?.endsWith('.m3u8') ? basePath + item.file : `${basePath + item.file}${token}`,
 
-							type: item.file?.endsWith('.m3u8') 
-								? 'application/x-mpegURL' 
-								: 'video/mp4',
-						}] 
-					: item.sources?.map((i) => {
-						return {
-							src: i.src?.endsWith('.m3u8') 
-								? basePath + i.src 
-								: `${basePath + i.src}${token}`,
-							type: i.src?.endsWith('.m3u8') 
-								? 'application/x-mpegURL' 
-								: 'video/mp4',
-						};
-					}) ?? [],
-				file: file.endsWith('.m3u8') 
-					? file 
-					: `${file}${token}`,
+						type: item.file?.endsWith('.m3u8') ? 'application/x-mpegURL' : 'video/mp4',
+					},
+				] : item.sources?.map((i) => {
+					return {
+						src: i.src?.endsWith('.m3u8') ? basePath + i.src : `${basePath + i.src}${token}`,
+						type: i.src?.endsWith('.m3u8') ? 'application/x-mpegURL' : 'video/mp4',
+					};
+				}) ?? [],
+				file: file.endsWith('.m3u8') ? file : `${file}${token}`,
 			};
 
 			if (this.playerType === 'jwplayer') {
@@ -1188,7 +1165,7 @@ export default class Base {
 	 * @returns {boolean} True if the current device is a TV, false otherwise.
 	 */
 	isTv(): boolean {
-		return /Playstation|webOS|AppleTV|AndroidTV|SmartTV|NetCast|NetTV|SmartTV|SmartTV|Tizen|TV/iu.test(navigator.userAgent) 
+		return /Playstation|webOS|AppleTV|AndroidTV|SmartTV|NetCast|NetTV|SmartTV|SmartTV|Tizen|TV/u.test(navigator.userAgent)
 			|| window.innerHeight == 540 && window.innerWidth == 960 || this.options.forceTvMode == true;
 	}
 
@@ -1307,8 +1284,8 @@ export default class Base {
 		} else {
 			this.player?.dispose?.();
 		}
-		
-		if(document.querySelector<HTMLDivElement>(`#${this.playerId}-events`)) {
+
+		if (document.querySelector<HTMLDivElement>(`#${this.playerId}-events`)) {
 			document.querySelectorAll<HTMLDivElement>(`#${this.playerId}-events`).forEach(el => el.remove());
 
 			this.dispose();
@@ -1316,7 +1293,7 @@ export default class Base {
 			this.getElement()?.remove();
 		}
 	}
-	
+
 	/**
 	 * Trigger an event on the player.
 	 * @param eventType type of event to trigger
@@ -1326,6 +1303,7 @@ export default class Base {
 	emit(eventType: 'audio-change', data: AudioEvent): void;
 	emit(eventType: 'audio', data: AudioEvent): void;
 	emit(eventType: 'back'): void;
+	emit(eventType: 'close'): void;
 	emit(eventType: 'caption-change', data: CaptionsEvent): void;
 	emit(eventType: 'captions', data: CaptionsEvent): void;
 	emit(eventType: 'fonts', data: Font[]): void;
@@ -1421,6 +1399,7 @@ export default class Base {
 	on(event: 'audio-change', callback: (data: AudioEvent) => void): void;
 	on(event: 'audio', callback: (data: AudioEvent) => void): void;
 	on(event: 'back', callback?: (callback: (arg?: any) => any) => void): void;
+	on(event: 'close', callback?: (callback: (arg?: any) => any) => void): void;
 	on(event: 'caption-change', callback: (data: CaptionsEvent) => void): void;
 	on(event: 'captions', callback: (data: CaptionsEvent) => void): void;
 	on(event: 'fonts', callback: (data: Font[]) => void): void;
@@ -1508,6 +1487,7 @@ export default class Base {
 	off(event: 'audio-change', callback: () => void): void;
 	off(event: 'audio', callback: () => void): void;
 	off(event: 'back', callback?: (callback: (arg?: any) => any) => void): void;
+	off(event: 'close', callback?: (callback: (arg?: any) => any) => void): void;
 	off(event: 'caption-change', callback: () => void): void;
 	off(event: 'captions', callback: () => void): void;
 	off(event: 'fonts', callback: () => void): void;
@@ -1594,6 +1574,7 @@ export default class Base {
 	once(event: 'audio-change', callback: (data: AudioEvent) => void): void;
 	once(event: 'audio', callback: (data: AudioEvent) => void): void;
 	once(event: 'back', callback?: (callback: (arg?: any) => any) => void): void;
+	once(event: 'close', callback?: (callback: (arg?: any) => any) => void): void;
 	once(event: 'caption-change', callback: (data: CaptionsEvent) => void): void;
 	once(event: 'captions', callback: (data: CaptionsEvent) => void): void;
 	once(event: 'fonts', callback: (data: Font[]) => void): void;
@@ -1683,6 +1664,8 @@ export default class Base {
 			this.hasTheaterEventHandler = enabled;
 		} else if (event == 'back') {
 			this.hasBackEventHandler = enabled;
+		} else if (event == 'close') {
+			this.hasCloseEventHandler = enabled;
 		}
 	}
 

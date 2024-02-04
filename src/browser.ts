@@ -5,7 +5,7 @@
  * @static
  * @type {Boolean}
  */
-export let IS_IPOD: boolean = false;
+export let IS_IPOD = false;
 
 /**
  * The detected iOS version - or `null`.
@@ -21,7 +21,7 @@ export let IOS_VERSION: string | null = null;
  * @static
  * @type {Boolean}
  */
-export let IS_ANDROID: boolean = false;
+export let IS_ANDROID = false;
 
 /**
  * The detected Android version - or `null` if not Android or indeterminable.
@@ -37,7 +37,7 @@ export let ANDROID_VERSION: number | string | null;
  * @static
  * @type {Boolean}
  */
-export let IS_FIREFOX: boolean = false;
+export let IS_FIREFOX = false;
 
 /**
  * Whether or not this is Microsoft Edge.
@@ -45,7 +45,7 @@ export let IS_FIREFOX: boolean = false;
  * @static
  * @type {Boolean}
  */
-export let IS_EDGE: boolean = false;
+export let IS_EDGE = false;
 
 /**
  * Whether or not this is any Chromium Browser
@@ -53,7 +53,7 @@ export let IS_EDGE: boolean = false;
  * @static
  * @type {Boolean}
  */
-export let IS_CHROMIUM: boolean = false;
+export let IS_CHROMIUM = false;
 
 /**
  * Whether or not this is any Chromium browser that is not Edge.
@@ -69,7 +69,7 @@ export let IS_CHROMIUM: boolean = false;
  * @deprecated
  * @type {Boolean}
  */
-export let IS_CHROME: boolean = false;
+export let IS_CHROME = false;
 
 /**
  * The detected Chromium version - or `null`.
@@ -105,7 +105,7 @@ export let IE_VERSION: number | null = null;
  * @static
  * @type {Boolean}
  */
-export let IS_SAFARI: boolean = false;
+export let IS_SAFARI = false;
 
 /**
  * Whether or not this is a Windows machine.
@@ -113,7 +113,7 @@ export let IS_SAFARI: boolean = false;
  * @static
  * @type {Boolean}
  */
-export let IS_WINDOWS: boolean = false;
+export let IS_WINDOWS = false;
 
 /**
  * Whether or not this device is an iPad.
@@ -121,7 +121,7 @@ export let IS_WINDOWS: boolean = false;
  * @static
  * @type {Boolean}
  */
-export let IS_IPAD: boolean = false;
+export let IS_IPAD = false;
 
 /**
  * Whether or not this device is an iPhone.
@@ -132,7 +132,7 @@ export let IS_IPAD: boolean = false;
 // The Facebook app's UIWebView identifies as both an iPhone and iPad, so
 // to identify iPhones, we need to exclude iPads.
 // http://artsy.github.io/blog/2012/10/18/the-perils-of-ios-user-agent-sniffing/
-export let IS_IPHONE: boolean = false;
+export let IS_IPHONE = false;
 
 /**
  * Whether or not this device is touch-enabled.
@@ -141,104 +141,104 @@ export let IS_IPHONE: boolean = false;
  * @const
  * @type {Boolean}
  */
-export const TOUCH_ENABLED: boolean = Boolean((
-  'ontouchstart' in window ||
-  window.navigator.maxTouchPoints ||
+export const TOUCH_ENABLED = Boolean((
+	'ontouchstart' in window
+  || window.navigator.maxTouchPoints
   // @ts-ignore
-  window.DocumentTouch && window.document instanceof window.DocumentTouch));
-  
+  || window.DocumentTouch && window.document instanceof window.DocumentTouch));
+
 // @ts-ignore
 const UAD = window.navigator && window.navigator.userAgentData;
 
 if (UAD) {
-  // If userAgentData is present, use it instead of userAgent to avoid warnings
-  // Currently only implemented on Chromium
-  // userAgentData does not expose Android version, so ANDROID_VERSION remains `null`
+	// If userAgentData is present, use it instead of userAgent to avoid warnings
+	// Currently only implemented on Chromium
+	// userAgentData does not expose Android version, so ANDROID_VERSION remains `null`
 
-  IS_ANDROID = UAD.platform === 'Android';
-  IS_EDGE = Boolean(UAD.brands.find((b: { brand: string; }) => b.brand === 'Microsoft Edge'));
-  IS_CHROMIUM = Boolean(UAD.brands.find((b: { brand: string; }) => b.brand === 'Chromium'));
-  IS_CHROME = !IS_EDGE && IS_CHROMIUM;
-  CHROMIUM_VERSION = CHROME_VERSION = (UAD.brands.find((b: { brand: string; }) => b.brand === 'Chromium') || {}).version || null;
-  IS_WINDOWS = UAD.platform === 'Windows';
+	IS_ANDROID = UAD.platform === 'Android';
+	IS_EDGE = Boolean(UAD.brands.find((b: { brand: string; }) => b.brand === 'Microsoft Edge'));
+	IS_CHROMIUM = Boolean(UAD.brands.find((b: { brand: string; }) => b.brand === 'Chromium'));
+	IS_CHROME = !IS_EDGE && IS_CHROMIUM;
+	CHROMIUM_VERSION = CHROME_VERSION = (UAD.brands.find((b: { brand: string; }) => b.brand === 'Chromium') || {}).version || null;
+	IS_WINDOWS = UAD.platform === 'Windows';
 }
 
 // If the browser is not Chromium, either userAgentData is not present which could be an old Chromium browser,
 //  or it's a browser that has added userAgentData since that we don't have tests for yet. In either case,
 // the checks need to be made agiainst the regular userAgent string.
 if (!IS_CHROMIUM) {
-  const USER_AGENT = window.navigator && window.navigator.userAgent || '';
+	const USER_AGENT = window.navigator && window.navigator.userAgent || '';
 
-  IS_IPOD = (/iPod/i).test(USER_AGENT);
+	IS_IPOD = (/iPod/iu).test(USER_AGENT);
 
-  IOS_VERSION = (function() {
-    const match = USER_AGENT.match(/OS (\d+)_/i);
+	IOS_VERSION = (function() {
+		const match = USER_AGENT.match(/OS (\d+)_/iu);
 
-    if (match && match[1]) {
-      return match[1];
-    }
-    return null;
-  }());
+		if (match && match[1]) {
+			return match[1];
+		}
+		return null;
+	})();
 
-  IS_ANDROID = (/Android/i).test(USER_AGENT);
+	IS_ANDROID = (/Android/iu).test(USER_AGENT);
 
-  ANDROID_VERSION = (function() {
-    // This matches Android Major.Minor.Patch versions
-    // ANDROID_VERSION is Major.Minor as a Number, if Minor isn't available, then only Major is returned
-    const match = USER_AGENT.match(/Android (\d+)(?:\.(\d+))?(?:\.(\d+))*/i);
+	ANDROID_VERSION = (function() {
+		// This matches Android Major.Minor.Patch versions
+		// ANDROID_VERSION is Major.Minor as a Number, if Minor isn't available, then only Major is returned
+		const match = USER_AGENT.match(/Android (\d+)(?:\.(\d+))?(?:\.(\d+))*/iu);
 
-    if (!match) {
-      return null;
-    }
+		if (!match) {
+			return null;
+		}
 
-    const major = match[1] && parseFloat(match[1]);
-    const minor = match[2] && parseFloat(match[2]);
+		const major = match[1] && parseFloat(match[1]);
+		const minor = match[2] && parseFloat(match[2]);
 
-    if (major && minor) {
-      return parseFloat(match[1] + '.' + match[2]);
-    } else if (major) {
-      return major;
-    }
-    return null;
-  }());
+		if (major && minor) {
+			return parseFloat(`${match[1]}.${match[2]}`);
+		} if (major) {
+			return major;
+		}
+		return null;
+	})();
 
-  IS_FIREFOX = (/Firefox/i).test(USER_AGENT);
+	IS_FIREFOX = (/Firefox/iu).test(USER_AGENT);
 
-  IS_EDGE = (/Edg/i).test(USER_AGENT);
+	IS_EDGE = (/Edg/iu).test(USER_AGENT);
 
-  IS_CHROMIUM = ((/Chrome/i).test(USER_AGENT) || (/CriOS/i).test(USER_AGENT));
+	IS_CHROMIUM = ((/Chrome/iu).test(USER_AGENT) || (/CriOS/iu).test(USER_AGENT));
 
-  IS_CHROME = !IS_EDGE && IS_CHROMIUM;
+	IS_CHROME = !IS_EDGE && IS_CHROMIUM;
 
-  CHROMIUM_VERSION = CHROME_VERSION = (function() {
-    const match = USER_AGENT.match(/(Chrome|CriOS)\/(\d+)/);
+	CHROMIUM_VERSION = CHROME_VERSION = (function() {
+		const match = USER_AGENT.match(/(Chrome|CriOS)\/(\d+)/u);
 
-    if (match && match[2]) {
-      return parseFloat(match[2]);
-    }
-    return null;
-  }());
+		if (match && match[2]) {
+			return parseFloat(match[2]);
+		}
+		return null;
+	})();
 
-  IE_VERSION = (function() {
-    const result = (/MSIE\s(\d+)\.\d/).exec(USER_AGENT);
-    let version = result && parseFloat(result[1]);
+	IE_VERSION = (function() {
+		const result = (/MSIE\s(\d+)\.\d/u).exec(USER_AGENT);
+		let version = result && parseFloat(result[1]);
 
-    if (!version && (/Trident\/7.0/i).test(USER_AGENT) && (/rv:11.0/).test(USER_AGENT)) {
-      // IE 11 has a different user agent string than other IE versions
-      version = 11.0;
-    }
+		if (!version && (/Trident\/7.0/iu).test(USER_AGENT) && (/rv:11.0/u).test(USER_AGENT)) {
+			// IE 11 has a different user agent string than other IE versions
+			version = 11.0;
+		}
 
-    return version;
-  }());
+		return version;
+	})();
 
-  IS_SAFARI = (/Safari/i).test(USER_AGENT) && !IS_CHROME && !IS_ANDROID && !IS_EDGE;
+	IS_SAFARI = (/Safari/iu).test(USER_AGENT) && !IS_CHROME && !IS_ANDROID && !IS_EDGE;
 
-  IS_WINDOWS = (/Windows/i).test(USER_AGENT);
+	IS_WINDOWS = (/Windows/iu).test(USER_AGENT);
 
-  IS_IPAD = (/iPad/i).test(USER_AGENT) ||
-  (IS_SAFARI && TOUCH_ENABLED && !(/iPhone/i).test(USER_AGENT));
+	IS_IPAD = (/iPad/iu).test(USER_AGENT)
+  || (IS_SAFARI && TOUCH_ENABLED && !(/iPhone/iu).test(USER_AGENT));
 
-  IS_IPHONE = (/iPhone/i).test(USER_AGENT) && !IS_IPAD;
+	IS_IPHONE = (/iPhone/iu).test(USER_AGENT) && !IS_IPAD;
 }
 
 /**

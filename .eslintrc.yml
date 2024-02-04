@@ -246,7 +246,7 @@ rules:
   prefer-regex-literals:
     - error
   prefer-rest-params:
-    - error
+    - off
   prefer-spread:
     - error
   prefer-template:

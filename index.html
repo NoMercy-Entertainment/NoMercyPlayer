@@ -1,95 +1,124 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+
+<!--    <head>-->
+<!--        <meta charset="UTF-8" />-->
+<!--        <link rel="icon"-->
+<!--              type="image/svg+xml"-->
+<!--              href="/favicon.ico" />-->
+<!--        <meta name="viewport"-->
+<!--              content="width=device-width, initial-scale=1.0" />-->
+<!--        <title>NoMercyPlayer API</title>-->
+<!--    </head>-->
+
+<!--    <body class="nm-flex nm-flex-col nm-items-center nm-justify-center nm-w-screen nm-h-screen nm-gap-4 nm-text-white nm-bg-zinc-900">-->
+
+<!--        <div id="container"-->
+<!--             class="nm-flex nm-flex-col nm-justify-center nm-w-full nm-gap-8 nm-p-8 sm:nm-flex-row">-->
+<!--            -->
+<!--        </div>-->
+
+<!--        <script type="module"-->
+<!--                src='./src/index.ts'></script>-->
+
+<!--        <script type="module"-->
+<!--                src='./index.js'></script>-->
+
+<!--    </body>-->
+
+<!--</html>-->
 <!DOCTYPE html>
 <html lang="en">
 
-    <head>
-        <meta charset="UTF-8" />
-        <link rel="icon"
-              type="image/svg+xml"
-              href="/favicon.ico" />
-        <meta name="viewport"
-              content="width=device-width, initial-scale=1.0" />
-        <title>NoMercyPlayer API</title>
-    </head>
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon"
+          type="image/svg+xml"
+          href="/favicon.ico" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+    <title>NoMercyPlayer API</title>
+</head>
 
-    <body class="nm-flex nm-flex-col nm-items-center nm-justify-center nm-w-screen nm-h-screen nm-gap-4 nm-text-white nm-bg-zinc-900">
+<body class="nm-flex nm-flex-col nm-items-center nm-justify-center nm-w-screen nm-h-screen nm-gap-4 nm-text-white nm-bg-zinc-900">
 
-        <div id="container"
-             class="nm-flex nm-flex-col nm-justify-center nm-w-full nm-gap-8 nm-p-8 sm:nm-flex-row">
-            <div id="wrapper2"
-                 class="nm-flex nm-flex-col nm-items-center nm-w-full nm-max-w-4xl nm-gap-2 nm-text-center">
-                <span>JWPlayer</span>
-                <video id="player2"></video>
-            </div>
+<div id="container"
+     class="nm-flex nm-flex-col nm-justify-center nm-w-full nm-gap-8 nm-p-8 sm:nm-flex-row">
+    <div id="wrapper2"
+         class="nm-flex nm-flex-col nm-items-center nm-w-full nm-max-w-4xl nm-gap-2 nm-text-center">
+        <span>JWPlayer</span>
+        <video id="player2"></video>
+    </div>
 
-            <div id="wrapper1"
-                 class="nm-flex nm-flex-col nm-items-center nm-w-full nm-max-w-4xl nm-gap-2 nm-text-center">
+    <div id="wrapper1"
+         class="nm-flex nm-flex-col nm-items-center nm-w-full nm-max-w-4xl nm-gap-2 nm-text-center">
 
-                <span>VideoJS</span>
-                <video id="player1"
-                       class="video-js group-hover/button:nm-flex"></video>
-            </div>
-        </div>
+        <span>VideoJS</span>
+        <video id="player1"
+               class="video-js group-hover/button:nm-flex"></video>
+    </div>
+</div>
 
-        <div class="nm-flex nm-flex-wrap nm-items-center nm-justify-center nm-gap-4">
-            <button type="button"
-                    class="nm-w-24 nm-text-white nm-bg-gradient-to-r nm-from-purple-700 nm-to-purple-500 hover:nm-bg-gradient-to-l focus:nm-ring-4 focus:nm-outline-none focus:nm-ring-purple-200 dark:focus:nm-ring-purple-800 nm-font-medium nm-rounded-md nm-text-sm nm-px-3 nm-py-1.5 nm-text-center nm-mr-2 nm-mb-2"
-                    onClick="play()">
-                Play
-            </button>
-            <button type="button"
-                    class="nm-w-24 nm-text-white nm-bg-gradient-to-r nm-from-purple-700 nm-to-purple-500 hover:nm-bg-gradient-to-l focus:nm-ring-4 focus:nm-outline-none focus:nm-ring-purple-200 dark:focus:nm-ring-purple-800 nm-font-medium nm-rounded-md nm-text-sm nm-px-3 nm-py-1.5 nm-text-center nm-mr-2 nm-mb-2"
-                    onClick="pause()">
-                Pause
-            </button>
-            <button type="button"
-                    class="nm-w-24 nm-text-white nm-bg-gradient-to-r nm-from-purple-700 nm-to-purple-500 hover:nm-bg-gradient-to-l focus:nm-ring-4 focus:nm-outline-none focus:nm-ring-purple-200 dark:focus:nm-ring-purple-800 nm-font-medium nm-rounded-md nm-text-sm nm-px-3 nm-py-1.5 nm-text-center nm-mr-2 nm-mb-2"
-                    onClick="next()">
-                Next
-            </button>
-            <button type="button"
-                    class="nm-w-24 nm-text-white nm-bg-gradient-to-r nm-from-purple-700 nm-to-purple-500 hover:nm-bg-gradient-to-l focus:nm-ring-4 focus:nm-outline-none focus:nm-ring-purple-200 dark:focus:nm-ring-purple-800 nm-font-medium nm-rounded-md nm-text-sm nm-px-3 nm-py-1.5 nm-text-center nm-mr-2 nm-mb-2"
-                    onClick="prev()">
-                Prev
-            </button>
-            <button type="button"
-                    class="nm-w-24 nm-text-white nm-bg-gradient-to-r nm-from-purple-700 nm-to-purple-500 hover:nm-bg-gradient-to-l focus:nm-ring-4 focus:nm-outline-none focus:nm-ring-purple-200 dark:focus:nm-ring-purple-800 nm-font-medium nm-rounded-md nm-text-sm nm-px-3 nm-py-1.5 nm-text-center nm-mr-2 nm-mb-2"
-                    onClick="sync()">
-                Sync
-            </button>
-        </div>
+<div class="nm-flex nm-flex-wrap nm-items-center nm-justify-center nm-gap-4">
+    <button type="button"
+            class="nm-w-24 nm-text-white nm-bg-gradient-to-r nm-from-purple-700 nm-to-purple-500 hover:nm-bg-gradient-to-l focus:nm-ring-4 focus:nm-outline-none focus:nm-ring-purple-200 dark:focus:nm-ring-purple-800 nm-font-medium nm-rounded-md nm-text-sm nm-px-3 nm-py-1.5 nm-text-center nm-mr-2 nm-mb-2"
+            onClick="play()">
+        Play
+    </button>
+    <button type="button"
+            class="nm-w-24 nm-text-white nm-bg-gradient-to-r nm-from-purple-700 nm-to-purple-500 hover:nm-bg-gradient-to-l focus:nm-ring-4 focus:nm-outline-none focus:nm-ring-purple-200 dark:focus:nm-ring-purple-800 nm-font-medium nm-rounded-md nm-text-sm nm-px-3 nm-py-1.5 nm-text-center nm-mr-2 nm-mb-2"
+            onClick="pause()">
+        Pause
+    </button>
+    <button type="button"
+            class="nm-w-24 nm-text-white nm-bg-gradient-to-r nm-from-purple-700 nm-to-purple-500 hover:nm-bg-gradient-to-l focus:nm-ring-4 focus:nm-outline-none focus:nm-ring-purple-200 dark:focus:nm-ring-purple-800 nm-font-medium nm-rounded-md nm-text-sm nm-px-3 nm-py-1.5 nm-text-center nm-mr-2 nm-mb-2"
+            onClick="next()">
+        Next
+    </button>
+    <button type="button"
+            class="nm-w-24 nm-text-white nm-bg-gradient-to-r nm-from-purple-700 nm-to-purple-500 hover:nm-bg-gradient-to-l focus:nm-ring-4 focus:nm-outline-none focus:nm-ring-purple-200 dark:focus:nm-ring-purple-800 nm-font-medium nm-rounded-md nm-text-sm nm-px-3 nm-py-1.5 nm-text-center nm-mr-2 nm-mb-2"
+            onClick="prev()">
+        Prev
+    </button>
+    <button type="button"
+            class="nm-w-24 nm-text-white nm-bg-gradient-to-r nm-from-purple-700 nm-to-purple-500 hover:nm-bg-gradient-to-l focus:nm-ring-4 focus:nm-outline-none focus:nm-ring-purple-200 dark:focus:nm-ring-purple-800 nm-font-medium nm-rounded-md nm-text-sm nm-px-3 nm-py-1.5 nm-text-center nm-mr-2 nm-mb-2"
+            onClick="sync()">
+        Sync
+    </button>
+</div>
 
-        <script type="module"
-                src='./src/index.ts'></script>
+<script type="module"
+        src='./src/index.ts'></script>
 
-        <script type="module"
-                src='./index.js'></script>
+<script type="module"
+        src='./index.js'></script>
 
-        <script>
-            function play() {
-                js.play();
-                jw.play();
-            }
+<script>
+    function play() {
+        js.play();
+        jw.play();
+    }
 
-            function pause() {
-                js.pause();
-                jw.pause();
-            }
+    function pause() {
+        js.pause();
+        jw.pause();
+    }
 
-            function next() {
-                js.next();
-                jw.next();
-            }
+    function next() {
+        js.next();
+        jw.next();
+    }
 
-            function prev() {
-                js.previous();
-                jw.previous();
-            }
+    function prev() {
+        js.previous();
+        jw.previous();
+    }
 
-            function sync() {
-                js.seek(jw.currentTime());
-            }
+    function sync() {
+        js.seek(jw.currentTime());
+    }
 
-        </script>
-    </body>
+</script>
+</body>
 
 </html>

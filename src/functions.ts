@@ -25,7 +25,7 @@ export default class Functions extends Base {
 
 	lastTime = 0;
 	translations: { [key: string]: string } = {};
-	
+
 	/**
 	 * The available options for stretching the video to fit the player dimensions.
 	 * - `uniform`: Fits JW Player dimensions while maintaining aspect ratio.
@@ -34,7 +34,7 @@ export default class Functions extends Base {
 	 * - `none`: Displays the actual size of the video file (Black borders).
 	 */
 	stretchOptions: Array<StretchOptions> = [
-		'uniform', 
+		'uniform',
 		'fill',
 		'exactfit',
 		'none',
@@ -54,7 +54,7 @@ export default class Functions extends Base {
 			this.#eventHandlers();
 		});
 	}
-	
+
 	enabled = false;
 
 	/**
@@ -67,11 +67,24 @@ export default class Functions extends Base {
 			} catch (error) {
 				//
 			}
-			this.getVideoElement().setAttribute('poster', this.getPlaylistItem()?.image?.replace?.(/w300|w500/, 'original') ?? '');
+
+			const image = this.getPlaylistItem()?.image?.replace?.(/w300|w500/u, 'original') ?? '';
+
+			fetch(image, {
+				method: 'HEAD',
+			})
+				.then((response) => {
+					if (response.ok) {
+						this.getVideoElement().setAttribute('poster', image);
+					}
+				})
+				.catch(() => {
+					//
+				});
 
 			this.enabled = false;
 			this.lastTime = 0;
-			
+
 			this.emit('speed', 1);
 			if (this.options.chapters != false) {
 				this.#fetchChapterFile();
@@ -95,7 +108,7 @@ export default class Functions extends Base {
 					this.setTextTrack(-1);
 				}
 			});
-			
+
 			this.once('audio', () => {
 				if (localStorage.getItem('audio-language')) {
 					this.setAudioTrack(this.getAudioTrackIndexByLanguage(localStorage.getItem('audio-language') as string));
@@ -111,35 +124,35 @@ export default class Functions extends Base {
 				});
 			});
 		});
-		
+
 		this.on('dispose', () => {
 			document.removeEventListener('keyup', this.keyHandler.bind(this), false);
-			
-			if(this.isJwplayer) {
+
+			if (this.isJwplayer) {
 				this.player.remove();
 			} else {
 				this.player.dispose();
 			}
 			document.querySelector<HTMLDivElement>(`#${this.playerType}-events`)?.remove();
 		});
-		
+
 		this.on('time', (data) => {
 			if (data.position > this.lastTime + 5) {
 				this.emit('lastTimeTrigger', data);
 				this.lastTime = data.position;
 			}
-			
-			if(this.skippers && !this.enabled) {
+
+			if (this.skippers && !this.enabled) {
 				this.getSkippers().forEach((skip: any) => {
 					if (data.position >= skip.startTime) {
 
-						if(Math.abs(skip.endTime - data.duration) < 5 && this.isLastPlaylistItem()) {
+						if (Math.abs(skip.endTime - data.duration) < 5 && this.isLastPlaylistItem()) {
 							return;
 						}
 
 						this.enabled = true;
-						
-						if(Math.abs(skip.endTime - data.duration) < 5) {
+
+						if (Math.abs(skip.endTime - data.duration) < 5) {
 							this.emit('show-next-up');
 						} else {
 							this.seek(skip.endTime);
@@ -153,47 +166,70 @@ export default class Functions extends Base {
 			this.enabled = false;
 			this.lastTime = 0;
 		});
-		
+
+		// Choose what to play
 		this.once('item', () => {
-			
-			const progressItem = this.getPlaylist()
-				.filter(i => i.progress);
-
-			if (progressItem.length == 0) {
-				this.play();
-				return
-			}
-
-			const playlistItem = progressItem
-				.sort((a, b) => b.progress!.date.localeCompare(a.progress!.date)).at(0);
-			
-			if (!playlistItem?.progress) {
-				this.play();
-				return
-			}
-			
-			setTimeout(() => {
-				if (playlistItem.progress && playlistItem.progress.percentage > 95) {
-					this.setPlaylistItem(this.getPlaylist().indexOf(playlistItem) + 1);
-				} else {
-					this.setPlaylistItem(this.getPlaylist().indexOf(playlistItem));
-				}
-			}, 0);
 
 			this.getVideoElement().focus();
 
-			this.once('play', () => {
-				if (!playlistItem.progress) return;
-				
+			const join = this.getParameterByName('join');
+			const item = this.getParameterByName('item');
+			const itemNumber = item ? parseInt(item, 10) : null;
+			const season = this.getParameterByName('season');
+			const seasonNumber = season ? parseInt(season, 10) : null;
+			const episode = this.getParameterByName('episode');
+			const episodeNumber = episode ? parseInt(episode, 10) : null;
+
+			if (join) {
+				// Join a session
+			} else if (itemNumber) {
 				setTimeout(() => {
+					this.setEpisode(0, itemNumber);
+				}, 0);
+			} else if (seasonNumber && episodeNumber) {
+				setTimeout(() => {
+					this.setEpisode(seasonNumber, episodeNumber);
+				}, 0);
+			} else {
+				// Get item with the latest progress timer
+
+				const progressItem = this.getPlaylist()
+					.filter(i => i.progress);
+
+				if (progressItem.length == 0) {
+					this.play();
+					return;
+				}
+
+				const playlistItem = progressItem
+					.sort((a, b) => b.progress!.date.localeCompare(a.progress!.date)).at(0);
+
+				if (!playlistItem?.progress) {
+					this.play();
+					return;
+				}
+
+				setTimeout(() => {
+					if (playlistItem.progress && playlistItem.progress.percentage > 95) {
+						this.setPlaylistItem(this.getPlaylist().indexOf(playlistItem) + 1);
+					} else {
+						this.setPlaylistItem(this.getPlaylist().indexOf(playlistItem));
+					}
+				}, 0);
+
+				this.once('play', () => {
 					if (!playlistItem.progress) return;
-					this.seek(this.convertToSeconds(playlistItem.duration) / 100 * playlistItem.progress.percentage);
-				}, 350);
-			});
+
+					setTimeout(() => {
+						if (!playlistItem.progress) return;
+						this.seek(this.convertToSeconds(playlistItem.duration) / 100 * playlistItem.progress.percentage);
+					}, 350);
+				});
+			}
 		});
 
 		this.on('ended', () => {
-			if (this.hasPlaylists() &&  this.isLastPlaylistItem()) {
+			if (this.hasPlaylists() && this.isLastPlaylistItem()) {
 				this.emit('finished');
 			}
 		});
@@ -202,7 +238,7 @@ export default class Functions extends Base {
 
 		this.keyEvents();
 	}
-	
+
 	/**
 	 * Returns the current orientation angle of the device.
 	 * @returns {number} The orientation angle in degrees.
@@ -239,8 +275,8 @@ export default class Functions extends Base {
 	 * If the disableControls option is set to true, no event listeners are attached.
 	 */
 	keyEvents() {
-		if(this.options.disableControls) return;
-		
+		if (this.options.disableControls) return;
+
 		document.removeEventListener('keyup', this.keyHandler.bind(this), false);
 		document.addEventListener('keyup', this.keyHandler.bind(this), false);
 	};
@@ -611,9 +647,9 @@ export default class Functions extends Base {
 	getCurrentAspect() {
 		if (this.isJwplayer) {
 			return this.player.getStretching();
-		} else {
-			return this.player.aspectRatio();
 		}
+		return this.player.aspectRatio();
+
 	}
 
 	/**
@@ -623,12 +659,12 @@ export default class Functions extends Base {
 	setAspect(aspect: string) {
 		if (this.isJwplayer) {
 			this.player.setConfig({
-				"stretching": aspect,
+				'stretching': aspect,
 			});
 		} else {
 			this.player.aspectRatio(aspect);
 		}
-		
+
 		this.displayMessage(`${this.localize('Aspect ratio')}: ${this.localize(aspect)}`);
 	}
 
@@ -685,7 +721,7 @@ export default class Functions extends Base {
 
 	/**
 	 * Sets the current playlist item to the one at the specified index.
-	 * 
+	 *
 	 * @param index - The index of the playlist item to set as the current item.
 	 */
 	setPlaylistItem(index: number) {
@@ -716,10 +752,14 @@ export default class Functions extends Base {
 	 * @returns The playlist of the player.
 	 */
 	getPlaylist() {
-		if (this.isJwplayer) {
-			return this.player.getPlaylist();
+		try {
+			if (this.isJwplayer) {
+				return this.player.getPlaylist();
+			}
+			return this.player.playlist();
+		} catch (error) {
+			return [];
 		}
-		return this.player.playlist();
 	}
 
 	/**
@@ -770,7 +810,7 @@ export default class Functions extends Base {
 	 * @returns {boolean} True if the player has more than one playlist, false otherwise.
 	 */
 	hasPlaylists(): boolean {
-		return this.getPlaylist().length > 0;
+		return this.getPlaylist().length > 1;
 	}
 
 	/**
@@ -868,7 +908,7 @@ export default class Functions extends Base {
 	 */
 	cycleAudioTracks() {
 
-		if(!this.hasAudioTracks()) {
+		if (!this.hasAudioTracks()) {
 			return;
 		}
 
@@ -956,10 +996,8 @@ export default class Functions extends Base {
 	 * @returns The source URL for the text track, with an optional access token query parameter.
 	 */
 	getTextTrackSrc() {
-		
-		const token = this.options.accessToken 
-			? `?token=${this.options.accessToken}` 
-			: '';
+
+		const token = this.options.accessToken ? `?token=${this.options.accessToken}` : '';
 
 		if (this.isJwplayer) {
 			return this.getTextTrack()?.id + token;
@@ -988,7 +1026,7 @@ export default class Functions extends Base {
 	 * @returns The language of the current text track, or null if no text track is available.
 	 */
 	getTextTrackLanguage() {
-		return this.getTextTrack()?.language ? this.localize(this.getTextTrack().language) + ' ' : null;
+		return this.getTextTrack()?.language ? `${this.localize(this.getTextTrack().language)} ` : null;
 	}
 
 	/**
@@ -998,7 +1036,8 @@ export default class Functions extends Base {
 	setTextTrack(index: number) {
 
 		try {
-			this.getElement().querySelectorAll<HTMLDivElement>(`.libassjs-canvas-parent`).forEach(el => el.remove());
+			this.getElement().querySelectorAll<HTMLDivElement>('.libassjs-canvas-parent')
+				.forEach(el => el.remove());
 			this.octopusInstance.dispose();
 		} catch (error) {
 			//
@@ -1058,8 +1097,8 @@ export default class Functions extends Base {
 	 * Finally, it displays a message indicating the current subtitle track.
 	 */
 	cycleSubtitles() {
-		
-		if(!this.hasTextTracks()) {
+
+		if (!this.hasTextTracks()) {
 			return;
 		}
 
@@ -1082,7 +1121,7 @@ export default class Functions extends Base {
 		const subtitleURL = this.getTextTrackSrc() ?? null;
 
 		if (subtitleURL) {
-			await this.#fetchFontFile();
+			await this.fetchFontFile();
 			const options = {
 				video: this.getVideoElement(),
 				lossyRender: true,
@@ -1247,26 +1286,23 @@ export default class Functions extends Base {
 
 	/**
 	 * Returns the file associated with the 'fonts' metadata item of the current playlist item, if it exists.
-	 * @returns {string | undefined} The file associated with the 'fonts' metadata item 
+	 * @returns {string | undefined} The file associated with the 'fonts' metadata item
 	 * of the current playlist item, or undefined if it does not exist.
 	 */
-	#getFontsFile(): string | undefined {
-		return this.getPlaylistItem()?.metadata
-		.find((t: { kind: string }) => t.kind === 'fonts')?.file;
+	getFontsFile(): string | undefined {
+		return this.getPlaylistItem()?.metadata?.find((t: { kind: string }) => t.kind === 'fonts')?.file;
 	}
 
 	/**
 	 * Fetches the font file and updates the fonts array if the file has changed.
 	 * @returns {Promise<void>} A Promise that resolves when the font file has been fetched and the fonts array has been updated.
 	 */
-	async #fetchFontFile(): Promise<void> {
-		const file = this.#getFontsFile();
+	async fetchFontFile(): Promise<void> {
+		const file = this.getFontsFile();
 		if (file && this.currentFontFile !== file) {
 			this.currentFontFile = file;
-			
-			const token = this.options.accessToken 
-				? `?token=${this.options.accessToken}` 
-				: '';
+
+			const token = this.options.accessToken ? `?token=${this.options.accessToken}` : '';
 
 			await this.getFileContents({
 				url: file,
@@ -1293,8 +1329,8 @@ export default class Functions extends Base {
 	async #fetchTranslationsFile() {
 		const language = this.options.language ?? navigator.language;
 
-		const file = `https://vscode.nomercy.tv/translations/${language}.json`;
-				
+		const file = `https://storage.nomercy.tv/laravel/player/translations/${language}.json`;
+
 		await this.getFileContents({
 			url: file,
 			options: {},
@@ -1325,7 +1361,7 @@ export default class Functions extends Base {
 					const parser = new window.WebVTTParser();
 					this.chapters = parser.parse(data, 'metadata');
 
-					if(this.duration()){ // VideoJs doesn't have duration yet
+					if (this.duration()) { // VideoJs doesn't have duration yet
 						this.emit('chapters', this.getChapters());
 					} else {
 						this.once('duration', () => {
@@ -1364,7 +1400,7 @@ export default class Functions extends Base {
 			return this.currentTime() >= chapter.startTime && this.currentTime() <= chapter.endTime;
 		});
 	}
-	
+
 	/**
 	 * Fetches the skip file and parses it to get the skippers.
 	 * Emits the 'skippers' event with the parsed skippers.
@@ -1383,7 +1419,7 @@ export default class Functions extends Base {
 					const parser = new window.WebVTTParser();
 					this.skippers = parser.parse(data, 'metadata');
 
-					if(this.duration()){ // VideoJs doesn't have duration yet
+					if (this.duration()) { // VideoJs doesn't have duration yet
 						this.emit('skippers', this.getSkippers());
 					} else {
 						this.once('duration', () => {
@@ -1429,7 +1465,7 @@ export default class Functions extends Base {
 	 */
 	getSpeeds() {
 		if (this.isJwplayer) {
-			return this.options.playbackRates;
+			return this.options.playbackRates ?? [];
 		}
 		return this.player.playbackRates();
 	}
@@ -1473,7 +1509,7 @@ export default class Functions extends Base {
 
 	/**
 	 * Sets up the media session API for the player.
-	 * 
+	 *
 	 * @remarks
 	 * This method sets up the media session API for the player, which allows the user to control media playback
 	 * using the media session controls on their device. It sets the metadata for the current media item, as well
@@ -1505,13 +1541,15 @@ export default class Functions extends Base {
 				] : [],
 			});
 
-			navigator.mediaSession.setActionHandler('previoustrack', this.previous.bind(this));
-			navigator.mediaSession.setActionHandler('nexttrack', this.next.bind(this));
-			navigator.mediaSession.setActionHandler('seekbackward', time => this.rewindVideo.bind(this)(time.seekTime));
-			navigator.mediaSession.setActionHandler('seekforward', time => this.forwardVideo.bind(this)(time.seekTime));
-			navigator.mediaSession.setActionHandler('seekto', time => this.seek(time.seekTime as number));
-			navigator.mediaSession.setActionHandler('play', this.play.bind(this));
-			navigator.mediaSession.setActionHandler('pause', this.pause.bind(this));
+			if (typeof navigator.mediaSession.setActionHandler == 'function') {
+				navigator.mediaSession.setActionHandler('previoustrack', this.previous.bind(this));
+				navigator.mediaSession.setActionHandler('nexttrack', this.next.bind(this));
+				navigator.mediaSession.setActionHandler('seekbackward', time => this.rewindVideo.bind(this)(time.seekTime));
+				navigator.mediaSession.setActionHandler('seekforward', time => this.forwardVideo.bind(this)(time.seekTime));
+				navigator.mediaSession.setActionHandler('seekto', time => this.seek(time.seekTime as number));
+				navigator.mediaSession.setActionHandler('play', this.play.bind(this));
+				navigator.mediaSession.setActionHandler('pause', this.pause.bind(this));
+			}
 		}
 	}
 
@@ -1548,7 +1586,7 @@ export default class Functions extends Base {
 	setAccessToken(token: string) {
 		this.options.accessToken = token;
 	}
-	
+
 	/**
 	 * Breaks a logo title string into two lines by inserting a newline character after a specified set of characters.
 	 * @param str The logo title string to break.
@@ -1561,12 +1599,8 @@ export default class Functions extends Base {
 		}
 
 		if (str.split('').some((l: string) => characters.includes(l))) {
-			const reg = new RegExp(characters.map(l => (l == '?'
-				? `\\${l}`
-				: l)).join('|'), 'u');
-			const reg2 = new RegExp(characters.map(l => (l == '?'
-				? `\\${l}\\s`
-				: `${l}\\s`)).join('|'), 'u');
+			const reg = new RegExp(characters.map(l => (l == '?' ? `\\${l}` : l)).join('|'), 'u');
+			const reg2 = new RegExp(characters.map(l => (l == '?' ? `\\${l}\\s` : `${l}\\s`)).join('|'), 'u');
 			if (reg && reg2 && str.match(reg2)) {
 				return str.replace((str.match(reg2) as any)[0], `${(str.match(reg) as any)[0]}\n`);
 			}
@@ -1587,18 +1621,29 @@ export default class Functions extends Base {
 		return this.duration() - this.currentTime() < 10;
 	}
 
-	lastPlaylistItem(): boolean{
+	lastPlaylistItem(): boolean {
 		return this.getPlaylist().length - 1 == this.getPlaylistIndex();
 	}
 
 	clearProgress(): boolean {
-		return this.duration() - this.currentTime() <= 60 * (this.getPlaylistItem().video_type === 'tv'
-		? 5
-		: 15);
+		return this.duration() - this.currentTime() <= 60 * (this.getPlaylistItem().video_type === 'tv' ? 5 : 15);
 	}
 
-	showInProduction(): boolean{
+	showInProduction(): boolean {
 		return this.getPlaylistItem().production!;
 	}
+
+	getParameterByName(name: string, url = window.location.href) {
+		name = name.replace(/[[\]]/gu, '\\$&');
+		const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`, 'u');
+		const results = regex.exec(url);
+		if (!results) {
+			return null;
+		}
+		if (!results[2]) {
+			return '';
+		}
+		return decodeURIComponent(results[2].replace(/\+/gu, ' '));
+	};
 
 }

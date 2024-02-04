@@ -33,169 +33,169 @@ const config = {
         // sliderNippleStyles: ['nm-bg-theme-500'],
         // sliderBarStyles: ['!nm-bg-transparent'],
     },
-    layout: {
-        top: [
-            {
-                backButton: {
-                    // action: () => {},
-                    // classNames: 'flex',
-                    // icons: {
-                    //     normal: '',
-                    //     hover: ''
-                    // }
-                },
-            },
-        ],
-        middle: [],
-        bottom: [
-            {
-                currentTime: {},
-                divider: {
-                    // classNames: 'mx-1',
-                    text: '/'
-                },
-                duration: {},
-                progress: {},
-            },
-            {
-                play: {
-                    // action: () => {},
-                    // classNames: 'flex',
-                    // icons: {
-                    //     normal: '',
-                    //     hover: ''
-                    // }
-                },
-                volume: {
-                    // action: () => {},
-                    // classNames: 'flex',
-                    // icons: {
-                    //     lowVolume: {
-                    //         normal: '',
-                    //         hover: ''
-                    //     },
-                    //     midVolume: {
-                    //         normal: '',
-                    //         hover: ''
-                    //     },
-                    //     highVolume: {
-                    //         normal: '',
-                    //         hover: ''
-                    //     },
-                    //     muted: {
-                    //         normal: '',
-                    //         hover: ''
-                    //     },
-                    // }
-                },
-                previous: {
-                    // action: () => {},
-                    // classNames: 'flex',
-                    // icons: {
-                    //     normal: '',
-                    //     hover: ''
-                    // }
-                },
-                skipMinus: {
-                    seconds: 10,
-                    // action: () => {},
-                    // classNames: 'flex',
-                    // icons: {
-                    //     normal: '',
-                    //     hover: ''
-                    // }
-                },
-                skipPlus: {
-                    seconds: 10,
-                    // action: () => {},
-                    // classNames: 'flex',
-                    // icons: {
-                    //     normal: '',
-                    //     hover: ''
-                    // }
-                },
-                next: {
-                    // action: () => {},
-                    // classNames: 'flex',
-                    // icons: {
-                    //     normal: '',
-                    //     hover: ''
-                    // }
-                },
-                autoPlay: {
-                    // action: () => {},
-                    // classNames: 'flex',
-                    // icons: {
-                    //     normal: '',
-                    //     hover: ''
-                    // }
-                },
-                divider: {
-                    // classNames: 'mx-auto',
-                    // text: ''
-                },
-                settings: {
-                    // action: () => {},
-                    // classNames: 'flex',
-                    // icons: {
-                    //     normal: '',
-                    //     hover: ''
-                    // }
-                },
-                pip: {
-                    // action: () => {},
-                    // classNames: 'flex',
-                    // icons: {
-                    //     normal: '',
-                    //     hover: ''
-                    // }
-                },
-                theaterMode: {
-                    // action: () => {},
-                    // classNames: 'flex',
-                    // icons: {
-                    //     normal: '',
-                    //     hover: ''
-                    // }
-                },
-                playlist: {
-                    // action: () => {},
-                    // classNames: 'flex',
-                    // icons: {
-                    //     normal: '',
-                    //     hover: ''
-                    // }
-                },
-                subtitles: {
-                    // action: () => {},
-                    // classNames: 'flex',
-                    // icons: {
-                    //     normal: '',
-                    //     hover: ''
-                    // }
-                },
-                settings: {
-                    // action: () => {},
-                    // classNames: 'flex',
-                    // icons: {
-                    //     normal: '',
-                    //     hover: ''
-                    // }
-                },
-                fullscreen: {
-                    // action: () => {},
-                    // classNames: 'flex',
-                    // icons: {
-                    //     normal: '',
-                    //     hover: ''
-                    // }
-                },
-            }
-        ],
-    },
+    // layout: {
+    //     top: [
+    //         {
+    //             backButton: {
+    //                 // action: () => {},
+    //                 // classNames: 'flex',
+    //                 // icons: {
+    //                 //     normal: '',
+    //                 //     hover: ''
+    //                 // }
+    //             },
+    //         },
+    //     ],
+    //     middle: [],
+    //     bottom: [
+    //         {
+    //             currentTime: {},
+    //             divider: {
+    //                 // classNames: 'mx-1',
+    //                 text: '/'
+    //             },
+    //             duration: {},
+    //             progress: {},
+    //         },
+    //         {
+    //             play: {
+    //                 // action: () => {},
+    //                 // classNames: 'flex',
+    //                 // icons: {
+    //                 //     normal: '',
+    //                 //     hover: ''
+    //                 // }
+    //             },
+    //             volume: {
+    //                 // action: () => {},
+    //                 // classNames: 'flex',
+    //                 // icons: {
+    //                 //     lowVolume: {
+    //                 //         normal: '',
+    //                 //         hover: ''
+    //                 //     },
+    //                 //     midVolume: {
+    //                 //         normal: '',
+    //                 //         hover: ''
+    //                 //     },
+    //                 //     highVolume: {
+    //                 //         normal: '',
+    //                 //         hover: ''
+    //                 //     },
+    //                 //     muted: {
+    //                 //         normal: '',
+    //                 //         hover: ''
+    //                 //     },
+    //                 // }
+    //             },
+    //             previous: {
+    //                 // action: () => {},
+    //                 // classNames: 'flex',
+    //                 // icons: {
+    //                 //     normal: '',
+    //                 //     hover: ''
+    //                 // }
+    //             },
+    //             skipMinus: {
+    //                 seconds: 10,
+    //                 // action: () => {},
+    //                 // classNames: 'flex',
+    //                 // icons: {
+    //                 //     normal: '',
+    //                 //     hover: ''
+    //                 // }
+    //             },
+    //             skipPlus: {
+    //                 seconds: 10,
+    //                 // action: () => {},
+    //                 // classNames: 'flex',
+    //                 // icons: {
+    //                 //     normal: '',
+    //                 //     hover: ''
+    //                 // }
+    //             },
+    //             next: {
+    //                 // action: () => {},
+    //                 // classNames: 'flex',
+    //                 // icons: {
+    //                 //     normal: '',
+    //                 //     hover: ''
+    //                 // }
+    //             },
+    //             autoPlay: {
+    //                 // action: () => {},
+    //                 // classNames: 'flex',
+    //                 // icons: {
+    //                 //     normal: '',
+    //                 //     hover: ''
+    //                 // }
+    //             },
+    //             divider: {
+    //                 // classNames: 'mx-auto',
+    //                 // text: ''
+    //             },
+    //             settings: {
+    //                 // action: () => {},
+    //                 // classNames: 'flex',
+    //                 // icons: {
+    //                 //     normal: '',
+    //                 //     hover: ''
+    //                 // }
+    //             },
+    //             pip: {
+    //                 // action: () => {},
+    //                 // classNames: 'flex',
+    //                 // icons: {
+    //                 //     normal: '',
+    //                 //     hover: ''
+    //                 // }
+    //             },
+    //             theaterMode: {
+    //                 // action: () => {},
+    //                 // classNames: 'flex',
+    //                 // icons: {
+    //                 //     normal: '',
+    //                 //     hover: ''
+    //                 // }
+    //             },
+    //             playlist: {
+    //                 // action: () => {},
+    //                 // classNames: 'flex',
+    //                 // icons: {
+    //                 //     normal: '',
+    //                 //     hover: ''
+    //                 // }
+    //             },
+    //             subtitles: {
+    //                 // action: () => {},
+    //                 // classNames: 'flex',
+    //                 // icons: {
+    //                 //     normal: '',
+    //                 //     hover: ''
+    //                 // }
+    //             },
+    //             settings: {
+    //                 // action: () => {},
+    //                 // classNames: 'flex',
+    //                 // icons: {
+    //                 //     normal: '',
+    //                 //     hover: ''
+    //                 // }
+    //             },
+    //             fullscreen: {
+    //                 // action: () => {},
+    //                 // classNames: 'flex',
+    //                 // icons: {
+    //                 //     normal: '',
+    //                 //     hover: ''
+    //                 // }
+    //             },
+    //         }
+    //     ],
+    // },
 
     // NoMercy test account
-    token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiJkNWE1YTAwNS05ZWE2LTRlODMtYmZmNy05ZTQ0MjY5OTg4OWMiLCJqdGkiOiJiNDAyZWU0YThjNGYxYzJjN2RhNmE0ODZjNjY2NDI4YWYyMzMwNGI2MzIyNzRmZjZjNThkODI2YTdjYTEzYTFhYmM2NTA2YjIyOWVmNWE3YiIsImlhdCI6MTY5MzI0NTIwNi42Mjk3NTUsIm5iZiI6MTY5MzI0NTIwNi42Mjk3NTYsImV4cCI6MTcyNDc4MTIwNi42MjM2NjcsInN1YiI6ImQ5OWE1NzQxLTM2ZTgtNGU1ZC1iYzUzLTg1MzAyNmIzZjRhYSIsInNjb3BlcyI6WyJvcGVuaWQiLCJwcm9maWxlIiwiZW1haWwiXSwibmFtZSI6IlRlc3QgVXNlciIsImVtYWlsIjoidGVzdEBub21lcmN5LnR2In0.GV7HlmRAVDL3Bb1MdWltS1AX8dR1LHRMF_vtvM01abLu2983djSKSUvtB26KV5MCpOSuOX-ZwlBlqbMJ5JUX55fSonUE0oiz0ujn8QIk0-G0ptB1-hqn6qIRtxncwZaT0TGNpF7TFejjMC_VcqwjtzmRA58JC940u7QL7k5304cbHJXv-_Op1FpAR3dRA0g3BVR8uJ5ckp1hO-KAj83NOetnviglQf6130WQKtx2AWC1qT55NW3Xx1YFAZZUptjgRZ5mhvDd0_OmTNnFvsQZYaHr5H2WFAzKfW7GEvlu7xFIiMxfhpfowyvV3u4VqoDU-wIfkod-U0lL9JlwnsufFAvE_dfXjMhDXZG80oFPifYLanj7DsL4lIfbaVJO92W1K4bYW0t8Jfi8U3ZdqXtvPSpjPmx5dyz9Z2Na16GtH0_sZu5oMPgbGRMk0pZLi0uGWb_Wxyg3MFMEE4f0zA3gRSc1yt3gCI-AIaiCeMKAbC_uPauV3QcNzbCV2JVxOzW-tKlexALBPYe53DKkODPVcQHhv_d1sqXZxqwS8OfkZzqNCg2MpN2DodgSAVM8b1xZMG_6Ym-hEtDYw0ZCghda7v0pZSAo67jFDv5kEk9MF4j7OGfvk3sFT-mi7gFogKLByrMfQMfs4-qnHrsoKOVZRU6S1JHkRJFSxkwcamv_AYI',
+    accessToken: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiJkNWE1YTAwNS05ZWE2LTRlODMtYmZmNy05ZTQ0MjY5OTg4OWMiLCJqdGkiOiJiNDAyZWU0YThjNGYxYzJjN2RhNmE0ODZjNjY2NDI4YWYyMzMwNGI2MzIyNzRmZjZjNThkODI2YTdjYTEzYTFhYmM2NTA2YjIyOWVmNWE3YiIsImlhdCI6MTY5MzI0NTIwNi42Mjk3NTUsIm5iZiI6MTY5MzI0NTIwNi42Mjk3NTYsImV4cCI6MTcyNDc4MTIwNi42MjM2NjcsInN1YiI6ImQ5OWE1NzQxLTM2ZTgtNGU1ZC1iYzUzLTg1MzAyNmIzZjRhYSIsInNjb3BlcyI6WyJvcGVuaWQiLCJwcm9maWxlIiwiZW1haWwiXSwibmFtZSI6IlRlc3QgVXNlciIsImVtYWlsIjoidGVzdEBub21lcmN5LnR2In0.GV7HlmRAVDL3Bb1MdWltS1AX8dR1LHRMF_vtvM01abLu2983djSKSUvtB26KV5MCpOSuOX-ZwlBlqbMJ5JUX55fSonUE0oiz0ujn8QIk0-G0ptB1-hqn6qIRtxncwZaT0TGNpF7TFejjMC_VcqwjtzmRA58JC940u7QL7k5304cbHJXv-_Op1FpAR3dRA0g3BVR8uJ5ckp1hO-KAj83NOetnviglQf6130WQKtx2AWC1qT55NW3Xx1YFAZZUptjgRZ5mhvDd0_OmTNnFvsQZYaHr5H2WFAzKfW7GEvlu7xFIiMxfhpfowyvV3u4VqoDU-wIfkod-U0lL9JlwnsufFAvE_dfXjMhDXZG80oFPifYLanj7DsL4lIfbaVJO92W1K4bYW0t8Jfi8U3ZdqXtvPSpjPmx5dyz9Z2Na16GtH0_sZu5oMPgbGRMk0pZLi0uGWb_Wxyg3MFMEE4f0zA3gRSc1yt3gCI-AIaiCeMKAbC_uPauV3QcNzbCV2JVxOzW-tKlexALBPYe53DKkODPVcQHhv_d1sqXZxqwS8OfkZzqNCg2MpN2DodgSAVM8b1xZMG_6Ym-hEtDYw0ZCghda7v0pZSAo67jFDv5kEk9MF4j7OGfvk3sFT-mi7gFogKLByrMfQMfs4-qnHrsoKOVZRU6S1JHkRJFSxkwcamv_AYI',
 };
 
 const js = new VideoPlayer('videojs', config, 'player1');
