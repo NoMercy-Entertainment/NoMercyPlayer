@@ -4324,6 +4324,8 @@ export default class UI extends Functions {
 
 		let enabled = false;
 		this.on('item', () => {
+			clearTimeout(this.timeout);
+			this.nextUp.style.display = 'none';
 			enabled = false;
 		});
 
