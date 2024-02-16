@@ -367,6 +367,7 @@ export interface Player {
     volumeUp: ReturnType<typeof Functions.volumeUp>;
     playlistItem: (index?: number) => PlaylistItem;
     getCaptionsList: () => CaptionsEventTrack[];
+    player: OriginalPlayer;
 }
 
 export interface PlaylistItem {
