@@ -560,6 +560,9 @@ export const playlistMenuButtonStyles = [
 	'nm-outline-solid',
 	'focus:nm-outline-2',
 	'focus:nm-outline-white',
+	'nm-transition-all',
+	'nm-duration-300',
+	'hover:nm-bg-neutral-600/50',
 ];
 
 export const episodeMenuButtonLeftStyles = [
@@ -624,6 +627,7 @@ export const progressContainerDurationTextStyles = [
 
 export const sliderContainerStyles = [
 	'slider-container',
+	'nm-hidden',
 	'nm-rounded-md',
 	'nm-overflow-clip',
 	'nm-bg-gray-500/80',
@@ -636,7 +640,6 @@ export const sliderContainerStyles = [
 export const progressBarStyles = [
 	'progress-bar',
 	'nm-bg-white',
-	'nm-w-1/2',
 ];
 
 export const episodeMenuButtonRightSideStyles = [

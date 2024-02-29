@@ -4030,7 +4030,7 @@ export default class UI extends Functions {
 		});
 
 		const buttonSpan = this.createElement('span', `season-${item.id}-span`)
-			.addClasses(this.makeStyles('menuButtonStyles'))
+			.addClasses(this.makeStyles('menuButtonTextStyles'))
 			.appendTo(seasonButton);
 
 		buttonSpan.innerText = `Season ${item.season}`;
@@ -4095,7 +4095,7 @@ export default class UI extends Functions {
 		const sliderContainer = this.createElement('div', `episode-${item.id}-slider-container`)
 			.addClasses(this.makeStyles('sliderContainerStyles'))
 			.appendTo(progressContainer);
-		sliderContainer.style.display = item.progress ? 'flex' : 'none';
+		sliderContainer.style.display = item.progress?.percentage ? 'flex' : 'none';
 
 		const progressBar = this.createElement('div', `episode-${item.id}-progress-bar`)
 			.addClasses(this.makeStyles('progressBarStyles'))
