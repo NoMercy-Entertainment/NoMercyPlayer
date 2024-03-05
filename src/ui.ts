@@ -1133,7 +1133,10 @@ export default class UI extends Functions {
 		const progressContainerItemText = this.createElement('div', `episode-${item.id}-progress-item`)
 			.addClasses(this.makeStyles('progressContainerItemTextStyles'))
 			.appendTo(progressContainerItemBox);
-		progressContainerItemText.innerText = `${this.localize('E')}${item.episode}`;
+
+		if (item.episode && item.show) {
+			progressContainerItemText.innerText = `${this.localize('E')}${item.episode}`;
+		}
 
 		const progressContainerDurationText = this.createElement('div', `episode-${item.id}-progress-duration`)
 			.addClasses(this.makeStyles('progressContainerDurationTextStyles'))
@@ -1209,8 +1212,10 @@ export default class UI extends Functions {
 			}
 		});
 
-		progressContainerItemText.innerText
-			= item.season == undefined ? `${item.episode}` : `${this.localize('S')}${item.season}: ${this.localize('E')}${item.episode}`;
+		if (item.episode && item.show) {
+			progressContainerItemText.innerText
+				= item.season == undefined ? `${item.episode}` : `${this.localize('S')}${item.season}: ${this.localize('E')}${item.episode}`;
+		}
 
 		button.addEventListener('keyup', (e) => {
 			if (e.key == 'ArrowLeft') {
@@ -4033,7 +4038,7 @@ export default class UI extends Functions {
 			.addClasses(this.makeStyles('menuButtonTextStyles'))
 			.appendTo(seasonButton);
 
-		buttonSpan.innerText = `Season ${item.season}`;
+		buttonSpan.innerText = item.seasonName ? item.seasonName : `Season ${item.season}`;
 
 		const chevron = this.createSVGElement(seasonButton, 'menu', this.buttons.chevronR, hovered);
 		this.addClasses(chevron, ['nm-ml-auto']);
@@ -4083,7 +4088,7 @@ export default class UI extends Functions {
 			.addClasses(this.makeStyles('progressContainerItemTextStyles'))
 			.appendTo(progressContainerItemBox);
 
-		if (item.episode) {
+		if (item.episode && item.show) {
 			progressContainerItemText.innerText = `${this.localize('E')}${item.episode}`;
 		}
 
@@ -4153,7 +4158,7 @@ export default class UI extends Functions {
 			}
 		});
 
-		if (item.episode) {
+		if (item.episode && item.show) {
 			progressContainerItemText.innerText
 				= item.season == undefined ? `${item.episode}` : `${this.localize('S')}${item.season}: ${this.localize('E')}${item.episode}`;
 		}

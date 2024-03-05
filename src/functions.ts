@@ -202,7 +202,7 @@ export default class Functions extends Base {
 				}
 
 				const playlistItem = progressItem
-					.sort((a, b) => b.progress!.date.localeCompare(a.progress!.date)).at(0);
+					.sort((a, b) => b.progress!.date?.localeCompare(a.progress!.date)).at(0);
 
 				if (!playlistItem?.progress) {
 					this.play();
