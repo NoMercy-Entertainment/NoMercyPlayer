@@ -340,6 +340,10 @@
     height: 100% !important;
 }
 
+.jw-reset, .jw-reset-text {
+    z-index: 0;
+}
+
 .jw-text-track-display {
     translate: 0 1rem;
     transition: translate 420ms ease-in-out;
@@ -350,6 +354,10 @@
 
 .nomercyplayer[active="false"] * {
     cursor: none !important;
+}
+
+.nomercyplayer[active="false"] #bottom-bar-shadow {
+    display: none !important;
 }
 
 .nextup-button {

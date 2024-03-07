@@ -10,7 +10,8 @@ import type {
 	toolTooltip,
 	VideoPlayerOptions,
 	VolumeState,
-	VideoPlayer as Types
+	VideoPlayer as Types,
+	TypeMapping
 } from './index.d';
 
 import * as styles from './styles';
@@ -29,9 +30,13 @@ export default class Base {
 	setupTime = 0;
 	events: string[] = [];
 
-	jwplayerVersion = '8.30.1';
-	videojsVersion = '8.6.0';
+	jwplayerVersion = '8.32.0';
+	videojsVersion = '8.11.6';
 	videojsPlaylistVersion = '5.1.0';
+
+	subtitleRenderer: 'octopus' | 'sabre' = 'octopus';
+	codepageVersion = '1.15.0';
+	sabreVersion = '0.5.1-pre.8bd763';
 
 	message: NodeJS.Timeout = <NodeJS.Timeout>{};
 	overlay: HTMLDivElement = <HTMLDivElement>{};
@@ -57,6 +62,10 @@ export default class Base {
 		this.eventElement.id = `${playerId}-events`;
 		this.eventElement.style.display = 'none';
 		this.getElement()?.appendChild(this.eventElement);
+
+		if (options.subtitleRenderer) {
+			this.subtitleRenderer = options.subtitleRenderer;
+		}
 
 		if (playerId) {
 			this.playerId = playerId;
@@ -203,6 +212,19 @@ export default class Base {
 		});
 	}
 
+	#sabreJsFiles = () => (this.subtitleRenderer == 'sabre' ? [
+		// codepage@1.15.0
+		'https://storage.nomercy.tv/laravel/player/js/sabre/cptable.js',
+		'https://storage.nomercy.tv/laravel/player/js/sabre/cputils.js',
+		'https://storage.nomercy.tv/laravel/player/js/sabre/opentype.min.js',
+		'https://storage.nomercy.tv/laravel/player/js/sabre/sabre.min.js',
+	] : []);
+
+	#sharedJsFiles = [
+		//
+		'https://cdn.jsdelivr.net/npm/webvtt-parser@2.2.0/parser.min.js',
+	];
+
 	/**
 	 * Loads the JWPlayer script files and initializes the player with the provided options.
 	 * @returns A promise that resolves with the initialized player instance.
@@ -210,7 +232,8 @@ export default class Base {
 	#loadJWPlayer() {
 		this.#appendScriptFilesToDocument(this.options.scriptFiles ?? [
 			`https://ssl.p.jwpcdn.com/player/v/${this.jwplayerVersion}/jwplayer.js`,
-			'https://cdn.jsdelivr.net/npm/webvtt-parser@2.2.0/parser.min.js',
+			...this.#sharedJsFiles,
+			...this.#sabreJsFiles(),
 		])
 			.then(() => {
 				// @ts-ignore
@@ -272,10 +295,10 @@ export default class Base {
 	#loadVideoJS() {
 		this.#appendScriptFilesToDocument(this.options.scriptFiles ?? [
 			`https://vjs.zencdn.net/${this.videojsVersion}/video.min.js`,
-			// 'https://vjs.zencdn.net/8.0.4/video-js.css',
 			`https://cdn.jsdelivr.net/npm/videojs-playlist@${this.videojsPlaylistVersion}/dist/videojs-playlist.min.js`,
 			'https://cdn.jsdelivr.net/npm/videojs-landscape-fullscreen@11.1111.0/dist/videojs-landscape-fullscreen.min.js',
-			'https://cdn.jsdelivr.net/npm/webvtt-parser@2.2.0/parser.min.js',
+			...this.#sharedJsFiles,
+			...this.#sabreJsFiles(),
 		])
 			.then(() => {
 
@@ -352,6 +375,7 @@ export default class Base {
 		if (this.options.controls === undefined) {
 			this.options.controls = false;
 		}
+
 		if (this.options.playbackRates === undefined) {
 			this.options.playbackRates = [
 				0.25,
@@ -388,6 +412,13 @@ export default class Base {
 			}
 			if (this.options.playlistVersion !== undefined) {
 				this.videojsPlaylistVersion = this.options.playlistVersion;
+			}
+
+			if (this.options.sabreVersion !== undefined) {
+				this.sabreVersion = this.options.sabreVersion;
+			}
+			if (this.options.codepageVersion !== undefined) {
+				this.codepageVersion = this.options.codepageVersion;
 			}
 
 			// @ts-ignore
@@ -950,7 +981,9 @@ export default class Base {
 	 * @param callback - The callback function to invoke with the fetched file contents.
 	 * @returns A Promise that resolves with the fetched file contents.
 	 */
-	getFileContents = async ({ url, options, callback }: { url: string, options: any, callback: (arg: string|Blob) => void; }) => {
+	// @ts-expect-error
+	getFileContents = async <T extends TypeMapping[number]>({ url, options, callback }
+		: { url: string, options: {type?: 'blob'|'json'|'arrayBuffer'|'text', anonymous?: boolean}, callback: (arg: T) => void; }) => {
 
 		const headers: { [arg: string]: string; } = {
 			'Accept-Language': localStorage.getItem('NoMercy-displayLanguage') ?? 'en',
@@ -969,10 +1002,24 @@ export default class Base {
 			headers,
 		})
 			.then(async (body) => {
-				options.type === 'blob' ? callback(await body.blob()) : callback(await body.text());
+				switch (options.type) {
+				case 'blob':
+					callback(await body.blob() as ReturnType<T>);
+					break;
+				case 'json':
+					callback(await body.json() as ReturnType<T>);
+					break;
+				case 'arrayBuffer':
+					callback(await body.arrayBuffer() as ReturnType<T>);
+					break;
+				case 'text':
+				default:
+					callback(await body.text() as ReturnType<T>);
+					break;
+				}
 			})
 			.catch(() => {
-				// console.error(error);
+				//
 			});
 	};
 
@@ -1000,10 +1047,20 @@ export default class Base {
 	 * Creates a new HTML element of the specified type and assigns the given ID to it.
 	 * @param type - The type of the HTML element to create.
 	 * @param id - The ID to assign to the new element.
-	 * @returns An object with methods to add classes, append to a parent element, and get the created element.
+	 * @returns An object with four methods:
+	 *   - `addClasses`: A function that adds the specified CSS class names to the element's class list and returns the next 3 functions.
+	 *   - `appendTo`: A function that appends the element to a parent element and returns the element.
+	 *   - `prependTo`: A function that prepends the element to a parent element and returns the element.
+	 *   - `get`: A function that returns the element.
 	 */
-	createElement<K extends keyof HTMLElementTagNameMap>(type: K, id: string) {
-		const el = document.createElement(type);
+	createElement<K extends keyof HTMLElementTagNameMap>(type: K, id: string, unique?: boolean) {
+		let el: HTMLElementTagNameMap[K];
+
+		if (unique) {
+			el = (document.getElementById(id) ?? document.createElement(type)) as HTMLElementTagNameMap[K];
+		} else {
+			el = document.createElement(type);
+		}
 		el.id = id;
 
 		return {
@@ -1012,7 +1069,11 @@ export default class Base {
 				parent.appendChild(el);
 				return el;
 			},
-			get: () => el,
+			prependTo: <T extends Element>(parent: T) => {
+				parent.prepend(el);
+				return el;
+			},
+			get: () => el as HTMLElementTagNameMap[K],
 		};
 	}
 
@@ -1021,8 +1082,9 @@ export default class Base {
 	 *
 	 * @param el - The element to add the classes to.
 	 * @param names - An array of CSS class names to add.
-	 * @returns An object with two methods:
+	 * @returns An object with three methods:
 	 *   - `appendTo`: A function that appends the element to a parent element and returns the element.
+	 *   - `prependTo`: A function that prepends the element to a parent element and returns the element.
 	 *   - `get`: A function that returns the element.
 	 * @template T - The type of the element to add the classes to.
 	 */
@@ -1033,6 +1095,10 @@ export default class Base {
 		return {
 			appendTo: <T extends Element>(parent: T) => {
 				parent.appendChild(el);
+				return el;
+			},
+			prependTo: <T extends Element>(parent: T) => {
+				parent.prepend(el);
 				return el;
 			},
 			get: () => el,

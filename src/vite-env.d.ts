@@ -16,6 +16,9 @@ interface Window {
 	videojs: import('video.js/dist/video');
 	jwplayer: import('jwplayer');
 	socket: import('socket.io-client').Socket;
+	sabre: import('./sabre').sabre;
+	opentype: import('./sabre').Opentype
+
 }
 
 (window as any).orientation = window.orientation || window.mozOrientation || window.msOrientation;

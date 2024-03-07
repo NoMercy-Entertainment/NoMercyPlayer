@@ -4,6 +4,8 @@ import SubtitlesOctopus from './subtitles-octopus.js';
 import translations from './translations';
 
 import type { VideoPlayerOptions, VideoPlayer as Types, TextTrack, PlaylistItem, Player, StretchOptions } from './index.d';
+import Sabre, { SABREOptions } from './sabre';
+
 export default class Functions extends Base {
 	tapCount = 0;
 	leftTap: NodeJS.Timeout = <NodeJS.Timeout>{};
@@ -22,6 +24,8 @@ export default class Functions extends Base {
 	currentSkipFile = '';
 	currentFontFile = '';
 	fonts: any;
+
+	frameCallbackHandle: number | null = null;
 
 	lastTime = 0;
 	translations: { [key: string]: string } = {};
@@ -620,10 +624,12 @@ export default class Functions extends Base {
 	 * Enters fullscreen mode for the player.
 	 */
 	enterFullscreen() {
-		if (this.isJwplayer) {
-			this.player.setFullscreen(true);
-		} else {
-			this.player.requestFullscreen();
+		if (navigator.userActivation.isActive) {
+			if (this.isJwplayer) {
+				this.player.setFullscreen(true);
+			} else {
+				this.player.requestFullscreen();
+			}
 		}
 	}
 
@@ -997,12 +1003,10 @@ export default class Functions extends Base {
 	 */
 	getTextTrackSrc() {
 
-		const token = this.options.accessToken ? `?token=${this.options.accessToken}` : '';
-
 		if (this.isJwplayer) {
-			return this.getTextTrack()?.id + token;
+			return this.getTextTrack()?.id;
 		}
-		return this.getTextTrack()?.src + token;
+		return this.getTextTrack()?.src;
 	}
 
 	getTextTrackLabel() {
@@ -1036,8 +1040,6 @@ export default class Functions extends Base {
 	setTextTrack(index: number) {
 
 		try {
-			this.getElement().querySelectorAll<HTMLDivElement>('.libassjs-canvas-parent')
-				.forEach(el => el.remove());
 			this.octopusInstance.dispose();
 		} catch (error) {
 			//
@@ -1050,13 +1052,7 @@ export default class Functions extends Base {
 
 			if (index >= 0) {
 				const file = this.player.getCaptionsList()[this.player.getCurrentCaptions()]?.id;
-				if (file) {
-					const [language, type, ext] = file.match(/\w+\.\w+\.\w+$/u)?.[0]?.split('.') ?? [];
-					localStorage.setItem('subtitle-language', language);
-					localStorage.setItem('subtitle-type', type);
-					localStorage.setItem('subtitle-ext', ext);
-					this.opus();
-				}
+				this.#triggerStyledSubs(file);
 			} else {
 				localStorage.removeItem('subtitle-language');
 				localStorage.removeItem('subtitle-type');
@@ -1073,19 +1069,34 @@ export default class Functions extends Base {
 				this.player.textTracks()[number].mode = 'showing';
 
 				const file = this.player.textTracks()[number]?.src;
-				if (file) {
-					const [language, type, ext] = file.match(/\w+\.\w+\.\w+$/u)?.[0]?.split('.') ?? [];
-					localStorage.setItem('subtitle-language', language);
-					localStorage.setItem('subtitle-type', type);
-					localStorage.setItem('subtitle-ext', ext);
-					this.opus();
-				}
+				this.#triggerStyledSubs(file);
 			} else {
 				localStorage.removeItem('subtitle-language');
 				localStorage.removeItem('subtitle-type');
 				localStorage.removeItem('subtitle-ext');
 			}
 			this.emit('caption-change', this.getCaptionState(true));
+		}
+	}
+
+	/**
+	 * Triggers the styled subtitles based on the provided file.
+	 * @param file - The file to extract language, type, and extension from.
+	 */
+	#triggerStyledSubs(file?: string) {
+		if (file) {
+			const [language, type, ext] = file.match(/\w+\.\w+\.\w+$/u)?.[0]?.split('.') ?? [];
+			localStorage.setItem('subtitle-language', language);
+			localStorage.setItem('subtitle-type', type);
+			localStorage.setItem('subtitle-ext', ext);
+
+			if (ext !== 'ass') return;
+
+			if (this.subtitleRenderer == 'octopus') {
+				this.opus().then();
+			} else if (this.subtitleRenderer == 'sabre') {
+				this.sabre().then();
+			}
 		}
 	}
 
@@ -1111,7 +1122,6 @@ export default class Functions extends Base {
 		this.displayMessage(`${this.localize('Subtitle')}: ${(this.getTextTrackLanguage() + this.getTextTrackLabel()) || this.localize('Off')}`);
 	};
 
-
 	/**
 	 * Initializes the SubtitlesOctopus instance with the video element and subtitle URL.
 	 * @returns {Promise<void>} A Promise that resolves when the SubtitlesOctopus instance is ready.
@@ -1122,6 +1132,21 @@ export default class Functions extends Base {
 
 		if (subtitleURL) {
 			await this.fetchFontFile();
+
+			const fontFiles: string[] = this.fonts
+				?.map((f: any) => `${this.options.basePath ?? ''}${f.file}`) ?? [];
+
+
+			this.getElement()
+				.querySelectorAll<HTMLDivElement>('.libassjs-canvas-parent')
+				.forEach(el => el.remove());
+
+			try {
+				this.octopusInstance.dispose();
+			} catch (error) {
+				//
+			}
+
 			const options = {
 				video: this.getVideoElement(),
 				lossyRender: true,
@@ -1130,7 +1155,7 @@ export default class Functions extends Base {
 				blendRender: true,
 				lazyFileLoading: true,
 				targetFps: 120,
-				fonts: this.fonts?.map((f: any) => `${this.options.basePath ?? ''}${f.file}`) ?? [],
+				fonts: fontFiles,
 				workerUrl: '/js/octopus/subtitles-octopus-worker.js',
 				legacyWorkerUrl: '/js/octopus/subtitles-octopus-worker-legacy.js',
 				onReady: async () => {
@@ -1146,6 +1171,143 @@ export default class Functions extends Base {
 			}
 		}
 	};
+
+	/**
+	 * Initializes SABRE.js instance
+	 * @returns {Promise<void>} A Promise that resolves when the SubtitlesOctopus instance is ready.
+	 */
+	async sabre(): Promise<void> {
+
+		if (this.frameCallbackHandle) {
+			this.getVideoElement().cancelVideoFrameCallback(this.frameCallbackHandle);
+			this.frameCallbackHandle = null;
+		}
+
+		await this.fetchFontFile();
+
+		await new Promise<void>((resolve) => {
+			function waitForLoad(): void {
+				if (window.sabre && window.sabre.SABRERenderer) {
+					resolve();
+					return;
+				}
+				setTimeout(waitForLoad, 30);
+			}
+			waitForLoad();
+		});
+
+		const sabreContainer = this.createElement('div', 'sabre-canvas-container', true)
+			.addClasses([
+				'nm-relative',
+				'nm-inset-0',
+				'nm-pointer-events-none',
+				'nm-w-full',
+				'nm-h-full',
+			    'nm-z-10',
+			])
+			.appendTo(this.getVideoElement().parentElement as HTMLElement);
+
+		const video = this.getVideoElement();
+
+		const sabreCanvas = this.createElement('canvas', 'sabre-canvas', true)
+			.addClasses([
+				'nm-w-full',
+				'nm-h-full',
+			])
+			.get();
+
+		let sabreRenderer: Sabre.SABRERenderer;
+
+		function updateCanvas(first: boolean) {
+			let videoWidth: number = video.videoWidth;
+			let videoHeight: number = video.videoHeight;
+			const elementWidth: number = video.offsetWidth;
+			const elementHeight: number = video.offsetHeight;
+			const pixelRatio: number = window.devicePixelRatio || 1;
+
+			if (!first && videoWidth === elementWidth / pixelRatio && videoHeight == elementHeight / pixelRatio) {
+				sabreContainer.style.paddingLeft = `${(sabreContainer.offsetWidth - videoWidth) / 2}px`;
+				sabreContainer.style.paddingTop = `${(sabreContainer.offsetHeight - videoHeight) / 2}px`;
+				return;
+			}
+
+			const elementRatio: number = elementWidth / elementHeight;
+			const ratioWidthHeight: number = videoWidth / videoHeight;
+			const ratioHeightWidth: number = videoHeight / videoWidth;
+
+			if (isNaN(elementRatio) || isNaN(ratioWidthHeight) || isNaN(ratioHeightWidth)) return;
+
+			if (elementRatio <= ratioWidthHeight) {
+				videoWidth = elementWidth;
+				videoHeight = elementWidth * ratioHeightWidth;
+			} else if (elementRatio > ratioWidthHeight) {
+				videoHeight = elementHeight;
+				videoWidth = elementHeight * ratioWidthHeight;
+			}
+
+			sabreCanvas.width = videoWidth * pixelRatio;
+			sabreCanvas.height = videoHeight * pixelRatio;
+			sabreCanvas.style.width = `${videoWidth}px`;
+			sabreCanvas.style.height = `${videoHeight}px`;
+			sabreRenderer.setViewport(videoWidth * pixelRatio, videoHeight * pixelRatio);
+			sabreContainer.style.paddingLeft = `${(sabreContainer.offsetWidth - videoWidth) / 2}px`;
+			sabreContainer.style.paddingTop = `${(sabreContainer.offsetHeight - videoHeight) / 2}px`;
+		}
+
+		const renderFrame: VideoFrameRequestCallback = (now, metaData) => {
+			updateCanvas(false);
+			if (sabreRenderer.checkReadyToRender()) {
+				sabreRenderer.drawFrame(metaData.mediaTime, sabreCanvas, 'bitmap');
+			}
+			this.frameCallbackHandle = video.requestVideoFrameCallback(renderFrame);
+		};
+
+		sabreContainer.appendChild(sabreCanvas);
+
+		const sabre = window.sabre;
+
+		const fonts: Array<object> = [];
+
+		const fontFiles: string[] = this.fonts
+			?.map((f: any) => `${this.options.basePath ?? ''}${f.file}`) ?? [];
+
+		fontFiles.push('https://storage.nomercy.tv/laravel/player/fonts/Arial.ttf');
+
+		for (const font of fontFiles) {
+
+			await this.getFileContents<ArrayBuffer>({
+				url: font,
+				options: {
+					type: 'arrayBuffer',
+				},
+				callback: (data) => {
+					fonts.push(window.opentype.parse(data));
+				},
+			});
+
+		}
+
+		const textTrackUrl: string = this.getTextTrackSrc();
+
+		if (textTrackUrl) {
+			await this.getFileContents<ArrayBuffer>({
+				url: textTrackUrl,
+				options: {
+					type: 'arrayBuffer',
+				},
+				callback: (data) => {
+					const options: SABREOptions = {
+						fonts: fonts,
+						subtitles: data,
+					};
+					sabreRenderer = new sabre.SABRERenderer(options);
+					updateCanvas(true);
+					sabreRenderer.setColorSpace(sabre.VideoColorSpaces.AUTOMATIC, video.videoWidth, video.videoHeight);
+					this.frameCallbackHandle = video.requestVideoFrameCallback(renderFrame.bind(this));
+				},
+			});
+		}
+	}
 
 	/**
 	 * Checks if there are any text tracks available.
@@ -1302,9 +1464,7 @@ export default class Functions extends Base {
 		if (file && this.currentFontFile !== file) {
 			this.currentFontFile = file;
 
-			const token = this.options.accessToken ? `?token=${this.options.accessToken}` : '';
-
-			await this.getFileContents({
+			await this.getFileContents<string>({
 				url: file,
 				options: {},
 				callback: (data) => {
@@ -1312,7 +1472,7 @@ export default class Functions extends Base {
 						const baseFolder = file.replace(/\/[^/]*$/u, '');
 						return {
 							...f,
-							file: `${baseFolder}/fonts/${f.file}${token}`,
+							file: `${baseFolder}/fonts/${f.file}`,
 						};
 					});
 

@@ -254,6 +254,9 @@ export interface VideoPlayerOptions {
     chapters?: boolean;
     nipple?: boolean;
     icons?: any;
+	codepageVersion?: string;
+	sabreVersion?: string;
+	subtitleRenderer: 'octopus' | 'sabre';
 }
 
 export interface VolumeState {
@@ -322,6 +325,13 @@ export interface PreviewTime {
     y: number;
     w: number;
     h: number;
+}
+
+interface TypeMapping {
+    'json': any;
+    'text': string;
+    'blob': Blob;
+    'arrayBuffer': ArrayBuffer;
 }
 
 

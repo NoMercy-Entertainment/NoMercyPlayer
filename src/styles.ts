@@ -115,7 +115,7 @@ export const chapterMarkerBGStyles = [
 export const chapterMarkerBufferStyles = [
 	'chapter-marker-buffer',
 	'nm-absolute',
-	'nm-bg-gray-300',
+	'nm-bg-gray-300/30',
 	'nm-h-available',
 	'nm-left-0',
 	'nm-origin-left',
@@ -280,7 +280,7 @@ export const overlayStyles = [
 	'nm-text-white',
 	'nm-text-sm',
 	'nm-w-available',
-	'nm-z-10',
+	'nm-z-20',
 ];
 
 export const scrollContainerStyles = [
